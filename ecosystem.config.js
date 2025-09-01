@@ -1,6 +1,6 @@
 module.exports = {
   apps : [{
-    name: "loxone",
+    name: "loxone-nexus",
     script: "npm",
     args: "start",
     watch: false,
