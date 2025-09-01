@@ -1,7 +1,6 @@
 import { Loxone } from "@prisma/client"
 import { LoxoneInstance } from "./LoxoneInstance"
 import { LoxoneConfig } from "../prisma/repositories/LoxoneRepository"
-import { ListenPortFinder } from "./util/ListenPortFinder"
 import { RepositoryContainer, ServiceContainer } from "../container"
 import { logger } from "../logger"
 import { InstanceManager } from "../core/InstanceManager"
@@ -11,10 +10,7 @@ export class LoxoneManager extends InstanceManager<Loxone, LoxoneInstance> {
   services!: ServiceContainer
   logger = logger.child({}, { msgPrefix: "[LoxoneManager] " })
 
-  constructor(
-    readonly repositories: RepositoryContainer,
-    private readonly listenPortFinder: ListenPortFinder
-  ) {
+  constructor(readonly repositories: RepositoryContainer) {
     super()
   }
 
@@ -49,11 +45,8 @@ export class LoxoneManager extends InstanceManager<Loxone, LoxoneInstance> {
    * creates a new source entry from scratch
    * @param config configuration for the new source
    */
-  async create(config: Omit<LoxoneConfig, "listenPort">) {
-    const entity = await this.repositories.loxone.create({
-      ...config,
-      listenPort: await this.listenPortFinder.getNextAvailablePort()
-    })
+  async create(config: LoxoneConfig) {
+    const entity = await this.repositories.loxone.create(config)
     const loxone = await this.createLoxoneEntry(entity)
     this.collection.push(loxone)
     this.services.socketManager.sendInstance(loxone)

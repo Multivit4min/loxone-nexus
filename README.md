@@ -1,15 +1,11 @@
-PREFIX
-  - mXXXXXXX: Motion
-    - 1 = motion
-    - 2 = person
-    - 3 = vehicle
-    - 4 = animal
-    - 10 = other
-  - pXXXXXXX: Power
-  - vXXXXXXX: Variable
-  - cXXXXXXX: Control
-  - lXXXXXXX: Light
-  - aXXXXXXX: Presence
+Loxone
+------
+- Remove default server data
+- Copy Connection Settings on click
+- make own id customizable
 
-TODO
-TRASH DATA
+
+Integration
+-----------
+- Socket Update on create
+- Socket Update on Variable Create
