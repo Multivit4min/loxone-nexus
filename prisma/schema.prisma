@@ -1,0 +1,92 @@
+datasource db {
+  provider = "sqlite"
+  url      = "file:../data/dev.db"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id            String                  @id @default(cuid())
+  username      String                  @unique
+  password      String
+  createdAt     DateTime                @default(now())
+  updatedAt     DateTime                @updatedAt
+}
+
+model Loxone {
+  id            String                  @id @default(cuid())
+  active        Boolean                 @default(false)
+  label         String 
+  host          String
+  port          Int                     @default(61263)
+  listenPort    Int                     @unique
+  remoteId      String
+  ownId         String
+
+  variables     LoxoneVariable[]
+}
+
+model Integration {
+  id            String                  @id @default(cuid())
+  label         String 
+  name          String
+  version       Int                     @default(1)
+  config        Json
+  variables     IntegrationVariable[]
+}
+
+model LoxoneVariable {
+  id              String                @id @default(cuid())
+  label           String?
+  direction       VariableDirection
+  loxone          Loxone                @relation(fields: [loxoneId], references: [id])
+  loxoneId        String
+  packetId        String
+  description     String?
+  value           String?
+  suffix          String?
+  forced          Boolean               @default(false)
+  forcedValue     String?
+  type            LoxoneVariableType
+  links           Link[]
+}
+
+model Link {
+  id                    String                  @id @default(cuid())
+  loxoneVariable        LoxoneVariable          @relation(fields: [loxoneVariableId], references: [id], onDelete: Cascade)
+  loxoneVariableId      String
+  integrationVariable   IntegrationVariable     @relation(fields: [integrationVariableId], references: [id], onDelete: Cascade)
+  integrationVariableId String  
+  
+  @@unique([integrationVariableId, loxoneVariableId], name: "variableCompound")
+}
+
+model IntegrationVariable {
+  id            String                  @id @default(cuid())
+  label         String
+  direction     VariableDirection
+  value         String?
+  version       Int                     @default(1)
+  config        Json
+  integration   Integration             @relation(fields: [integrationId], references: [id])
+  integrationId String
+  links         Link[]
+}
+
+enum LoxoneVariableType {
+  DIGITAL
+  ANALOG
+  TEXT
+  T5
+  SMART_ACTUATOR_RGBW
+  SMART_ACTUATOR_SINGLE_CHANNEL
+  SMART_ACTUATOR_TUNABLE_WHITE
+  UNKNOWN
+}
+
+enum VariableDirection {
+  INPUT
+  OUTPUT
+}

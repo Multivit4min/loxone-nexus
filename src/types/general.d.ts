@@ -1,0 +1,1 @@
+export type VariableDataTypes = string|number|boolean
