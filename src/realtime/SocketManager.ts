@@ -58,10 +58,10 @@ export class SocketManager {
     this.getAuthenticated().map(socket => socket.sendInstance(serialized))
   }
 
-  sendVariable(instance: LoxoneInstance, variable: LoxoneVariableService) {
-    this.logger.silent(`Sending Loxone variable ${variable.entity.packetId} (${variable.id}) to ${instance.entity.label} (${instance.id})`)
+  sendVariable(variable: LoxoneVariableService) {
+    this.logger.silent(`Sending Loxone variable ${variable.entity.packetId} (${variable.id}) to ${variable.entity.loxoneId}`)
     const serialized = variable.serialize()
-    this.getAuthenticated().map(socket => socket.sendVariable(instance.id, serialized))
+    this.getAuthenticated().map(socket => socket.sendVariable(variable.entity.loxoneId, serialized))
   }
 
   /**
@@ -92,7 +92,7 @@ export class SocketManager {
   }
 
 
-  sendIntegrationVariable(variable: IntegrationVariable<any>) {
+  sendIntegrationVariable(variable: IntegrationVariable) {
     this.logger.silent(`Sending Integration variable ${variable.entity.label} (${variable.id})`)
     const data = variable.serialize()
     this.getAuthenticated().map(socket => socket.sendIntegrationVariable(data))

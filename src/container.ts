@@ -5,7 +5,6 @@ import { IntegrationVariableRepository } from "./prisma/repositories/Integration
 import { LinkRepository } from "./prisma/repositories/LinkRepository"
 import { LoxoneManager } from "./loxone/LoxoneManager"
 import { LoxoneRepository } from "./prisma/repositories/LoxoneRepository"
-import { ListenPortFinder } from "./loxone/util/ListenPortFinder"
 import { LoxoneVariableRepository } from "./prisma/repositories/LoxoneVariableRepository"
 import { prisma } from "./prisma"
 import { SocketManager } from "./realtime/SocketManager"
@@ -39,10 +38,7 @@ export const services = {
   userService: new UserService(repositories),
   socketManager: new SocketManager(),
   integrationManager: new IntegrationManager(repositories),
-  loxoneManager: new LoxoneManager(
-    repositories,
-    new ListenPortFinder(repositories.loxone, [61263, 65535])
-  ),
+  loxoneManager: new LoxoneManager(repositories),
   linkService: new LinkService(repositories),
 }
 
@@ -56,7 +52,7 @@ services.userService.init(services).then(async () => {
 
   await services.authService.init(services)
   await services.socketManager.init(services)
-  services.integrationManager
+  await services.integrationManager
     .register("HomeAssistant", HomeAssistantIntegration)
     .init(services)
   await services.loxoneManager.init(services)

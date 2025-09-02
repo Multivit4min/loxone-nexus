@@ -77,6 +77,7 @@ export class LoxoneVariableService extends Instance<LoxoneVariable> {
     if (!entity) entity = await this.parent.repositories.variables.findById(this.id) || undefined
     if (!entity) throw new Error(`loxone variable with id ${this.id} not found`)
     this.entity = entity
+    this.services.socketManager.sendVariable(this)
   }
 
   async updateEntity(props: Partial<LoxoneVariable>) {
@@ -107,7 +108,7 @@ export class LoxoneVariableService extends Instance<LoxoneVariable> {
     if (this.entity.id.length > 0) {
       await this.repositories.variables.update(this.entity.id, this.entity)
     }
-    this.services.socketManager.sendVariable(this.manager.parent, this)
+    this.services.socketManager.sendVariable(this)
   }
 
   async force(value: any) {

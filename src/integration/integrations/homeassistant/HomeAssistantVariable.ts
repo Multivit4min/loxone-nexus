@@ -1,21 +1,31 @@
 import { IntegrationVariable as VariableEntity } from "@prisma/client"
 import { IntegrationVariable } from "../../variables/IntegrationVariable"
 import { IntegrationVariableManager } from "../../variables/IntegrationVariableManager"
-import { HomeAssistantIntegration } from "./HomeAssistantIntegration"
 import { SubscribeTriggerCommand } from "./lib/command/SubscribeTriggerCommand"
 import { HomeAssistant } from "./lib/HomeAssistant"
 import { logger } from "../../../logger"
+import { HomeAssistantIntegration } from "./HomeAssistantIntegration"
 
-export class HomeAssistantVariable extends IntegrationVariable<HomeAssistantIntegration> {
+export class HomeAssistantVariable extends IntegrationVariable {
 
   subscribeTriggerCommand?: SubscribeTriggerCommand = undefined
 
-  constructor(e: VariableEntity, parent: IntegrationVariableManager<HomeAssistantIntegration>) {
-    super(e, parent)
+  constructor(entity: VariableEntity, parent: IntegrationVariableManager) {
+    super(entity, parent)
+  }
+
+  get logger() {
+    return this.instance.logger
+  }
+
+  get instance() {
+    const instance = this.parent.parent
+    if (instance instanceof HomeAssistantIntegration) return instance
+    throw new Error(`received invalid parent instance`)
   }
 
   get ha() {
-    return this.parent.parent.ha
+    return this.instance.ha
   }
 
   get entityId() {
@@ -31,6 +41,18 @@ export class HomeAssistantVariable extends IntegrationVariable<HomeAssistantInte
     return domain
   }
 
+  async reload() {
+    await this.stop()
+    const entity = await this.repositories.integrationVariable.findById(this.id)
+    if (!entity) throw new Error(`could not find entity with id ${this.id}`)
+    this.entity = entity
+    await this.start()
+  }
+
+  async update() {
+
+  }
+
   static parseValue(type: "string"|"number"|"boolean", value: string) {
     switch (type) {
       case "number":
@@ -43,7 +65,7 @@ export class HomeAssistantVariable extends IntegrationVariable<HomeAssistantInte
   }
 
   async sendValue() {
-    const action = this.parent.parent.haServices.findServiceAction(this.domain, this.config.key)
+    const action = this.instance.haServices.findServiceAction(this.domain, this.config.key)
     if (!action) throw new Error(`action ${this.domain}.${this.config.key} not found on variable id ${this.id}`)
     return action.action({
       action,

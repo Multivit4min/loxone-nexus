@@ -1,12 +1,12 @@
 import z from "zod"
 import { IntegrationEntry } from "../../IntegrationEntry"
 import { HomeAssistant } from "./lib/HomeAssistant"
-import { IntegrationVariable as VariableEntity, VariableDirection } from "@prisma/client"
-import { CreateIntegrationVariableProps } from "../../../express/api/controllers/integration.controller"
+import { Integration, IntegrationVariable as VariableEntity } from "@prisma/client"
 import { HomeAssistantVariable } from "./HomeAssistantVariable"
 import { IntegrationVariableManager } from "../../variables/IntegrationVariableManager"
 import { HomeAssistantLoxoneServices } from "./HomeAssistantLoxoneServices"
 import { VariableDataTypes } from "../../../types/general"
+import { IntegrationManager } from "../../IntegrationManager"
 
 export class HomeAssistantIntegration extends IntegrationEntry<
   z.infer<ReturnType<typeof HomeAssistantIntegration.configSchema>>
@@ -15,16 +15,12 @@ export class HomeAssistantIntegration extends IntegrationEntry<
   ha?: HomeAssistant
   haServices = new HomeAssistantLoxoneServices(this)
 
+  constructor(entity: Integration, parent: IntegrationManager) {
+    super(entity, parent, HomeAssistantIntegration)
+  }
+
   getConstructor() {
     return HomeAssistantIntegration
-  }
-
-  get services() {
-    return this.parent.services
-  }
-
-  get container() {
-    return this.parent.container
   }
 
   async start() {
@@ -46,18 +42,6 @@ export class HomeAssistantIntegration extends IntegrationEntry<
       this.logger.error(e, `error during stop`)
       return false
     }
-  }
-
-  async remove() {
-    await this.stop()
-  }
-
-  protected async _reload() {
-    await this.stop()
-    const entity = await this.container.integration.findById(this.entity.id)
-    if (!entity) throw new Error(`integration entity ${this.entity.id} not found`)
-    this.entity = entity
-    await this.start()
   }
 
   async getInternalVariables() {
@@ -89,67 +73,11 @@ export class HomeAssistantIntegration extends IntegrationEntry<
     return states.find(i => i.entityId === id)
   }
 
-  async createVariable(
-    props: CreateIntegrationVariableProps<ReturnType<typeof HomeAssistantIntegration.getVariableSchema>>
-  ): Promise<HomeAssistantVariable> {
-    if (props.type === "input") {
-      return this.createInputVariable(props)
-    } else if (props.type) {
-      return this.createOutputVariable(props)
-    } else {
-      throw new Error(`invalid prop.type: ${props.type}`)
-    }
-  }
-
-  async createInputVariable(
-    props: CreateIntegrationVariableProps<ReturnType<typeof HomeAssistantIntegration.getVariableSchema>>
-  ): Promise<HomeAssistantVariable> {
-    const { entityId, key } = props.integration
-    const input = await this.getStateByEntityId(entityId)
-    if (!input) throw new Error(`entityId "${entityId}" not found`)
-    if (input.values[key] === undefined) throw new Error(`key ${key} not found in ${entityId}`)
-    const entity = await this.container.integrationVariable.create({
-      integrationId: this.id,
-      label: props.label,
-      direction: VariableDirection.INPUT,
-      version: 1,
-      value: null,
-      config: props.integration,
-    })
-    const variable = this.getConstructor().createIntegrationVariable(entity, this.variables)
-    this.variables.add(variable)
-    this.services.socketManager.sendIntegration(this)
-    return variable
-  }
-
-  async createOutputVariable(
-    props: CreateIntegrationVariableProps<ReturnType<typeof HomeAssistantIntegration.getVariableSchema>>
-  ): Promise<HomeAssistantVariable> {
-    const actions = this.haServices.getServiceActions()
-    const { entityId, key } = props.integration
-    const [domain] = entityId.split(".")
-    if (!actions[domain]) throw new Error(`domain unknown: ${domain}`)
-    if (!actions[domain].some(a => a.name === key)) throw new Error(`action unknown: ${key}`)
-    if (!await this.getStateByEntityId(entityId)) throw new Error(`entityId "${entityId}" not found`)
-    const entity = await this.container.integrationVariable.create({
-      integrationId: this.id,
-      label: props.label,
-      direction: VariableDirection.OUTPUT,
-      version: 1,
-      value: null,
-      config: { entityId, key, domain },
-    })
-    const variable = this.getConstructor().createIntegrationVariable(entity, this.variables)
-    this.variables.add(variable)
-    this.services.socketManager.sendIntegration(this)
-    return variable
-  }
-
   specificSerialize() {
     return null
   }
 
-  static createIntegrationVariable(v: VariableEntity, parent: IntegrationVariableManager<any>) {
+  static createIntegrationVariable(v: VariableEntity, parent: IntegrationVariableManager) {
     return new HomeAssistantVariable(v, parent)
   }
 

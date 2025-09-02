@@ -21,7 +21,7 @@ model Loxone {
   label         String 
   host          String
   port          Int                     @default(61263)
-  listenPort    Int                     @unique
+  listenPort    Int
   remoteId      String
   ownId         String
 

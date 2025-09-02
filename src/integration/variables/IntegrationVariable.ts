@@ -2,19 +2,20 @@ import { VariableDirection, IntegrationVariable as VariableEntity } from "@prism
 import { IntegrationEntry } from "../IntegrationEntry"
 import { IntegrationVariableManager } from "./IntegrationVariableManager"
 import { VariableDataTypes } from "../../types/general"
+import { Instance } from "../../core/Instance"
 
-export abstract class IntegrationVariable<T extends IntegrationEntry<any>> {
+export abstract class IntegrationVariable extends Instance<VariableEntity> {
 
   constructor(
-    readonly entity: VariableEntity,
-    readonly parent: IntegrationVariableManager<T>
-  ) {}
+    entity: VariableEntity,
+    readonly parent: IntegrationVariableManager
+  ) {
+    super(entity, parent)
+  }
 
   abstract sendValue(): Promise<void>
-
-  get id() {
-    return this.entity.id
-  }
+  abstract start(): Promise<void>
+  abstract stop(): Promise<void>
 
   get config() {
     return this.entity.config as any
@@ -31,22 +32,19 @@ export abstract class IntegrationVariable<T extends IntegrationEntry<any>> {
   }
 
   get services() {
-    return this.parent.parent.parent.services
+    return this.parent.services
   }
 
-  get container() {
-    return this.parent.parent.parent.container
+  get repositories() {
+    return this.parent.repositories
   }
-
-  abstract start(): Promise<void>
-  abstract stop(): Promise<void>
 
   async updateValue(value: VariableDataTypes|null) {
     this.entity.value = String(value)
-    await this.container.integrationVariable.update(this.entity.id, this.entity)
-    this.services.socketManager.sendIntegrationVariable(this)
+    await this.repositories.integrationVariable.update(this.entity.id, { value: this.entity.value})
     if (this.isInput) this.services.linkService.sendIntegrationInput(this.id, this.entity.value)
     if (this.isOutput) this.sendValue()
+    this.services.socketManager.sendIntegrationVariable(this)
     return this
   }
 
@@ -57,6 +55,6 @@ export abstract class IntegrationVariable<T extends IntegrationEntry<any>> {
 }
 
 export interface IntegrationVariableConstructor {
-  new (entity: VariableEntity, parent: IntegrationVariableManager<any>): IntegrationEntry<any>
+  new (entity: VariableEntity, parent: IntegrationVariableManager): IntegrationEntry<any>
 
 }

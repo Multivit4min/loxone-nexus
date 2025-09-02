@@ -16,13 +16,10 @@ export abstract class Instance<T extends EntityType> {
     return this.entity.id
   }
 
-  protected abstract reload(entity?: T): Promise<void>
-
-  protected abstract update(props: Partial<T>): Promise<void>
-
-  protected abstract start(): Promise<any>
-  protected abstract stop(): Promise<any>
-
+  abstract reload(entity?: T): Promise<void>
+  abstract update(props: Partial<T>): Promise<void>
+  abstract start(): Promise<any>
+  abstract stop(): Promise<any>
   abstract serialize(): Record<string, any>
 
 }

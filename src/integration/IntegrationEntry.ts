@@ -1,20 +1,30 @@
 import { Integration, IntegrationVariable as VariableEntity } from "@prisma/client"
 import { IntegrationManager } from "./IntegrationManager"
 import z from "zod"
-import { CreateIntegrationVariableProps } from "../express/api/controllers/integration.controller"
 import { IntegrationVariable } from "./variables/IntegrationVariable"
 import { IntegrationVariableManager } from "./variables/IntegrationVariableManager"
 import { logger } from "../logger"
 import { Logger } from "pino"
+import { Instance } from "../core/Instance"
 
-export abstract class IntegrationEntry<T extends object> {
+export abstract class IntegrationEntry<T extends object> extends Instance<Integration> {
 
-  variables: IntegrationVariableManager<any> = new IntegrationVariableManager(this)
+  variables: IntegrationVariableManager
   logger: Logger
 
-  constructor(protected entity: Integration, readonly parent: IntegrationManager) {
+  constructor(entity: Integration, parent: IntegrationManager, varConstructor: IntegrationConstructor) {
+    super(entity, parent)
+    this.variables = new IntegrationVariableManager(this, varConstructor)
     this.logger = logger.child({ id: this.entity.id }, { msgPrefix: "[Integration] " })
     this.variables.init()
+  }
+
+  get services() {
+    return this.parent.services
+  }
+
+  get repositories() {
+    return this.parent.repositories
   }
 
   get id() {
@@ -29,23 +39,11 @@ export abstract class IntegrationEntry<T extends object> {
     return this.entity.label
   }
 
-  get services() {
-    return this.parent.services
-  }
-
-  get container() {
-    return this.parent.container
-  }
-
   get config() {
     const { config } = this.entity
     if (config === null && typeof config !== "object")
       throw new Error(`invalid config in ${this.entity.id}`)
     return config as T
-  }
-
-  getVariableById(id: string) {
-    return this.variables.findById(id)
   }
 
   async update(data: UpdateProps) {
@@ -57,33 +55,35 @@ export abstract class IntegrationEntry<T extends object> {
 
   async reload() {
     this.logger.info("reloading integration")
-    await this._reload()
+    await this.stop()
+    const entity = await this.repositories.integration.findById(this.entity.id)
+    if (!entity) throw new Error(`integration entity ${this.entity.id} not found`)
+    this.entity = entity
+    await this.start()
     this.services.socketManager.sendIntegration(this)
   }
 
   private async updateEntity() {
-    await this.container.integration.update(this.entity.id, this.entity)
+    await this.repositories.integration.update(this.entity.id, this.entity)
     this.services.socketManager.sendIntegration(this)
   }
 
   serialize() {
     const constructor = this.getConstructor()
     return {
-      id: this.id,
-      common: this.entity,
       specific: this.specificSerialize(),
       variables: this.variables.serialize(),
       icon: constructor.icon(),
-      config: z.toJSONSchema(constructor.configSchema())
+      configSchema: z.toJSONSchema(constructor.configSchema()),
+      ...this.entity
     }
   }
 
   abstract getConstructor(): IntegrationConstructor
-  abstract createVariable<Y extends z.ZodObject<any>>(props: CreateIntegrationVariableProps<Y>): Promise<IntegrationVariable<any>>
   abstract getInternalVariables(): Promise<any>
   abstract specificSerialize(): any
-  abstract remove(): Promise<void>
-  protected abstract _reload(): Promise<void>
+  abstract start(): Promise<any>
+  abstract stop(): Promise<any>
 
 }
 
@@ -96,7 +96,7 @@ export type UpdateProps = {
 export interface IntegrationConstructor {
   new (entity: Integration, parent: IntegrationManager): IntegrationEntry<any>
 
-  createIntegrationVariable(entity: VariableEntity, parent: IntegrationVariableManager<any>): IntegrationVariable<any>
+  createIntegrationVariable(entity: VariableEntity, parent: IntegrationVariableManager): IntegrationVariable
   getVariableSchema(): z.Schema
   configSchema(): z.Schema
   icon(): string

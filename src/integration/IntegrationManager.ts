@@ -4,33 +4,30 @@ import { RepositoryContainer, ServiceContainer } from "../container"
 import z from "zod"
 import { logger } from "../logger"
 import { Logger } from "pino"
+import { InstanceManager } from "../core/InstanceManager"
 
-export class IntegrationManager {
+export class IntegrationManager extends InstanceManager<Integration, IntegrationEntry<any>> {
 
   registered: Record<string, IntegrationConstructor> = {}
-  integrations: IntegrationEntry<any>[] = []
   logger: Logger
 
   services!: ServiceContainer
 
-  constructor(readonly container: RepositoryContainer) {
+  constructor(readonly repositories: RepositoryContainer) {
+    super()
     this.logger = logger.child({}, { msgPrefix: "[IntegrationManager] " })
   }
 
   // load all data integrations from the repository
   async init(services: ServiceContainer) {
     this.services = services
-    const entities = await this.container.integration.findAll()
-    await Promise.all(entities.map(async entity => {
-      try {
-        const entry = this.createEntryFromEntity(entity)
-        this.integrations.push(entry)
-        await entry.reload()
-      } catch (e) {
-        this.logger.error(`could not activate integration id ${entity.id} with name ${entity.name}`)
-      }
-    }))
+    const entities = await this.repositories.integration.findAll()
+    this.collection.set(...await Promise.all(entities.map(entity => this.createEntryFromEntity(entity))))
     this.logger.info("initialized")
+  }
+
+  async reload() {
+    await Promise.all(this.collection.map(integration => integration.reload()))
   }
 
   getConfig() {
@@ -61,10 +58,13 @@ export class IntegrationManager {
    * @param entity entity from database
    * @returns 
    */
-  private createEntryFromEntity(entity: Integration) {
+  private async createEntryFromEntity(entity: Integration) {
     const constructorClass = this.getRegisteredConstructor(entity.name)
     if (!constructorClass) throw new Error(`Integration with name ${entity.name} not found`)
-    return new constructorClass(entity, this)
+    const integration = new constructorClass(entity, this)
+    await integration.start()
+    await integration.variables.init()
+    return integration
   }
 
   /**
@@ -75,22 +75,13 @@ export class IntegrationManager {
   }
 
   /**
-   * finds a single data integration by its id
-   * @param id the id of the data integration to find
-   */
-  findById(id: string) {
-    return this.integrations.find(integration => integration.id === id)
-  }
-
-  /**
    * creates a new integration entry from scratch
    * @param config configuration for the new integration
    */
-  async createIntegration(config: any) {
-    const entity = await this.container.integration.create(config)
-    const integration = this.createEntryFromEntity(entity)
-    this.integrations.push(integration)
-    await integration.reload()
+  async create(config: any) {
+    const entity = await this.repositories.integration.create(config)
+    const integration = await this.createEntryFromEntity(entity)
+    this.collection.push(integration)
     this.services.socketManager.sendIntegrations()
     return integration
   }
@@ -99,18 +90,13 @@ export class IntegrationManager {
    * removes a integration entry completely
    * @param id id of the integration to remove
    */
-  async removeIntegration(id: string) {
-    const entity = await this.container.integration.remove(id)
-    const integration = this.findById(entity.id)
-    if (!integration) return entity
-    await integration.remove()
-    this.integrations = this.integrations.filter(i => i.id !== entity.id)
+  async remove(id: string) {
+    const entity = await this.repositories.integration.remove(id)
+    const integration = this.getId(entity.id)
+    await integration.stop()
+    this.collection.removeBy("id", id)
     this.services.socketManager.sendIntegrations()
-    return entity
-  }
-
-  serialize() {
-    return this.integrations.map(integration => integration.serialize())
+    return integration
   }
 
 }

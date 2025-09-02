@@ -1,55 +1,66 @@
-import { IntegrationEntry } from "../IntegrationEntry"
+import { InstanceManager } from "../../core/InstanceManager"
+import { IntegrationConstructor, IntegrationEntry } from "../IntegrationEntry"
 import { IntegrationVariable } from "./IntegrationVariable"
+import { type IntegrationVariable as VariableEntity } from "@prisma/client"
 
-export class IntegrationVariableManager<T extends IntegrationEntry<any>> {
+export class IntegrationVariableManager extends InstanceManager<VariableEntity, IntegrationVariable> {
 
-  variables: IntegrationVariable<T>[] = []
-
-  constructor(public parent: T) {}
-
-  get services() {
-    return this.parent.parent.services
+  constructor(public parent: IntegrationEntry<any>, readonly varConstructor: IntegrationConstructor) {
+    super()
   }
 
-  get container() {
-    return this.parent.parent.container
+  get logger() {
+    return this.parent.logger.child({ module: "IntegrationVariableManager" })
+  }
+
+  get services() {
+    return this.parent.services
+  }
+
+  get repositories() {
+    return this.parent.repositories
   }
 
   async init() {
-    await this.reload()
+    const entities = await this.repositories.integrationVariable.findByIntegrationId(this.parent.id)
+    this.collection.set(...await Promise.all(entities.map(entity => this.createEntryFromEntity(entity))))
+    this.logger.info("initialized")
   }
+
 
   async reload() {
-    await Promise.all(this.variables.map(v => v.stop()))
-    const vars = await this.container.integrationVariable.findByIntegrationId(this.parent.id)
-    this.variables = vars.map(v => this.parent.getConstructor().createIntegrationVariable(v, this))
-    await Promise.all(this.variables.map(v => v.start()))
+    await Promise.all(this.collection.map(v => v.reload()))
     this.services.socketManager.sendIntegration(this.parent)
   }
 
-  async add(variable: IntegrationVariable<T>) {
-    this.variables.push(variable)
+  private async createEntryFromEntity(entity: VariableEntity) {
+    const variable = this.varConstructor.createIntegrationVariable(entity, this)
     await variable.start()
-    this.services.socketManager.sendIntegration(this.parent)
-    return this
+    return variable
   }
 
-  findById(id: string) {
-    return this.variables.find(v => v.id === id)
+  async create(props: Pick<VariableEntity, "config"|"direction"|"label">): Promise<IntegrationVariable> {
+    const entity = await this.repositories.integrationVariable.create({
+      integrationId: this.parent.id,
+      label: props.label,
+      direction: props.direction,
+      config: props.config,
+      version: 1,
+      value: null,
+    })
+    const variable = this.varConstructor.createIntegrationVariable(entity, this)
+    this.collection.push(variable)
+    this.services.socketManager.sendIntegration(this.parent)
+    return variable
   }
 
   async remove(id: string) {
-    const variable = this.findById(id)
-    if (!variable) return
+    const variable = this.getId(id)
     await variable.stop()
-    await this.container.integrationVariable.remove(variable.id)
-    this.variables = this.variables.filter(v => v.id !== variable.id)
+    await this.repositories.integrationVariable.remove(variable.id)
+    this.collection.removeBy("id", id)
     this.services.socketManager.sendIntegration(this.parent)
-    return
-  }
-
-  serialize() {
-    return this.variables.map(v => v.serialize())
+    return variable
   }
 
 }

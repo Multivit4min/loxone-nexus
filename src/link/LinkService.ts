@@ -43,8 +43,8 @@ export class LinkService {
     })
     const entry = await new LinkEntry(entity, this).init()
     this.links.push(entry)
-    await entry.loxoneVariable.manager.reload()
-    await entry.integrationVariable.parent.reload()
+    await entry.loxoneVariable.reload()
+    await entry.integrationVariable.reload()
     return entity
   }
 
@@ -66,7 +66,7 @@ export class LinkService {
     if (!link.valid) return
     const loxone = this.services.loxoneManager.findId(link.loxoneId!)
     if (loxone) loxone.variables.reload()
-    const integration = this.services.integrationManager.findById(link.integrationId!)
+    const integration = this.services.integrationManager.findId(link.integrationId!)
     if (integration) integration.variables.reload()
   }
 

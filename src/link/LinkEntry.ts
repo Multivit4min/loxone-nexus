@@ -12,7 +12,7 @@ export class LinkEntry {
   receiver?: "loxone"|"integration"
   private lastValue = ""
   private loxoneVariableCache?: LoxoneVariableService
-  private integrationVariableCache?: IntegrationVariable<any>
+  private integrationVariableCache?: IntegrationVariable
 
   constructor(
     readonly entity: Link,
@@ -48,10 +48,8 @@ export class LinkEntry {
   get integrationVariable() {
     if (!this.valid) throw new Error(`invalid configuration for link ${this.id}`)
     if (!this.integrationVariableCache) {
-      const integration = this.parent.services.integrationManager.findById(this.integrationId!)
-      if (!integration) throw new Error(`integration instance not found for link ${this.id}`)
-      const variable = integration.getVariableById(this.integrationVariableId)
-      if (!variable) throw new Error(`integration variable not found on link ${this.id}`)
+      const integration = this.parent.services.integrationManager.getId(this.integrationId!)
+      const variable = integration.variables.getId(this.integrationVariableId)
       this.integrationVariableCache = variable
     }
     return this.integrationVariableCache
