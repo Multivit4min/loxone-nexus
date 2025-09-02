@@ -70,7 +70,7 @@ export class HomeAssistantVariable extends IntegrationVariable {
         const sma = { channel: 0, fadeTime: 0 }
         try {
           const { channel, fadeTime } = JSON.parse(value)
-          sma.channel = typeof channel === "number" ? channel : 0
+          sma.channel = typeof channel === "number" ? channel * 2.55 : 0
           sma.fadeTime = typeof fadeTime === "number" ? fadeTime : 0
         } catch (e) {
           sma.channel = HomeAssistantVariable.parseValue("number", value)
