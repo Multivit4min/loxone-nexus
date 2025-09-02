@@ -54,9 +54,14 @@ export class LoxoneVariableService extends Instance<LoxoneVariable> {
   get value() {
     let value = this.entity.forced ? this.entity.forcedValue : this.entity.value
     switch (this.type) {
-      case LoxoneVariableType.TEXT: return value ?? ""
-      case LoxoneVariableType.ANALOG: return parseFloat(value ?? "0")
-      case LoxoneVariableType.DIGITAL: return value === "true"
+      case LoxoneVariableType.TEXT:
+        return value ?? ""
+      case LoxoneVariableType.ANALOG:
+        return parseFloat(value ?? "0")
+      case LoxoneVariableType.DIGITAL:
+        return value === "true"
+      case LoxoneVariableType.SMART_ACTUATOR_SINGLE_CHANNEL:
+        return value ? JSON.parse(value) : { fadeTime: 0, channel: 0 }
       default: return value ?? null
     }
   }
@@ -86,8 +91,9 @@ export class LoxoneVariableService extends Instance<LoxoneVariable> {
   }
 
   async updateValue(value: VariableDataTypes): Promise<any> {
-    if (this.entity.value === String(value)) return
-    this.entity.value = String(value)
+    const str = JSON.stringify(value)
+    if (this.entity.value === str) return
+    this.entity.value = str
     if (this.isInput) this.services.linkService.sendLoxoneInput(this.id, this.entity.value)
     this.send()
     await this.saveEntity()
@@ -113,7 +119,7 @@ export class LoxoneVariableService extends Instance<LoxoneVariable> {
 
   async force(value: any) {
     this.entity.forced = true
-    this.entity.forcedValue = String(value)
+    this.entity.forcedValue = JSON.stringify(value)
     await this.saveEntity()
     this.send()
   }

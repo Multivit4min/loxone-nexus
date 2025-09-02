@@ -5,6 +5,8 @@ import { SubscribeTriggerCommand } from "./lib/command/SubscribeTriggerCommand"
 import { HomeAssistant } from "./lib/HomeAssistant"
 import { logger } from "../../../logger"
 import { HomeAssistantIntegration } from "./HomeAssistantIntegration"
+import { ActionType } from "./HomeAssistantLoxoneServices"
+import { SmartActuatorSingleChannelType } from "../../../types/general"
 
 export class HomeAssistantVariable extends IntegrationVariable {
 
@@ -53,13 +55,28 @@ export class HomeAssistantVariable extends IntegrationVariable {
 
   }
 
-  static parseValue(type: "string"|"number"|"boolean", value: string) {
+  static parseValue(type: "string", value: string): string
+  static parseValue(type: "number", value: string): number
+  static parseValue(type: "boolean", value: string): boolean
+  static parseValue(type: "SmartActuatorSingleChannel", value: string): SmartActuatorSingleChannelType
+  static parseValue(type: ActionType, value: string) {
     switch (type) {
       case "number":
         const num = parseFloat(value)
         return isNaN(num) ? 0 : num
       case "boolean": 
         return ["on", "true", "active", "ok", "1"].includes(value.toLowerCase())
+      case "SmartActuatorSingleChannel":
+        const sma = { channel: 0, fadeTime: 0 }
+        try {
+          const { channel, fadeTime } = JSON.parse(value)
+          sma.channel = typeof channel === "number" ? channel : 0
+          sma.fadeTime = typeof fadeTime === "number" ? fadeTime : 0
+        } catch (e) {
+          sma.channel = HomeAssistantVariable.parseValue("number", value)
+        }
+        return sma
+      case "string":
       default: return String(value)
     }
   }

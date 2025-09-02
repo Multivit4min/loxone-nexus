@@ -8,7 +8,7 @@ export const loginSchema = z.object({
 }).strict()
 
 export const authController = {
-  //login handler
+
   async login(req: Request, res: Response) {
     const body = loginSchema.parse(req.body)
     const data = await services.userService.login(body.username, body.password)
@@ -21,7 +21,7 @@ export const authController = {
       const user = await req.store.getAuthentication()
       if (!user) return void res.sendStatus(401)
       return void res.json({
-        user: { 
+        user: {
           id: user.id,
           username: user.username
         }

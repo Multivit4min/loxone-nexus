@@ -1,5 +1,7 @@
 import { LoxoneVariableType } from "@prisma/client"
 import { DATA_TYPE, LoxoneIOPacket } from "loxone-ici"
+import { logger } from "../logger"
+import { SmartActuatorSingleChannelType } from "../types/general"
 
 export class TypeConversion {
 
@@ -23,6 +25,19 @@ export class TypeConversion {
     return num
   }
 
+  static parseSmartActuatorSingleChannel(value: string): SmartActuatorSingleChannelType {
+    try {
+      const { fadeTime, channel } = JSON.parse(value)
+      return {
+        fadeTime: fadeTime||0,
+        channel: channel||0
+      }
+    } catch (e) {
+      logger.error({ value }, `could not parse value to SmartActuatorSingleChannel`)
+      return { fadeTime: 0, channel: 0 }
+    }
+  }
+
   /**
    * tries to convert a string to the desired Loxone Variable Type
    * @param type loxone data type to convert to
@@ -33,6 +48,7 @@ export class TypeConversion {
     switch (type) {
       case LoxoneVariableType.ANALOG: return TypeConversion.parseNumber(value)
       case LoxoneVariableType.DIGITAL: return TypeConversion.parseBoolean(value)
+      case LoxoneVariableType.SMART_ACTUATOR_SINGLE_CHANNEL: return TypeConversion.parseSmartActuatorSingleChannel(value)
       default: return String(value)
     }
   }

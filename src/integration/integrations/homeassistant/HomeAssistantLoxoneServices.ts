@@ -1,4 +1,4 @@
-import { VariableDataTypes } from "../../../types/general"
+import { SmartActuatorSingleChannelType, VariableDataTypes } from "../../../types/general"
 import { HomeAssistantIntegration } from "./HomeAssistantIntegration"
 
 export class HomeAssistantLoxoneServices {
@@ -34,7 +34,7 @@ export class HomeAssistantLoxoneServices {
       "light": [{
         name: "setBrightness",
         description: "sets the brightness of a light in % (0 = off)",
-        type: "number",
+        type: "SmartActuatorSingleChannel",
         action: this.setLightBrightness.bind(this)
       }, {
         name: "setLight",
@@ -254,11 +254,11 @@ export class HomeAssistantLoxoneServices {
     return this.callService({ domain, service, service_data: { entity_id: entityId } })
   }
 
-  async setLightBrightness({ domain, entityId, value }: ActionProps<number>) {
-    const serviceData: Record<string, any> = { entity_id: entityId }
-    const service = value > 0 ? "turn_on" : "turn_off"
+  async setLightBrightness({ domain, entityId, value }: ActionProps<SmartActuatorSingleChannelType>) {
+    const serviceData: Record<string, any> = { entity_id: entityId, transition: value.fadeTime }
+    const service = value.channel > 0 ? "turn_on" : "turn_off"
     if (service === "turn_on") {
-      serviceData.brightness = Math.round(value)
+      serviceData.brightness = Math.round(value.channel)
       if (serviceData.brightness < 0) serviceData.brightness = 0
       if (serviceData.brightness > 100) serviceData.brightness = 100
     }
@@ -310,10 +310,9 @@ export type ServiceAction = ServiceActionEntry<any>[]
 export type ServiceActionEntry<T extends VariableDataTypes = any, P = any> = {
   name: string
   description?: string
-  type: T extends string ? "string" :
-        T extends number ? "number" :
-        T extends boolean ? "boolean" :
-        never
+  type: ActionType
   payload?: P
   action: (props: ActionProps<T, P>) => Promise<void>
 }
+
+export type ActionType = "string"|"number"|"boolean"|"SmartActuatorSingleChannel"

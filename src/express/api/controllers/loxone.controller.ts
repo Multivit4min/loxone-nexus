@@ -21,7 +21,8 @@ export const createVariableSchema = z.object({
   type: z.enum([
     LoxoneVariableType.DIGITAL,
     LoxoneVariableType.ANALOG,
-    LoxoneVariableType.TEXT
+    LoxoneVariableType.TEXT,
+    LoxoneVariableType.SMART_ACTUATOR_SINGLE_CHANNEL
   ]),
   label: z.string().optional(),
   suffix: z.string().nullable().optional(),
