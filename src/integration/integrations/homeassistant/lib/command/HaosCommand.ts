@@ -10,6 +10,8 @@ export abstract class HaosCommand<T extends HaosCommand.BasePayload = any, R = a
 
   id: number|undefined = undefined
   internalId: number
+  timeout: number = 5000
+  private _timeout?: NodeJS.Timeout
   protected resolve?: (data: R) => void
   protected reject?: (err: Error) => void
 
@@ -46,6 +48,8 @@ export abstract class HaosCommand<T extends HaosCommand.BasePayload = any, R = a
   ): Promise<void>
 
   setResponse(res: Record<string, any>) {
+    if (this.state !== HaosCommand.State.PENDING) return
+    this.clearTimeoutTimer()
     this.state = HaosCommand.State.RECEIVED
     if (!this.resolve || !this.reject)
       throw new Error(`no resolver (${!!this.resolve}) or reject (${!!this.reject}) function found`)
@@ -78,6 +82,7 @@ export abstract class HaosCommand<T extends HaosCommand.BasePayload = any, R = a
 
   reset() {
     this.state = HaosCommand.State.REQUESTED
+    this.clearTimeoutTimer()
     this.id = undefined
   }
 
@@ -97,6 +102,22 @@ export abstract class HaosCommand<T extends HaosCommand.BasePayload = any, R = a
     })
   }
 
+  setTimeout(time: number) {
+    this.timeout = time
+    return this
+  }
+
+  startTimeoutTimer() {
+    this._timeout = setTimeout(() => {
+      if (!this.reject) return
+      this.state = HaosCommand.State.RECEIVED_TIMEOUT
+      this.reject(new Error(`waiting for response timed out (took > ${this.timeout}ms)`))
+    }, this.timeout)
+  }
+
+  clearTimeoutTimer() {
+    clearTimeout(this._timeout)
+  }
 
 }
 
@@ -119,7 +140,8 @@ export namespace HaosCommand {
     PENDING,
     RECEIVED,
     RECEIVED_OK,
-    RECEIVED_FAILED
+    RECEIVED_FAILED,
+    RECEIVED_TIMEOUT
   }
 
 }

@@ -52,7 +52,7 @@ export class HomeAssistantVariable extends IntegrationVariable {
   }
 
   async update() {
-
+    this.logger.trace("HomeAssistantVariable#update is not implemented")
   }
 
   static parseValue(type: "string", value: string): string
@@ -124,8 +124,15 @@ export class HomeAssistantVariable extends IntegrationVariable {
 
   async stop() {
     if (!this.ha) return this.subscribeTriggerCommand = undefined
-    if (this.subscribeTriggerCommand) await this.subscribeTriggerCommand.unsubscribe()
+    const triggerCmd = this.subscribeTriggerCommand
     this.subscribeTriggerCommand = undefined
+    if (triggerCmd) {
+      try {
+        await triggerCmd.unsubscribe()
+      } catch (e) {
+        this.logger.warn(e, `failed to unsubscribe from trigger command during stop command, skipping...`)
+      }
+    }
   }
 
 }

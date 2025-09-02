@@ -34,6 +34,7 @@ export class HomeAssistantIntegration extends IntegrationEntry<
   async stop() {
     if (!this.ha) return true
     try {
+      await Promise.all(this.variables.collection.map(v => v.stop()))
       this.ha.disconnect()
       this.ha.removeAllListeners()
       this.ha = undefined

@@ -49,8 +49,8 @@ export abstract class IntegrationEntry<T extends object> extends Instance<Integr
   async update(data: UpdateProps) {
     this.entity.label = data.label
     this.entity.config = data.config
-    await this.reload()
     await this.updateEntity()
+    await this.reload()
   }
 
   async reload() {

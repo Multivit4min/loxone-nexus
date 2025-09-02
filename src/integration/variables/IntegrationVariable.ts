@@ -40,7 +40,7 @@ export abstract class IntegrationVariable extends Instance<VariableEntity> {
   }
 
   async updateValue(value: VariableDataTypes|null) {
-    this.entity.value = String(value)
+    this.entity.value = JSON.stringify(value)
     await this.repositories.integrationVariable.update(this.entity.id, { value: this.entity.value})
     if (this.isInput) this.services.linkService.sendIntegrationInput(this.id, this.entity.value)
     if (this.isOutput) this.sendValue()

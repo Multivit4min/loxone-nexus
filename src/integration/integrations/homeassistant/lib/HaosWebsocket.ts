@@ -39,6 +39,7 @@ export class HaosWebsocket extends EventEmitter {
 
   sendCommand(cmd: HaosCommand) {
     cmd.state = HaosCommand.State.PENDING
+    cmd.startTimeoutTimer()
     this.ws.send(JSON.stringify(cmd.content))
   }
 
