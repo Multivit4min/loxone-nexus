@@ -260,7 +260,7 @@ export class HomeAssistantLoxoneServices {
     if (service === "turn_on") {
       serviceData.brightness = Math.round(value.channel)
       if (serviceData.brightness < 0) serviceData.brightness = 0
-      if (serviceData.brightness > 100) serviceData.brightness = 100
+      if (serviceData.brightness > 255) serviceData.brightness = 255
     }
     return this.callService({ domain, service, service_data: serviceData })
   }
