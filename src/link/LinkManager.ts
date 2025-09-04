@@ -1,7 +1,6 @@
 import {
   IntegrationVariable as IntegrationVariableEntity,
-  LoxoneVariable as LoxoneVariableEntity,
-  Link as LinkEntity
+  LoxoneVariable as LoxoneVariableEntity
 } from "@prisma/client"
 import { RepositoryContainer, ServiceContainer } from "../container"
 import { InstanceManager } from "../core/InstanceManager"
@@ -10,6 +9,7 @@ import { logger } from "../logger"
 import { LinkError } from "./LinkError"
 import { IntegrationVariable } from "../integration/variables/IntegrationVariable"
 import { LoxoneVariableService } from "../loxone/variables/LoxoneVariableService"
+import { LinkEntity } from "../prisma/repositories/LinkRepository"
 
 export class LinkManager extends InstanceManager<LinkEntity, Link> {
 
@@ -26,14 +26,19 @@ export class LinkManager extends InstanceManager<LinkEntity, Link> {
   }
 
   async reload() {
-    const links = await this.repositories.linkRepository.findAll()
-    this.collection.set(...(await Promise.all(
-      links.map(async link => {
-        const l = new Link(link, this)
-        await l.reload()
-        return l
-      })
-    )))
+    const entities = await this.repositories.linkRepository.findAll()
+    const links = await Promise.all(
+      entities.map(link => new Link(link, this).reload())
+    )
+    this.collection.set(...links)
+  }
+
+  async reloadLoxoneInstance(id: string) {
+    await Promise.all([
+      this.collection
+        .filter(link => link.entity.loxoneVariable.loxoneId === id)
+        .map(link => link.reload())
+    ])
   }
 
   sendIntegrationInput(variable: IntegrationVariable) {

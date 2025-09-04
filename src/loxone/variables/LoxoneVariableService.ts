@@ -83,6 +83,7 @@ export class LoxoneVariableService extends Instance<LoxoneVariable> {
     if (!entity) throw new Error(`loxone variable with id ${this.id} not found`)
     this.entity = entity
     this.services.socketManager.sendVariable(this)
+    return this
   }
 
   async updateEntity(props: Partial<LoxoneVariable>) {

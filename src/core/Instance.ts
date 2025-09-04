@@ -16,7 +16,7 @@ export abstract class Instance<T extends EntityType> {
     return this.entity.id
   }
 
-  abstract reload(entity?: T): Promise<void>
+  abstract reload(entity?: T): Promise<this>
   abstract update(props: Partial<T>): Promise<void>
   abstract start(): Promise<any>
   abstract stop(): Promise<any>

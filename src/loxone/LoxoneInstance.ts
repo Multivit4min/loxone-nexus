@@ -69,6 +69,7 @@ export class LoxoneInstance extends Instance<Loxone> {
     await this.variables.reload()
     this.undefinedInputs = []
     this.parent.services.socketManager.sendInstance(this)
+    return this
   }
 
   /**
@@ -96,7 +97,7 @@ export class LoxoneInstance extends Instance<Loxone> {
         suppressECONNREFUSED: true
       })
       this.loxoneServer.on("input", this.inputHandler.bind(this))
-      this.variables.send()
+      this.parent.services.linkService.reloadLoxoneInstance(this.id)
       await this.setActive(true)
     })
   }

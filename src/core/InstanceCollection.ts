@@ -19,6 +19,10 @@ export class InstanceCollection<Y extends EntityType, T extends Instance<Y>> {
     return this.items.findIndex(predicate)
   }
 
+  filter(predicate: (value: T, index: number, obj: T[]) => unknown): T[] {
+    return this.items.filter(predicate)
+  }
+
   /** returns a new array of filtered items by the given key and value */
   filterBy<K extends keyof Y>(key: K, value: Y[K], inverse = false) {
     return this.items.filter(item => inverse ? item.entity[key] !== value : item.entity[key] === value)

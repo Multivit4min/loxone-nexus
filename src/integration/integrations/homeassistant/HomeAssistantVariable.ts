@@ -49,6 +49,7 @@ export class HomeAssistantVariable extends IntegrationVariable {
     if (!entity) throw new Error(`could not find entity with id ${this.id}`)
     this.entity = entity
     await this.start()
+    return this
   }
 
   async update() {
