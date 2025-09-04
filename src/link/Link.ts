@@ -38,6 +38,7 @@ export class Link extends Instance<LinkEntity> {
     const [loxVar, intVar] = await Promise.all([this.loxoneVariable, this.integrationVariable])
     if (loxVar.isInput) this.sendToIntegration(loxVar)
     if (intVar.isInput) this.sendToLoxone(intVar)
+    await this.reloadReceiverEmitter()
     return this
   }
 
