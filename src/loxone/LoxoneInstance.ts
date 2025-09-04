@@ -1,4 +1,4 @@
-import { Loxone, VariableDirection, LoxoneVariableType } from "@prisma/client"
+import { Loxone } from "@prisma/client"
 import { RunState, State } from "../core/State"
 import { LoxoneManager } from "./LoxoneManager"
 import { LoxoneRemoteSystem, LoxoneServer } from "loxone-ici"

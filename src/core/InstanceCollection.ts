@@ -15,25 +15,29 @@ export class InstanceCollection<Y extends EntityType, T extends Instance<Y>> {
     return this.props.uniqueKey
   }
 
+  findIndex(predicate: (value: T, index: number, obj: T[]) => unknown) {
+    return this.items.findIndex(predicate)
+  }
+
   /** returns a new array of filtered items by the given key and value */
-  filterBy<T extends keyof Y>(key: T, value: Y[T], inverse = false) {
+  filterBy<K extends keyof Y>(key: K, value: Y[K], inverse = false) {
     return this.items.filter(item => inverse ? item.entity[key] !== value : item.entity[key] === value)
   }
 
   /** tries to find an item by the given key and value */
-  findBy<T extends keyof Y>(key: T, value: Y[T], inverse = false) {
+  findBy<K extends keyof Y>(key: K, value: Y[K], inverse = false) {
     return this.items.find(item => inverse ? item.entity[key] !== value : item.entity[key] === value)
   }
 
   /** tries to find an item by the given key and value throws an error if not found */
-  getBy<T extends keyof Y>(key: T, value: Y[T]) {
+  getBy<K extends keyof Y>(key: K, value: Y[K]) {
     const item = this.findBy(key, value)
     if (!item) throw new CollectionItemNotFoundError(key, value)
     return item
   }
 
   /** removes items with given key and property */
-  removeBy<T extends keyof Y>(key: T, value: Y[T]) {
+  removeBy<K extends keyof Y>(key: K, value: Y[K]) {
     const removed = this.filterBy(key, value)
     if (removed.length === 0) return removed
     this.items = this.filterBy(key, value, true)

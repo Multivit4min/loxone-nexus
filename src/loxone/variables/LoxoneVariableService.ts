@@ -94,9 +94,9 @@ export class LoxoneVariableService extends Instance<LoxoneVariable> {
     const str = JSON.stringify(value)
     if (this.entity.value === str) return
     this.entity.value = str
-    if (this.isInput) this.services.linkService.sendLoxoneInput(this.id, this.entity.value)
-    this.send()
     await this.saveEntity()
+    if (this.isInput) this.services.linkService.sendLoxoneInput(this)
+    this.send()
   }
 
   async updateValueFromPacket(packet: LoxoneIOPacket): Promise<any> {

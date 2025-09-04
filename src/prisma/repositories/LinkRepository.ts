@@ -8,20 +8,21 @@ export class LinkRepository {
     return this.prisma.link.findMany()
   }
 
+  findById(id: string) {
+    return this.prisma.link.findUnique({
+      where: { id }
+    })
+  }
+
   create(data: Omit<Link, "id">) {
     return this.prisma.link.create({
       data,
     })
   }
 
-  remove(integrationVariableId: string, loxoneVariableId: string) {
+  remove(id: string) {
     return this.prisma.link.delete({
-      where: { 
-        variableCompound: {
-          integrationVariableId,
-          loxoneVariableId
-        }
-      },
+      where: { id },
     })
   }
 

@@ -4,6 +4,6 @@ import { linkController } from "../controllers/link.controller"
 const router = express.Router()
 
 router.post("/link", linkController.createLink)
-router.delete("/link/:integrationVariable/:loxoneVariable", linkController.removeLink)
+router.delete("/link/:id", linkController.removeLink)
 
 export default router

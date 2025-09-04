@@ -11,7 +11,7 @@ import { SocketManager } from "./realtime/SocketManager"
 import { AuthService } from "./user/AuthService"
 import { UserRepository } from "./prisma/repositories/UserRepository"
 import { UserService } from "./user/UserService"
-import { LinkService } from "./link/LinkService"
+import { LinkManager } from "./link/LinkManager"
 import { logger } from "./logger"
 import { setupStore } from "./express/api/controllers/setup.controller"
 
@@ -39,7 +39,7 @@ export const services = {
   socketManager: new SocketManager(),
   integrationManager: new IntegrationManager(repositories),
   loxoneManager: new LoxoneManager(repositories),
-  linkService: new LinkService(repositories),
+  linkService: new LinkManager(repositories),
 }
 
 services.userService.init(services).then(async () => {

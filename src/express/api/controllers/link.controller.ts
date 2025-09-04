@@ -1,7 +1,7 @@
 import { Request, Response } from "express"
 import { services } from "../../../container"
 import z from "zod"
-import { LinkError } from "../../../link/LinkService"
+import { LinkError } from "../../../link/LinkError"
 import { logger } from "../../../logger"
 
 export const createLinkSchema = z.object({
@@ -14,8 +14,11 @@ export const linkController = {
   async createLink(req: Request, res: Response) {
     const body = createLinkSchema.parse(req.body)
     try {
-      const entity = await services.linkService.createLink(body.integrationVariable, body.loxoneVariable)
-      res.json(entity)
+      const entity = await services.linkService.create({
+        integrationVariableId: body.integrationVariable,
+        loxoneVariableId: body.loxoneVariable
+      })
+      res.json(entity.serialize())
     } catch (e) {
       if (e instanceof LinkError) {
         res.status(400).json({ error: e.message })
@@ -27,7 +30,7 @@ export const linkController = {
   },
 
   async removeLink(req: Request, res: Response) {
-    await services.linkService.removeLink(req.params.integrationVariable, req.params.loxoneVariable)
+    await services.linkService.remove(req.params.id)
     res.json({})
   }
 }

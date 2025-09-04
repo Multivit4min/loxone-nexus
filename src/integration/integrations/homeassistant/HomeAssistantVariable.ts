@@ -87,6 +87,7 @@ export class HomeAssistantVariable extends IntegrationVariable {
     return action.action({
       action,
       entityId: this.entityId,
+      //@ts-ignore
       value: HomeAssistantVariable.parseValue(action.type, this.entity.value||""),
       domain: this.domain
     })
