@@ -93,14 +93,12 @@ export class LinkManager extends InstanceManager<LinkEntity, Link> {
     return { integrationVariable, loxoneVariable }
   }
 
-  async getAvailableLoxoneInputs() {
-    const inputs = await this.repositories.variables.getInputs()
-    return inputs
+  getAvailableLoxoneInputs() {
+    return this.repositories.variables.getInputs()
   }
 
-  async getAvailableLoxoneOutputs() {
-    const outputs = await this.repositories.variables.getUnusedOutputs()
-    return outputs
+  getAvailableLoxoneOutputs() {
+    return this.repositories.variables.getUnusedOutputs()
   }
 
 }

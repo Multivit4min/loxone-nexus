@@ -3,6 +3,7 @@ import { join } from "path"
 import { randomBytes } from "crypto"
 import dotenv from "dotenv"
 import { logger } from "./logger"
+import { prisma } from "./prisma"
 
 //base configuration directory
 export const dataDir = join(__dirname, "..", "data")
@@ -20,13 +21,14 @@ const environment = {
 //create data directory if it does not exist
 try {
   const stat = fs.statSync(dataDir)
-  if (!stat.isDirectory()) throw new Error("Data path is not a directory")
+  if (!stat.isDirectory()) throw new Error("data path is not a directory")
 } catch (err: any) {
   if (err.code === "ENOENT") {
     fs.mkdirSync(dataDir)
     logger.info(`Created data directory: ${dataDir}`)
   } else {
     logger.error(`Error creating data directory: ${err}`)
+    process.exit(1)
   }
 }
 
