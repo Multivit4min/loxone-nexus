@@ -53,17 +53,7 @@ export class LoxoneVariableService extends Instance<LoxoneVariable> {
   /** current parsed value */
   get value() {
     let value = this.entity.forced ? this.entity.forcedValue : this.entity.value
-    switch (this.type) {
-      case LoxoneVariableType.TEXT:
-        return value ?? ""
-      case LoxoneVariableType.ANALOG:
-        return parseFloat(value ?? "0")
-      case LoxoneVariableType.DIGITAL:
-        return value === "true"
-      case LoxoneVariableType.SMART_ACTUATOR_SINGLE_CHANNEL:
-        return value ? JSON.parse(value) : { fadeTime: 0, channel: 0 }
-      default: return value ?? null
-    }
+    return TypeConversion.DeserializeDataType(value)
   }
 
   async start() {
@@ -92,7 +82,7 @@ export class LoxoneVariableService extends Instance<LoxoneVariable> {
   }
 
   async updateValue(value: VariableDataTypes): Promise<any> {
-    const str = JSON.stringify(value)
+    const str = TypeConversion.SerializeDataType(value)
     if (this.entity.value === str) return
     this.entity.value = str
     await this.saveEntity()
@@ -101,10 +91,8 @@ export class LoxoneVariableService extends Instance<LoxoneVariable> {
   }
 
   async updateValueFromPacket(packet: LoxoneIOPacket): Promise<any> {
-    let value = packet.payload.value
-    if (typeof value === "number") value = parseFloat(value.toFixed(5))
     this.entity.type = TypeConversion.LoxoneDataTypeToVariableType(packet)
-    return this.updateValue(value)
+    return this.updateValue(packet.payload.value)
   }
 
   /**
@@ -120,7 +108,7 @@ export class LoxoneVariableService extends Instance<LoxoneVariable> {
 
   async force(value: any) {
     this.entity.forced = true
-    this.entity.forcedValue = JSON.stringify(value)
+    this.entity.forcedValue = TypeConversion.SerializeDataType(value)
     await this.saveEntity()
     this.send()
   }
@@ -138,7 +126,10 @@ export class LoxoneVariableService extends Instance<LoxoneVariable> {
   }
 
   serialize() {
-    return { ...this.entity }
+    return {
+      ...this.entity,
+      value: this.value.value
+     }
   }
 
   

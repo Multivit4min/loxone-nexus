@@ -14,6 +14,7 @@ import { UserService } from "./user/UserService"
 import { LinkManager } from "./link/LinkManager"
 import { logger } from "./logger"
 import { setupStore } from "./express/api/controllers/setup.controller"
+import { SonosIntegration } from "./integration/integrations/sonos/SonosIntegration"
 
 const secret = process.env.SECRET
 if (!secret) {
@@ -54,6 +55,7 @@ services.userService.init(services).then(async () => {
   await services.socketManager.init(services)
   await services.integrationManager
     .register("HomeAssistant", HomeAssistantIntegration)
+    .register("Sonos", SonosIntegration)
     .init(services)
   await services.loxoneManager.init(services)
   await services.linkService.init(services)

@@ -62,14 +62,14 @@ export class Link extends Instance<LinkEntity> {
     if (variable.entity.value === null)
       return this.logger.warn(`integration variable ${variable.entity.label} is null`)
     return this.loxoneVariable.updateValue(
-      TypeConversion.parseLoxoneTypeFromString(this.loxoneVariable.type, variable.entity.value)
+      TypeConversion.parseLoxoneTypeFromString(this.loxoneVariable.type, String(variable.value.value))
     )
   }
 
   sendToIntegration(variable: LoxoneVariableService) {
     if (variable.entity.value === null)
       return this.logger.warn(`loxone variable ${variable.entity.label} is null`)
-    this.integrationVariable.updateValue(variable.entity.value)
+    this.integrationVariable.updateValue(variable.value.value)
   }
 
 }

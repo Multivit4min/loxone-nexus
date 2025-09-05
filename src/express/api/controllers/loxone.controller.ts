@@ -63,7 +63,6 @@ export const loxoneController = {
   //create a loxone Instance
   async createInstance(req: Request, res: Response) {
     const body = instanceSchema.parse(req.body)
-    console.log(body)
     const instance = await services.loxoneManager.create({ active: false, ...body })
     res.json(instance.serialize())
   },

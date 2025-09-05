@@ -33,7 +33,7 @@ if you want to run it with a process manager like pm2 you can start it with `pm2
 - HomeAssistant
 
 ### Planned Integrations
-
+- Sonos
 - .ical Calendar Support
 - Fronius
 - Webhooks

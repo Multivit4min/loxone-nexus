@@ -1,7 +1,7 @@
 import { LoxoneVariableType } from "@prisma/client"
 import { DATA_TYPE, LoxoneIOPacket } from "loxone-ici"
 import { logger } from "../logger"
-import { SmartActuatorSingleChannelType } from "../types/general"
+import { SmartActuatorSingleChannelType, VariableDataTypes } from "../types/general"
 
 export class TypeConversion {
 
@@ -99,4 +99,67 @@ export class TypeConversion {
     }
   }
 
+  static SerializeDataType(value: VariableDataTypes|null) {
+    return JSON.stringify(TypeConversion.WrapType(value))
+  }
+
+  static WrapType(value: VariableDataTypes|null): SerializedDataType {
+    switch (typeof value) {
+      case "number":
+        value = parseFloat(value.toFixed(5))
+      case "string": 
+      case "boolean":
+        return { type: <any>typeof value, value }
+      case "object":
+        if (value === null) return { type: "null", value: null }
+        if ("channel" in value && "fadeTime" in value) {
+          return { type: "SmartActuatorSingleChannel", value }
+        }
+      default:
+        return { type: "null", value: null }
+    }
+  }
+
+  static DeserializeDataType(val: string|null): SerializedDataType {
+    if (val === null) return { type: "null", value: null }
+    try {
+      const { type, value } = JSON.parse(val) as { type: string, value: VariableDataTypes }
+      switch (type) {
+        case "string": 
+        case "number":
+        case "boolean":
+        case "SmartActuatorSingleChannel":
+          return { type, value } as any
+        case "unknown":
+        default:
+          return { type: "null", value: null }
+      }
+    } catch (e) {
+      logger.error(e, `could not deserialize data: ${val}`)
+      return { type: "null", value: null }
+    }
+  }
+
+}
+
+export type SerializedDataType = NumberDataType|BooleanDataType|StringDataType|SmartActuatorSingleChannelDataType|NullDataType
+export type NumberDataType = {
+  type: "number"
+  value: number
+}
+export type BooleanDataType = {
+  type: "boolean"
+  value: boolean
+}
+export type StringDataType = {
+  type: "string"
+  value: string
+}
+export type NullDataType = {
+  type: "null"
+  value: null
+}
+export type SmartActuatorSingleChannelDataType = {
+  type: "SmartActuatorSingleChannel"
+  value: SmartActuatorSingleChannelType
 }

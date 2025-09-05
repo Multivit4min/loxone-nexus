@@ -61,6 +61,7 @@ export abstract class IntegrationEntry<T extends object> extends Instance<Integr
     this.entity = entity
     await this.start()
     this.services.socketManager.sendIntegration(this)
+    return this
   }
 
   private async updateEntity() {

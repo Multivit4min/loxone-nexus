@@ -7,6 +7,7 @@ import { logger } from "../../../logger"
 import { HomeAssistantIntegration } from "./HomeAssistantIntegration"
 import { ActionType } from "./HomeAssistantLoxoneServices"
 import { SmartActuatorSingleChannelType } from "../../../types/general"
+import { TypeConversion } from "../../../util/TypeConversion"
 
 export class HomeAssistantVariable extends IntegrationVariable {
 
@@ -56,6 +57,7 @@ export class HomeAssistantVariable extends IntegrationVariable {
     this.logger.trace("HomeAssistantVariable#update is not implemented")
   }
 
+  /*
   static parseValue(type: "string", value: string): string
   static parseValue(type: "number", value: string): number
   static parseValue(type: "boolean", value: string): boolean
@@ -80,16 +82,18 @@ export class HomeAssistantVariable extends IntegrationVariable {
       case "string":
       default: return String(value)
     }
-  }
+  }*/
 
   async sendValue() {
     const action = this.instance.haServices.findServiceAction(this.domain, this.config.key)
     if (!action) throw new Error(`action ${this.domain}.${this.config.key} not found on variable id ${this.id}`)
+    const { type, value } = TypeConversion.DeserializeDataType(this.entity.value)
+    if (value === null) return
+    if (type === "SmartActuatorSingleChannel") value.channel *= 2.55
     return action.action({
       action,
       entityId: this.entityId,
-      //@ts-ignore
-      value: HomeAssistantVariable.parseValue(action.type, this.entity.value||""),
+      value,
       domain: this.domain
     })
   }

@@ -132,8 +132,10 @@ export class LoxoneInstance extends Instance<Loxone> {
 
   sendVariable(variable: LoxoneVariableService) {
     if (!this.remoteSystem) return
+    const { value } = variable.value
+    if (value === null) return
     const type = TypeConversion.LoxoneVariableTypeToDataType(variable.entity.type)
-    return this.remoteSystem.createOutput(variable.packetId, type).setValue(variable.value!).send()
+    return this.remoteSystem.createOutput(variable.packetId, type).setValue(value).send()
   }
 
   serialize() {

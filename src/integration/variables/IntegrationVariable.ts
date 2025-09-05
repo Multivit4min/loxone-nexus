@@ -1,10 +1,11 @@
 import { VariableDirection, IntegrationVariable as VariableEntity } from "@prisma/client"
 import { IntegrationEntry } from "../IntegrationEntry"
 import { IntegrationVariableManager } from "./IntegrationVariableManager"
-import { VariableDataTypes } from "../../types/general"
+import { SmartActuatorSingleChannelType, VariableDataTypes } from "../../types/general"
 import { Instance } from "../../core/Instance"
+import { TypeConversion } from "../../util/TypeConversion"
 
-export abstract class IntegrationVariable extends Instance<VariableEntity> {
+export abstract class IntegrationVariable<T extends object = any> extends Instance<VariableEntity> {
 
   constructor(
     entity: VariableEntity,
@@ -18,7 +19,11 @@ export abstract class IntegrationVariable extends Instance<VariableEntity> {
   abstract stop(): Promise<void>
 
   get config() {
-    return this.entity.config as any
+    return this.entity.config as T
+  }
+
+  get value() {
+    return TypeConversion.DeserializeDataType(this.entity.value)
   }
   
   /** true when the variable gets sent from loxone to node */
@@ -40,7 +45,7 @@ export abstract class IntegrationVariable extends Instance<VariableEntity> {
   }
 
   async updateValue(value: VariableDataTypes|null) {
-    this.entity.value = String(value)
+    this.entity.value = TypeConversion.SerializeDataType(value)
     await this.repositories.integrationVariable.update(this.entity.id, { value: this.entity.value})
     if (this.isInput) this.services.linkService.sendIntegrationInput(this)
     if (this.isOutput) this.sendValue()
@@ -49,7 +54,10 @@ export abstract class IntegrationVariable extends Instance<VariableEntity> {
   }
 
   serialize() {
-    return { ...this.entity }
+    return {
+      ...this.entity,
+      value: this.value.value
+     }
   }
 
 }
