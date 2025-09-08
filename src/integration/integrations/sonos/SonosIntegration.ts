@@ -24,6 +24,10 @@ export class SonosIntegration extends IntegrationEntry<
     this.device = new SonosDevice(this.config.address)
   }
 
+  static label() {
+    return "Sonos"
+  }
+
   getConstructor() {
     return SonosIntegration
   }
@@ -81,21 +85,22 @@ export class SonosIntegration extends IntegrationEntry<
 
   static getVariableSchema() {
     const tts = z.object({
-      action: z.literal("tts"),
-      volume: z.number().min(0).max(100).optional(),
-      text: z.string().min(1).optional()
+      action: z.literal("tts").describe("Text to Speech Message"),
+      volume: z.number().min(0).max(100).describe("Volume level in %").optional(),
+      text: z.string().min(1).describe("message to say").optional(),
+      provider: z.url().describe("tts provider")
     })
     const notification = z.object({
-      action: z.literal("notification"),
-      volume: z.number().min(0).max(100).optional(),
-      uri: z.string().min(1).optional()
+      action: z.literal("notification").describe("Play Notification"),
+      volume: z.number().min(0).max(100).describe("Volume level in %").optional(),
+      uri: z.string().min(1).describe("URI to play").optional()
     })
     return z.discriminatedUnion("action", [tts, notification])
   }
 
   static configSchema() {
     return z.object({
-      address: z.ipv4()
+      address: z.ipv4().describe("address of the speaker")
     })
   }
 }

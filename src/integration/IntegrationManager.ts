@@ -1,10 +1,12 @@
-import { Integration } from "@prisma/client"
+import { Integration, Prisma } from "@prisma/client"
 import { IntegrationConstructor, IntegrationEntry } from "./IntegrationEntry"
 import { RepositoryContainer, ServiceContainer } from "../container"
-import z from "zod"
+import z, { ZodLiteral, ZodSchema, ZodType } from "zod"
 import { logger } from "../logger"
 import { Logger } from "pino"
 import { InstanceManager } from "../core/InstanceManager"
+import { CreateIntegrationProps } from "../prisma/repositories/IntegrationRepository"
+
 
 export class IntegrationManager extends InstanceManager<Integration, IntegrationEntry<any>> {
 
@@ -30,16 +32,36 @@ export class IntegrationManager extends InstanceManager<Integration, Integration
     await Promise.all(this.collection.map(integration => integration.reload()))
   }
 
+  get mappedConstructors() {
+    return Object.keys(this.registered)
+      .map(key => {
+        const constructor = this.getRegisteredConstructor(key)
+        if (!constructor) return null
+        return { key, constructor }
+      })
+      .filter(v => v !== null)
+  }
+
+  getCommonIntegrationSchema() {
+    const options = this.mappedConstructors.map(c => {
+      return (c.constructor.configSchema() as z.ZodObject<any>).extend({
+        name: z.literal(c.key).describe(c.constructor.label()),
+        label: z.string().min(1).describe("name to identify this integration")
+      })
+    })
+    if (options.length === 0) throw new Error(`no registered integrations`)
+    return z.discriminatedUnion("name", options as any)
+  }
+
   getConfig() {
-    return Object.keys(this.registered).map(k => {
-      const constructor = this.getRegisteredConstructor(k)
-      if (!constructor) return null
-      return {
-        name: k,
+    return {
+      commonSchema: z.toJSONSchema(this.getCommonIntegrationSchema()),
+      integrations: this.mappedConstructors.map(({ key, constructor }) => ({
+        name: key,
         icon: constructor.icon(),
         config: z.toJSONSchema(constructor.configSchema())
-      }
-    })
+      }))
+    }
   }
 
   /**
@@ -78,8 +100,8 @@ export class IntegrationManager extends InstanceManager<Integration, Integration
    * creates a new integration entry from scratch
    * @param config configuration for the new integration
    */
-  async create(config: any) {
-    const entity = await this.repositories.integration.create(config)
+  async create(data: CreateIntegrationProps) {
+    const entity = await this.repositories.integration.create(data)
     const integration = await this.createEntryFromEntity(entity)
     this.collection.push(integration)
     this.services.socketManager.sendIntegrations()

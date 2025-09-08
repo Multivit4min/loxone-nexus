@@ -9,15 +9,11 @@ export const updateIntegrationSchema = z.object({
   config: z.any()
 }).strict()
 
-export const createIntegrationSchema = updateIntegrationSchema.extend({
-  name: z.string().min(1),
-})
-
 
 export const createIntegrationVariableSchema = <T extends z.Schema>(zodObject: T) => z.object({
   label: z.string().min(1),
   direction: z.enum([VariableDirection.INPUT, VariableDirection.OUTPUT]),
-  integration: zodObject
+  props: zodObject
 })
 
 export type CreateIntegrationVariableProps<T extends z.Schema> = z.infer<ReturnType<typeof createIntegrationVariableSchema<T>>>
@@ -43,11 +39,9 @@ export const integrationController = {
 
   //create a integration
   async createIntegration(req: Request, res: Response) {
-    const body = createIntegrationSchema.parse(req.body)
-    const constructor = services.integrationManager.getRegisteredConstructor(body.name)
-    if (!constructor) return void res.status(404).json({ error: `Integration ${body.name} not found` })
-    constructor.configSchema().parse(body.config)
-    const integration = await services.integrationManager.create(body)
+    const schema = services.integrationManager.getCommonIntegrationSchema()
+    const { label, name, ...config } = schema.parse(req.body)
+    const integration = await services.integrationManager.create({ label, name, config })
     res.json(integration.serialize())
   },
 
@@ -79,7 +73,7 @@ export const integrationController = {
     const variable = await integration.variables.create({
       label: props.label,
       direction: props.direction,
-      config: props.integration as any
+      config: props.props as any
     })
     res.json({ variable: variable.serialize() })
   },

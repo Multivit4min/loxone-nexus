@@ -19,6 +19,10 @@ export class HomeAssistantIntegration extends IntegrationEntry<
     super(entity, parent, HomeAssistantIntegration)
   }
 
+  static label() {
+    return "HomeAssistant"
+  }
+
   getConstructor() {
     return HomeAssistantIntegration
   }

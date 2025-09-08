@@ -14,6 +14,7 @@ This project aims to connect different Integrations like HomeAssistant with Loxo
 #### Installation
 ```
 git clone https://github.com/Multivit4min/loxone-nexus
+cd loxone-nexus
 npm ci
 npx prisma migrate deploy
 npm start

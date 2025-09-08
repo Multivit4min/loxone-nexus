@@ -1,7 +1,7 @@
 import { VariableDirection, IntegrationVariable as VariableEntity } from "@prisma/client"
 import { IntegrationEntry } from "../IntegrationEntry"
 import { IntegrationVariableManager } from "./IntegrationVariableManager"
-import { SmartActuatorSingleChannelType, VariableDataTypes } from "../../types/general"
+import { VariableDataTypes } from "../../types/general"
 import { Instance } from "../../core/Instance"
 import { TypeConversion } from "../../util/TypeConversion"
 

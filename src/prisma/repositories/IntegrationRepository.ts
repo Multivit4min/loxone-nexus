@@ -1,4 +1,6 @@
-import { Integration, PrismaClient } from "@prisma/client"
+import { Integration, Prisma, PrismaClient } from "@prisma/client"
+
+export type CreateIntegrationProps = Prisma.XOR<Prisma.IntegrationCreateInput, Prisma.IntegrationUncheckedCreateInput>
 
 export class IntegrationRepository {
 
@@ -14,11 +16,8 @@ export class IntegrationRepository {
     })
   }
 
-  create(data: Omit<Integration, "id">) {
-    return this.prisma.integration.create({
-      //@ts-ignore
-      data,
-    })
+  create(data: CreateIntegrationProps) {
+    return this.prisma.integration.create({ data })
   }
 
   remove(id: string) {
