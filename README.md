@@ -29,7 +29,7 @@ if you want to run it with a process manager like pm2 you can start it with `pm2
  - TEXT
  - SmartActuatorSingleChannel
 
-### Supported Integrations
+### Available Integrations
 
 - HomeAssistant
   - access to all entities which have string, number, boolean attributes
