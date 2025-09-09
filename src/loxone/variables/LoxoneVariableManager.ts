@@ -3,7 +3,7 @@ import { LoxoneVariableService } from "./LoxoneVariableService"
 import { LoxoneInstance } from "../LoxoneInstance"
 import { InstanceManager } from "../../core/InstanceManager"
 import { Logger } from "pino"
-import { logger } from "../../logger"
+import { logger } from "../../logger/pino"
 import { ServiceContainer } from "../../container"
 
 export class LoxoneVariableManager extends InstanceManager<LoxoneVariable, LoxoneVariableService> {

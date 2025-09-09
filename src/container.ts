@@ -12,7 +12,7 @@ import { AuthService } from "./user/AuthService"
 import { UserRepository } from "./prisma/repositories/UserRepository"
 import { UserService } from "./user/UserService"
 import { LinkManager } from "./link/LinkManager"
-import { logger } from "./logger"
+import { logger } from "./logger/pino"
 import { setupStore } from "./express/api/controllers/setup.controller"
 import { SonosIntegration } from "./integration/integrations/sonos/SonosIntegration"
 

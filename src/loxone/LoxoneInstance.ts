@@ -8,7 +8,7 @@ import { TypeConversion } from "../util/TypeConversion"
 import { Instance } from "../core/Instance"
 import { InstanceManager } from "../core/InstanceManager"
 import { Logger } from "pino"
-import { logger } from "../logger"
+import { logger } from "../logger/pino"
 
 export class LoxoneInstance extends Instance<Loxone> {
 

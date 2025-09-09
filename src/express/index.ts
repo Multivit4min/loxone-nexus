@@ -5,7 +5,7 @@ import { apiRouter } from "./api/index"
 import { createProxyMiddleware } from "http-proxy-middleware"
 import { createSocketServer } from "../realtime/socket"
 import history from "connect-history-api-fallback"
-import { logger } from "../logger"
+import { logger } from "../logger/pino"
 import pinoHttp from "pino-http"
 
 const httpLogger = pinoHttp({

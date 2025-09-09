@@ -2,7 +2,7 @@ import fs from "fs"
 import { join } from "path"
 import { randomBytes } from "crypto"
 import dotenv from "dotenv"
-import { logger } from "./logger"
+import { logger } from "./logger/pino"
 import { prisma } from "./prisma"
 
 //base configuration directory

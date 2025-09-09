@@ -5,7 +5,7 @@ import { TypeConversion } from "../../util/TypeConversion"
 import { LoxoneVariableManager } from "./LoxoneVariableManager"
 import { Instance } from "../../core/Instance"
 import { Logger } from "pino"
-import { logger } from "../../logger"
+import { logger } from "../../logger/pino"
 
 export class LoxoneVariableService extends Instance<LoxoneVariable> {
 

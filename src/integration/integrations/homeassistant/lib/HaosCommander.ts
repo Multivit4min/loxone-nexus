@@ -5,7 +5,7 @@ import { HaosCommand } from "./command/HaosCommand"
 import { EventEmitter } from "events"
 import { Response } from "./types/Response"
 import { EventCommand } from "./command/events/EventCommand"
-import { logger } from "../../../../logger"
+import { logger } from "../../../../logger/pino"
 
 export interface HaosCommander extends EventEmitter {
   on(eventName: "state", listener: (state: HaosCommander.State, oldState: HaosCommander.State) => void): this

@@ -15,7 +15,7 @@ export class SonosIntegration extends IntegrationEntry<
 
   device: SonosDevice
   private pollInterval?: NodeJS.Timeout
-  static POLL_INTERVAL = 5 * 1000
+  static POLL_INTERVAL = 10 * 1000
   private zone?: GetZoneInfoResponse
   private state?: SonosState
 
@@ -84,18 +84,27 @@ export class SonosIntegration extends IntegrationEntry<
   }
 
   static getVariableSchema() {
-    const tts = z.object({
-      action: z.literal("tts").describe("Text to Speech Message"),
-      volume: z.number().min(0).max(100).describe("Volume level in %").optional(),
-      text: z.string().min(1).describe("message to say").optional(),
-      provider: z.url().describe("tts provider")
-    })
     const notification = z.object({
       action: z.literal("notification").describe("Play Notification"),
       volume: z.number().min(0).max(100).describe("Volume level in %").optional(),
       uri: z.string().min(1).describe("URI to play").optional()
     })
-    return z.discriminatedUnion("action", [tts, notification])
+    const play = z.object({
+      action: z.literal("play").describe("start playback")
+    })
+    const pause = z.object({
+      action: z.literal("pause").describe("pause playback")
+    })
+    const volume = z.object({
+      action: z.literal("volume").describe("set volume")
+    })
+    const next = z.object({
+      action: z.literal("next").describe("next track")
+    })
+    const previous = z.object({
+      action: z.literal("previous").describe("previous track")
+    })
+    return z.discriminatedUnion("action", [notification, play, pause, volume, next, previous])
   }
 
   static configSchema() {

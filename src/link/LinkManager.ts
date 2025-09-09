@@ -5,7 +5,7 @@ import {
 import { RepositoryContainer, ServiceContainer } from "../container"
 import { InstanceManager } from "../core/InstanceManager"
 import { Link } from "./Link"
-import { logger } from "../logger"
+import { logger } from "../logger/pino"
 import { LinkError } from "./LinkError"
 import { IntegrationVariable } from "../integration/variables/IntegrationVariable"
 import { LoxoneVariableService } from "../loxone/variables/LoxoneVariableService"

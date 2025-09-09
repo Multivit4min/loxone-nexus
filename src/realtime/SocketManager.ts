@@ -5,7 +5,7 @@ import { LoxoneInstance } from "../loxone/LoxoneInstance"
 import { LoxoneVariableService } from "../loxone/variables/LoxoneVariableService"
 import { IntegrationEntry } from "../integration/IntegrationEntry"
 import { IntegrationVariable } from "../integration/variables/IntegrationVariable"
-import { logger } from "../logger"
+import { logger } from "../logger/pino"
 
 export class SocketManager {
 

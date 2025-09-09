@@ -2,7 +2,7 @@ import { Request, Response } from "express"
 import { NextFunction } from "http-proxy-middleware/dist/types"
 import { z } from "zod"
 import { services } from "../../../container"
-import { logger } from "../../../logger"
+import { logger } from "../../../logger/pino"
 
 export const setupSchema = z.object({
   username: z.string().min(1),

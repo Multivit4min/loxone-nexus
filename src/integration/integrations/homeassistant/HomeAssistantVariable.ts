@@ -3,10 +3,8 @@ import { IntegrationVariable } from "../../variables/IntegrationVariable"
 import { IntegrationVariableManager } from "../../variables/IntegrationVariableManager"
 import { SubscribeTriggerCommand } from "./lib/command/SubscribeTriggerCommand"
 import { HomeAssistant } from "./lib/HomeAssistant"
-import { logger } from "../../../logger"
+import { logger } from "../../../logger/pino"
 import { HomeAssistantIntegration } from "./HomeAssistantIntegration"
-import { ActionType } from "./HomeAssistantLoxoneServices"
-import { SmartActuatorSingleChannelType } from "../../../types/general"
 import { TypeConversion } from "../../../util/TypeConversion"
 
 export class HomeAssistantVariable extends IntegrationVariable {

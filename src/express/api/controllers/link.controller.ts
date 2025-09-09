@@ -2,7 +2,7 @@ import { Request, Response } from "express"
 import { services } from "../../../container"
 import z from "zod"
 import { LinkError } from "../../../link/LinkError"
-import { logger } from "../../../logger"
+import { logger } from "../../../logger/pino"
 
 export const createLinkSchema = z.object({
   integrationVariable: z.string().min(1),

@@ -52,7 +52,7 @@ export abstract class HaosCommand<T extends HaosCommand.BasePayload = any, R = a
     this.clearTimeoutTimer()
     this.state = HaosCommand.State.RECEIVED
     if (!this.resolve || !this.reject)
-      throw new Error(`no resolver (${!!this.resolve}) or reject (${!!this.reject}) function found`)
+      return console.error(`no resolver (${!!this.resolve}) or reject (${!!this.reject}) function found`)
     this.handleResponse(
       res,
       this.handleResolve.bind(this, this.resolve),

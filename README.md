@@ -1,7 +1,7 @@
 Loxone Nexus
 ============
 
-> This project is currently under development use at your own risk
+> This project is currently under development
 
 
 This project aims to connect different Integrations like HomeAssistant with Loxone via their integrated Loxone Intercommunication Interface used to communicate variables across different Loxone Miniservers
@@ -32,9 +32,9 @@ if you want to run it with a process manager like pm2 you can start it with `pm2
 ### Supported Integrations
 
 - HomeAssistant
-
-### Planned Integrations
+  - access to all entities which have string, number, boolean attributes
+  - control switch, lights, buttons, counters, valve, lock and many more
+ 
 - Sonos
-- .ical Calendar Support
-- Fronius
-- Webhooks
+  - Notifications (mp3 files from web or Network Storage)
+  - various controls, play, pause, set volume, next, previous

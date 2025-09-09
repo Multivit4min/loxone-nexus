@@ -3,6 +3,7 @@ import { IntegrationVariable } from "../../variables/IntegrationVariable"
 import { IntegrationVariableManager } from "../../variables/IntegrationVariableManager"
 import { SonosIntegration } from "./SonosIntegration"
 import z from "zod"
+import { UpdateProps } from "../../IntegrationEntry"
 
 export class SonosVariable extends IntegrationVariable<
   z.infer<ReturnType<typeof SonosIntegration.getVariableSchema>>
@@ -31,16 +32,23 @@ export class SonosVariable extends IntegrationVariable<
     return this
   }
 
-  async update() {
-    this.logger.trace("SonosVariable#update is not implemented")
+  async update({ label, config }: UpdateProps) {
+    this.entity.label = label
+    this.entity.config = config
+    await this.repositories.integrationVariable.update(this.id, this.entity)
+    this.services.socketManager.sendIntegrationVariable(this)
   }
 
   async sendValue() {
     if (this.value.value === null) return
     try {
       switch (this.config.action) {
-        case "tts": return await this.executeTTS()
+        case "volume": return await this.setVolume()
         case "notification": return await this.executeNotification()
+        case "next": return await this.next()
+        case "previous": return await this.previous()
+        case "play": return await this.play()
+        case "pause": return await this.pause()
         default:
           this.logger.warn(`action ${(<any>this.config).action } is not implemented`)
       }
@@ -49,14 +57,43 @@ export class SonosVariable extends IntegrationVariable<
     }
   }
 
-  async executeTTS() {
+  async next() {
+    if (this.config.action !== "next") return //type guard
     const { type, value } = this.value
-    if (type !== "string") return this.logger.warn("Sonos TTS only available for string if no uri has been given")
-    if (value.length === 0) return
-    await this.instance.device.PlayTTS({
-      text: value,
-      volume: this.config.volume
-    })
+    if (type !== "boolean") return this.logger.warn("Sonos next is only available for digital inputs")
+    if (!value) return
+    await this.instance.device.Next()
+  }
+
+  async previous() {
+    if (this.config.action !== "previous") return //type guard
+    const { type, value } = this.value
+    if (type !== "boolean") return this.logger.warn("Sonos previous is only available for digital inputs")
+    if (!value) return
+    await this.instance.device.Previous()
+  }
+
+  async setVolume() {
+    if (this.config.action !== "volume") return //type guard
+    const { type, value } = this.value
+    if (type !== "number") return this.logger.warn("Sonos set Volume is only available for analog inputs")
+    await this.instance.device.SetVolume(value)
+  }
+
+  async pause() {
+    if (this.config.action !== "pause") return //type guard
+    const { type, value } = this.value
+    if (type !== "boolean") return this.logger.warn("Sonos pause is only available for digital inputs")
+    if (!value) return
+    await this.instance.device.Pause()
+  }
+
+  async play() {
+    if (this.config.action !== "play") return //type guard
+    const { type, value } = this.value
+    if (type !== "boolean") return this.logger.warn("Sonos play is only available for digital inputs")
+    if (!value) return
+    await this.instance.device.Play()
   }
 
   async executeNotification() {

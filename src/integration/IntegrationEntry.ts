@@ -3,9 +3,10 @@ import { IntegrationManager } from "./IntegrationManager"
 import z from "zod"
 import { IntegrationVariable } from "./variables/IntegrationVariable"
 import { IntegrationVariableManager } from "./variables/IntegrationVariableManager"
-import { logger } from "../logger"
+import { logger } from "../logger/pino"
 import { Logger } from "pino"
 import { Instance } from "../core/Instance"
+
 
 export abstract class IntegrationEntry<T extends object> extends Instance<Integration> {
 

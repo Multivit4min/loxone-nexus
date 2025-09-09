@@ -1,7 +1,7 @@
 import Websocket, { RawData } from "ws"
 import { EventEmitter } from "events"
 import { HaosCommand } from "./command/HaosCommand"
-import { logger } from "../../../../logger"
+import { logger } from "../../../../logger/pino"
 
 export interface HaosWebsocket extends EventEmitter {
   on(eventName: "message", listener: (props: any) => void): this
