@@ -1,6 +1,6 @@
 {
-  "name": "loxone",
-  "version": "1.0.0",
+  "name": "loxone-nexus",
+  "version": "0.0.1",
   "description": "managment interfaces to connect different services like homeassistant with loxone with the the loxone intercommunication interface",
   "scripts": {
     "start": "tsx src/index.ts",
