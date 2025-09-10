@@ -75,7 +75,6 @@ export abstract class IntegrationEntry<T extends object> extends Instance<Integr
     return {
       specific: this.specificSerialize(),
       variables: this.variables.serialize(),
-      icon: constructor.icon(),
       configSchema: z.toJSONSchema(constructor.configSchema()),
       variableSchema: z.toJSONSchema(constructor.getVariableSchema()),
       ...this.entity
@@ -99,9 +98,7 @@ export type UpdateProps = {
 export interface IntegrationConstructor {
   new (entity: Integration, parent: IntegrationManager): IntegrationEntry<any>
 
-  label(): string
   createIntegrationVariable(entity: VariableEntity, parent: IntegrationVariableManager): IntegrationVariable
   getVariableSchema(): z.Schema
   configSchema(): z.ZodObject
-  icon(): string
 }

@@ -24,10 +24,6 @@ export class SonosIntegration extends IntegrationEntry<
     this.device = new SonosDevice(this.config.address)
   }
 
-  static label() {
-    return "Sonos"
-  }
-
   getConstructor() {
     return SonosIntegration
   }
@@ -77,10 +73,6 @@ export class SonosIntegration extends IntegrationEntry<
       result[k] = attributes[k]
     })
     return result
-  }
-
-  static icon() {
-    return "mdi-cast-audio"
   }
 
   static getVariableSchema() {

@@ -45,7 +45,7 @@ export class IntegrationManager extends InstanceManager<Integration, Integration
   getCommonIntegrationSchema() {
     const options = this.mappedConstructors.map(c => {
       return (c.constructor.configSchema() as z.ZodObject<any>).extend({
-        name: z.literal(c.key).describe(c.constructor.label()),
+        name: z.literal(c.key),
         label: z.string().min(1).describe("name to identify this integration")
       })
     })
@@ -58,7 +58,6 @@ export class IntegrationManager extends InstanceManager<Integration, Integration
       commonSchema: z.toJSONSchema(this.getCommonIntegrationSchema()),
       integrations: this.mappedConstructors.map(({ key, constructor }) => ({
         name: key,
-        icon: constructor.icon(),
         config: z.toJSONSchema(constructor.configSchema())
       }))
     }

@@ -1,15 +1,16 @@
 import { IntegrationVariable as VariableEntity } from "@prisma/client"
 import { IntegrationVariable } from "../../variables/IntegrationVariable"
 import { IntegrationVariableManager } from "../../variables/IntegrationVariableManager"
-import { SubscribeTriggerCommand } from "./lib/command/SubscribeTriggerCommand"
-import { HomeAssistant } from "./lib/HomeAssistant"
+import { HomeAssistant } from "./hass/HomeAssistant"
 import { logger } from "../../../logger/pino"
 import { HomeAssistantIntegration } from "./HomeAssistantIntegration"
 import { TypeConversion } from "../../../util/TypeConversion"
+import { HomeAssistantEventHandler } from "./hass/events/HomeAssistantEventHandler"
+import { State } from "./hass/commands/HomeAssistantStateCommand"
 
 export class HomeAssistantVariable extends IntegrationVariable {
 
-  subscribeTriggerCommand?: SubscribeTriggerCommand = undefined
+  triggerEventHandler?: HomeAssistantEventHandler = undefined
 
   constructor(entity: VariableEntity, parent: IntegrationVariableManager) {
     super(entity, parent)
@@ -55,33 +56,6 @@ export class HomeAssistantVariable extends IntegrationVariable {
     this.logger.trace("HomeAssistantVariable#update is not implemented")
   }
 
-  /*
-  static parseValue(type: "string", value: string): string
-  static parseValue(type: "number", value: string): number
-  static parseValue(type: "boolean", value: string): boolean
-  static parseValue(type: "SmartActuatorSingleChannel", value: string): SmartActuatorSingleChannelType
-  static parseValue(type: ActionType, value: string) {
-    switch (type) {
-      case "number":
-        const num = parseFloat(value)
-        return isNaN(num) ? 0 : num
-      case "boolean": 
-        return ["on", "true", "active", "ok", "1"].includes(value.toLowerCase())
-      case "SmartActuatorSingleChannel":
-        const sma = { channel: 0, fadeTime: 0 }
-        try {
-          const { channel, fadeTime } = JSON.parse(value)
-          sma.channel = typeof channel === "number" ? channel * 2.55 : 0
-          sma.fadeTime = typeof fadeTime === "number" ? fadeTime : 0
-        } catch (e) {
-          sma.channel = HomeAssistantVariable.parseValue("number", value)
-        }
-        return sma
-      case "string":
-      default: return String(value)
-    }
-  }*/
-
   async sendValue() {
     const action = this.instance.haServices.findServiceAction(this.domain, this.config.key)
     if (!action) throw new Error(`action ${this.domain}.${this.config.key} not found on variable id ${this.id}`)
@@ -97,21 +71,21 @@ export class HomeAssistantVariable extends IntegrationVariable {
   }
 
   async start() {
-    if (!this.ha) return this.subscribeTriggerCommand = undefined
-    if (this.subscribeTriggerCommand) await this.subscribeTriggerCommand.unsubscribe()
+    if (!this.ha) return this.triggerEventHandler = undefined
+    if (this.triggerEventHandler) await this.triggerEventHandler.unsubscribe()
     this.updateValue(await this.getCurrentValue())
-    this.subscribeTriggerCommand = await this.ha.createTrigger(cmd => {
-      const trigger = cmd.addStateTrigger().setEntityId(this.entityId)
-      if (this.key !== "state") trigger.setAttribute(this.key)
-      trigger.on(res => {
-        if (!res.to_state) return
-        this.updateValue(this.getValueFromState(res.to_state))
-      })
-      return trigger
+    this.triggerEventHandler = await this.ha.subscribeTrigger({
+      platform: "state",
+      entity_id: this.entityId,
+      attribute: this.key !== "state" ? this.key : undefined
+    })
+    this.triggerEventHandler.on(res => {
+      if (!res.to_state) return
+      this.updateValue(this.getValueFromState(res.to_state))
     })
   }
 
-  getValueFromState({ attributes, state }: HomeAssistant.StateResponse) {
+  getValueFromState({ attributes, state }: State) {
     return this.key !== "state" ? attributes[this.key] : state
   }
 
@@ -127,9 +101,9 @@ export class HomeAssistantVariable extends IntegrationVariable {
   }
 
   async stop() {
-    if (!this.ha) return this.subscribeTriggerCommand = undefined
-    const triggerCmd = this.subscribeTriggerCommand
-    this.subscribeTriggerCommand = undefined
+    if (!this.ha) return this.triggerEventHandler = undefined
+    const triggerCmd = this.triggerEventHandler
+    this.triggerEventHandler = undefined
     if (triggerCmd) {
       try {
         await triggerCmd.unsubscribe()

@@ -1,6 +1,6 @@
 import z from "zod"
 import { IntegrationEntry } from "../../IntegrationEntry"
-import { HomeAssistant } from "./lib/HomeAssistant"
+import { HomeAssistant } from "./hass/HomeAssistant"
 import { Integration, IntegrationVariable as VariableEntity } from "@prisma/client"
 import { HomeAssistantVariable } from "./HomeAssistantVariable"
 import { IntegrationVariableManager } from "../../variables/IntegrationVariableManager"
@@ -19,18 +19,15 @@ export class HomeAssistantIntegration extends IntegrationEntry<
     super(entity, parent, HomeAssistantIntegration)
   }
 
-  static label() {
-    return "HomeAssistant"
-  }
-
   getConstructor() {
     return HomeAssistantIntegration
   }
 
   async start() {
-    this.ha = new HomeAssistant({
-      ws: this.config.ws,
-      token: this.config.token
+    this.ha = await new HomeAssistant({
+      url: this.config.ws,
+      token: this.config.token,
+      logger: this.logger
     }).connect()
     await this.variables.reload()
   }
@@ -93,10 +90,6 @@ export class HomeAssistantIntegration extends IntegrationEntry<
       result[k] = attributes[k]
     })
     return result
-  }
-
-  static icon() {
-    return "mdi-home-assistant"
   }
 
   static getVariableSchema() {

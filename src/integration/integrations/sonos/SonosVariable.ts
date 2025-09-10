@@ -77,7 +77,10 @@ export class SonosVariable extends IntegrationVariable<
     if (this.config.action !== "volume") return //type guard
     const { type, value } = this.value
     if (type !== "number") return this.logger.warn("Sonos set Volume is only available for analog inputs")
-    await this.instance.device.SetVolume(value)
+    let volume = Math.round(value)
+    if (volume < 0) volume = 0
+    if (volume > 100) volume = 100
+    await this.instance.device.SetVolume(volume)
   }
 
   async pause() {
