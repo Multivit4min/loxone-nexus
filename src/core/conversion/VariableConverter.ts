@@ -31,7 +31,7 @@ export class VariableConverter {
 
   private safeConvert<T = any>(handler: Handlers<T>, fallback: T) {
     try {
-      return handler[this.type](this.value as any)
+      return handler[this.type](this.valueType as any)
     } catch (e) {
       return fallback
     }

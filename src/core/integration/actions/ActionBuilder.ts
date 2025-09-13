@@ -33,7 +33,7 @@ export class ActionBuilder {
   execute(variable: IntegrationVariable) {
     const actionId = variable.config.action
     const action = this.actions[actionId]
-    if (!action) return this.logger.warn(variable.config, `Action "${actionId}" not found!`)
+    if (!action) return this.logger.warn({ value: variable.value, config: variable.config }, `Action "${actionId}" not found!`)
     return action.request(variable)
   }
 

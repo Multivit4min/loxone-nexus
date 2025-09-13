@@ -68,8 +68,7 @@ export const integrationController = {
 
   async createIntegrationVariable(req: Request, res: Response) {
     const integration = services.integrationManager.getId(req.params.id)
-    const varSchema = integration.getConstructor().getVariableSchema()
-    const props = createIntegrationVariableSchema(varSchema).parse(req.body)
+    const props = createIntegrationVariableSchema(integration.actions.schema).parse(req.body)
     const variable = await integration.variables.create({
       label: props.label,
       direction: props.direction,
@@ -81,9 +80,8 @@ export const integrationController = {
 
   async updateIntegrationVariable(req: Request, res: Response) {
     const integration = services.integrationManager.getId(req.params.id)
-    const varSchema = integration.getConstructor().getVariableSchema()
     const variable = await integration.variables.getId(req.params.variableId)
-    const { label, props } = createIntegrationVariableSchema(varSchema).parse({
+    const { label, props } = createIntegrationVariableSchema(integration.actions.schema).parse({
       ...req.body,
       direction: variable.entity.direction
     })
