@@ -3,8 +3,8 @@ import { SocketClient } from "./SocketClient"
 import { ServiceContainer } from "../container"
 import { LoxoneInstance } from "../loxone/LoxoneInstance"
 import { LoxoneVariableService } from "../loxone/variables/LoxoneVariableService"
-import { IntegrationEntry } from "../integration/IntegrationEntry"
-import { IntegrationVariable } from "../integration/variables/IntegrationVariable"
+import { IntegrationEntry } from "../core/integration/IntegrationInstance"
+import { IntegrationVariable } from "../core/integration/variables/IntegrationVariable"
 import { logger } from "../logger/pino"
 
 export class SocketManager {

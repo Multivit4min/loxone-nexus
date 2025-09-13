@@ -1,8 +1,8 @@
-import { Instance } from "../core/Instance"
-import { TypeConversion } from "../util/TypeConversion"
+import { Instance } from "../instance/Instance"
+import { TypeConversion } from "../conversion/TypeConversion"
 import { IntegrationVariable } from "../integration/variables/IntegrationVariable"
-import { LoxoneVariableService } from "../loxone/variables/LoxoneVariableService"
-import { LinkEntity } from "../prisma/repositories/LinkRepository"
+import { LoxoneVariableService } from "../../loxone/variables/LoxoneVariableService"
+import { LinkEntity } from "../../prisma/repositories/LinkRepository"
 import { LinkManager } from "./LinkManager"
 
 export class Link extends Instance<LinkEntity> {

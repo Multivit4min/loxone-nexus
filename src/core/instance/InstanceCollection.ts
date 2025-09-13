@@ -1,5 +1,5 @@
-import { CollectionItemNotFoundError } from "./errors/CollectionItemNotFoundError"
-import { CollectionItemNotUniqueError } from "./errors/CollectionItemNotUniqueError"
+import { CollectionItemNotFoundError } from "../errors/CollectionItemNotFoundError"
+import { CollectionItemNotUniqueError } from "../errors/CollectionItemNotUniqueError"
 import { EntityType, Instance } from "./Instance"
 
 export class InstanceCollection<Y extends EntityType, T extends Instance<Y>> {

@@ -3,13 +3,15 @@ import { IntegrationManager } from "./IntegrationManager"
 import z from "zod"
 import { IntegrationVariable } from "./variables/IntegrationVariable"
 import { IntegrationVariableManager } from "./variables/IntegrationVariableManager"
-import { logger } from "../logger/pino"
+import { logger } from "../../logger/pino"
 import { Logger } from "pino"
-import { Instance } from "../core/Instance"
+import { Instance } from "../instance/Instance"
+import { ActionBuilder } from "./actions/ActionBuilder"
 
 
-export abstract class IntegrationEntry<T extends object> extends Instance<Integration> {
+export abstract class IntegrationInstance<T extends object> extends Instance<Integration> {
 
+  actions = new ActionBuilder(this)
   variables: IntegrationVariableManager
   logger: Logger
 
@@ -76,7 +78,8 @@ export abstract class IntegrationEntry<T extends object> extends Instance<Integr
       specific: this.specificSerialize(),
       variables: this.variables.serialize(),
       configSchema: z.toJSONSchema(constructor.configSchema()),
-      variableSchema: z.toJSONSchema(constructor.getVariableSchema()),
+      variableSchema: this.actions.schema,
+      actions: this.actions.serialize(),
       ...this.entity
     }
   }
@@ -96,9 +99,9 @@ export type UpdateProps = {
 
 
 export interface IntegrationConstructor {
-  new (entity: Integration, parent: IntegrationManager): IntegrationEntry<any>
+  new (entity: Integration, parent: IntegrationManager): IntegrationInstance<any>
 
   createIntegrationVariable(entity: VariableEntity, parent: IntegrationVariableManager): IntegrationVariable
-  getVariableSchema(): z.Schema
+  //getVariableSchema(): z.Schema
   configSchema(): z.ZodObject
 }

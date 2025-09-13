@@ -1,7 +1,7 @@
 import { LoxoneVariableType } from "@prisma/client"
 import { DATA_TYPE, LoxoneIOPacket } from "loxone-ici"
-import { logger } from "../logger/pino"
-import { SmartActuatorSingleChannelType, VariableDataTypes } from "../types/general"
+import { logger } from "../../logger/pino"
+import { SmartActuatorSingleChannelType, VariableDataTypes } from "../../types/general"
 
 export class TypeConversion {
 

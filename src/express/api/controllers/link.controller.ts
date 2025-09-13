@@ -1,7 +1,7 @@
 import { Request, Response } from "express"
 import { services } from "../../../container"
 import z from "zod"
-import { LinkError } from "../../../link/LinkError"
+import { LinkError } from "../../../core/link/LinkError"
 import { logger } from "../../../logger/pino"
 
 export const createLinkSchema = z.object({

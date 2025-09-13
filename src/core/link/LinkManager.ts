@@ -2,14 +2,14 @@ import {
   IntegrationVariable as IntegrationVariableEntity,
   LoxoneVariable as LoxoneVariableEntity
 } from "@prisma/client"
-import { RepositoryContainer, ServiceContainer } from "../container"
-import { InstanceManager } from "../core/InstanceManager"
+import { RepositoryContainer, ServiceContainer } from "../../container"
+import { InstanceManager } from "../instance/InstanceManager"
 import { Link } from "./Link"
-import { logger } from "../logger/pino"
+import { logger } from "../../logger/pino"
 import { LinkError } from "./LinkError"
 import { IntegrationVariable } from "../integration/variables/IntegrationVariable"
-import { LoxoneVariableService } from "../loxone/variables/LoxoneVariableService"
-import { LinkEntity } from "../prisma/repositories/LinkRepository"
+import { LoxoneVariableService } from "../../loxone/variables/LoxoneVariableService"
+import { LinkEntity } from "../../prisma/repositories/LinkRepository"
 
 export class LinkManager extends InstanceManager<LinkEntity, Link> {
 

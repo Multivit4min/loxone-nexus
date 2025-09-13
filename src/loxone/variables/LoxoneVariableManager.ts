@@ -1,7 +1,7 @@
 import { LoxoneVariable, VariableDirection } from "@prisma/client"
 import { LoxoneVariableService } from "./LoxoneVariableService"
 import { LoxoneInstance } from "../LoxoneInstance"
-import { InstanceManager } from "../../core/InstanceManager"
+import { InstanceManager } from "../../core/instance/InstanceManager"
 import { Logger } from "pino"
 import { logger } from "../../logger/pino"
 import { ServiceContainer } from "../../container"

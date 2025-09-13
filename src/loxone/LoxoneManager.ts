@@ -3,7 +3,7 @@ import { LoxoneInstance } from "./LoxoneInstance"
 import { LoxoneConfig } from "../prisma/repositories/LoxoneRepository"
 import { RepositoryContainer, ServiceContainer } from "../container"
 import { logger } from "../logger/pino"
-import { InstanceManager } from "../core/InstanceManager"
+import { InstanceManager } from "../core/instance/InstanceManager"
 
 export class LoxoneManager extends InstanceManager<Loxone, LoxoneInstance> {
 

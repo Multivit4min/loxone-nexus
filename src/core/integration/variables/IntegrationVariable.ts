@@ -1,9 +1,9 @@
 import { VariableDirection, IntegrationVariable as VariableEntity } from "@prisma/client"
-import { IntegrationEntry } from "../IntegrationEntry"
+import { IntegrationInstance } from "../IntegrationInstance"
 import { IntegrationVariableManager } from "./IntegrationVariableManager"
-import { VariableDataTypes } from "../../types/general"
-import { Instance } from "../../core/Instance"
-import { TypeConversion } from "../../util/TypeConversion"
+import { VariableDataTypes } from "../../../types/general"
+import { Instance } from "../../instance/Instance"
+import { TypeConversion } from "../../conversion/TypeConversion"
 
 export abstract class IntegrationVariable<T extends object = any> extends Instance<VariableEntity> {
 
@@ -14,7 +14,6 @@ export abstract class IntegrationVariable<T extends object = any> extends Instan
     super(entity, parent)
   }
 
-  abstract sendValue(): Promise<void>
   abstract start(): Promise<void>
   abstract stop(): Promise<void>
 
@@ -53,6 +52,11 @@ export abstract class IntegrationVariable<T extends object = any> extends Instan
     return this
   }
 
+  async sendValue() {
+    if (this.value.value === null) return
+    this.parent.actions.execute(this)
+  }
+
   serialize() {
     return {
       ...this.entity,
@@ -63,6 +67,6 @@ export abstract class IntegrationVariable<T extends object = any> extends Instan
 }
 
 export interface IntegrationVariableConstructor {
-  new (entity: VariableEntity, parent: IntegrationVariableManager): IntegrationEntry<any>
+  new (entity: VariableEntity, parent: IntegrationVariableManager): IntegrationInstance<any>
 
 }

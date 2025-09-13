@@ -1,9 +1,9 @@
 import { LoxoneVariable, VariableDirection, LoxoneVariableType } from "@prisma/client"
 import { LoxoneIOPacket } from "loxone-ici"
 import { VariableDataTypes } from "../../types/general"
-import { TypeConversion } from "../../util/TypeConversion"
+import { TypeConversion } from "../../core/conversion/TypeConversion"
 import { LoxoneVariableManager } from "./LoxoneVariableManager"
-import { Instance } from "../../core/Instance"
+import { Instance } from "../../core/instance/Instance"
 import { Logger } from "pino"
 import { logger } from "../../logger/pino"
 

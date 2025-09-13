@@ -1,5 +1,5 @@
 import { Logger } from "pino"
-import { RepositoryContainer, ServiceContainer } from "../container"
+import { RepositoryContainer, ServiceContainer } from "../../container"
 import { EntityType, Instance } from "./Instance"
 import { InstanceCollection } from "./InstanceCollection"
 

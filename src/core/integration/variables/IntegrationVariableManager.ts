@@ -1,12 +1,16 @@
-import { InstanceManager } from "../../core/InstanceManager"
-import { IntegrationConstructor, IntegrationEntry } from "../IntegrationEntry"
+import { InstanceManager } from "../../instance/InstanceManager"
+import { IntegrationConstructor, IntegrationInstance } from "../IntegrationInstance"
 import { IntegrationVariable } from "./IntegrationVariable"
 import { type IntegrationVariable as VariableEntity } from "@prisma/client"
 
 export class IntegrationVariableManager extends InstanceManager<VariableEntity, IntegrationVariable> {
 
-  constructor(public parent: IntegrationEntry<any>, readonly varConstructor: IntegrationConstructor) {
+  constructor(public parent: IntegrationInstance<any>, readonly varConstructor: IntegrationConstructor) {
     super()
+  }
+
+  get actions() {
+    return this.parent.actions
   }
 
   get logger() {

@@ -1,11 +1,11 @@
 import { Integration, Prisma } from "@prisma/client"
-import { IntegrationConstructor, IntegrationEntry } from "./IntegrationEntry"
-import { RepositoryContainer, ServiceContainer } from "../container"
+import { IntegrationConstructor, IntegrationEntry } from "./IntegrationInstance"
+import { RepositoryContainer, ServiceContainer } from "../../container"
 import z, { ZodLiteral, ZodSchema, ZodType } from "zod"
-import { logger } from "../logger/pino"
+import { logger } from "../../logger/pino"
 import { Logger } from "pino"
-import { InstanceManager } from "../core/InstanceManager"
-import { CreateIntegrationProps } from "../prisma/repositories/IntegrationRepository"
+import { InstanceManager } from "../instance/InstanceManager"
+import { CreateIntegrationProps } from "../../prisma/repositories/IntegrationRepository"
 
 
 export class IntegrationManager extends InstanceManager<Integration, IntegrationEntry<any>> {

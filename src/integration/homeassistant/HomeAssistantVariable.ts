@@ -1,10 +1,10 @@
 import { IntegrationVariable as VariableEntity } from "@prisma/client"
-import { IntegrationVariable } from "../../variables/IntegrationVariable"
-import { IntegrationVariableManager } from "../../variables/IntegrationVariableManager"
+import { IntegrationVariable } from "../../core/integration/variables/IntegrationVariable"
+import { IntegrationVariableManager } from "../../core/integration/variables/IntegrationVariableManager"
 import { HomeAssistant } from "./hass/HomeAssistant"
-import { logger } from "../../../logger/pino"
+import { logger } from "../../logger/pino"
 import { HomeAssistantIntegration } from "./HomeAssistantIntegration"
-import { TypeConversion } from "../../../util/TypeConversion"
+import { TypeConversion } from "../../core/conversion/TypeConversion"
 import { HomeAssistantEventHandler } from "./hass/events/HomeAssistantEventHandler"
 import { State } from "./hass/commands/HomeAssistantStateCommand"
 
@@ -54,20 +54,6 @@ export class HomeAssistantVariable extends IntegrationVariable {
 
   async update() {
     this.logger.trace("HomeAssistantVariable#update is not implemented")
-  }
-
-  async sendValue() {
-    const action = this.instance.haServices.findServiceAction(this.domain, this.config.key)
-    if (!action) throw new Error(`action ${this.domain}.${this.config.key} not found on variable id ${this.id}`)
-    const { type, value } = TypeConversion.DeserializeDataType(this.entity.value)
-    if (value === null) return
-    if (type === "SmartActuatorSingleChannel") value.channel *= 2.55
-    return action.action({
-      action,
-      entityId: this.entityId,
-      value,
-      domain: this.domain
-    })
   }
 
   async start() {

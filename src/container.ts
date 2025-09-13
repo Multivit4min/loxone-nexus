@@ -1,6 +1,6 @@
-import { IntegrationManager } from "./integration/IntegrationManager"
+import { IntegrationManager } from "./core/integration/IntegrationManager"
 import { IntegrationRepository } from "./prisma/repositories/IntegrationRepository"
-import { HomeAssistantIntegration } from "./integration/integrations/homeassistant/HomeAssistantIntegration"
+import { HomeAssistantIntegration } from "./integration/homeassistant/HomeAssistantIntegration"
 import { IntegrationVariableRepository } from "./prisma/repositories/IntegrationVariableRepository"
 import { LinkRepository } from "./prisma/repositories/LinkRepository"
 import { LoxoneManager } from "./loxone/LoxoneManager"
@@ -11,10 +11,10 @@ import { SocketManager } from "./realtime/SocketManager"
 import { AuthService } from "./user/AuthService"
 import { UserRepository } from "./prisma/repositories/UserRepository"
 import { UserService } from "./user/UserService"
-import { LinkManager } from "./link/LinkManager"
+import { LinkManager } from "./core/link/LinkManager"
 import { logger } from "./logger/pino"
 import { setupStore } from "./express/api/controllers/setup.controller"
-import { SonosIntegration } from "./integration/integrations/sonos/SonosIntegration"
+import { SonosIntegration } from "./integration/sonos/SonosIntegration"
 
 const secret = process.env.SECRET
 if (!secret) {
