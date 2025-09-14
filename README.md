@@ -6,7 +6,16 @@
 
 Loxone Nexus connects external integrations (currently **Home Assistant** and **Sonos**) to **Loxone Miniservers** using the **Loxone Intercommunication Interface** for variable exchange.
 
----
+<details>
+  <summary>Screenshots</summary>
+
+  ![Loxone](https://github.com/Multivit4min/loxone-nexus/blob/main/images/loxone.png?raw=true)
+  ![HomeAssistant](https://github.com/Multivit4min/loxone-nexus/blob/main/images/hass.png?raw=true)
+  ![Sonos](https://github.com/Multivit4min/loxone-nexus/blob/main/images/sonos.png?raw=true)
+  ![Variable](https://github.com/Multivit4min/loxone-nexus/blob/main/images/variable.png?raw=true)
+
+</details>
+
 
 ## Setup
 
