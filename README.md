@@ -1,50 +1,47 @@
-Loxone Nexus
-============
+# Loxone Nexus
 
 [![codecov](https://codecov.io/github/Multivit4min/loxone-nexus/branch/main/graph/badge.svg?token=QF11M7H8SB)](https://codecov.io/github/Multivit4min/loxone-nexus)
 
-> This project is currently under development
+⚠️ **Under active development** – expect breaking changes.
 
+Loxone Nexus connects external integrations (currently **Home Assistant** and **Sonos**) to **Loxone Miniservers** using the **Loxone Intercommunication Interface** for variable exchange.
 
-This project aims to connect different Integrations like HomeAssistant with Loxone via their integrated Loxone Intercommunication Interface used to communicate variables across different Loxone Miniservers
+---
 
-### Setup
+## Setup
 
-#### Prerequisites
-`NodeJS`, `npm` and `git` installed
+### Requirements
+- [Node.js](https://nodejs.org/en/download/)
+- npm  
+- git (just for cloning of the repo)
 
-#### Installation
+### Installation
 ```sh
 git clone https://github.com/Multivit4min/loxone-nexus
 cd loxone-nexus
 npm ci
 npx prisma migrate deploy
 npm start
-#or via pm2:
-#pm2 start ecosystem.js
 ```
-<details>
-  <summary>Screenshots</summary>
 
-  ![Loxone](https://github.com/Multivit4min/loxone-nexus/blob/main/images/loxone.png?raw=true)
-  ![HomeAssistant](https://github.com/Multivit4min/loxone-nexus/blob/main/images/hass.png?raw=true)
-  ![Sonos](https://github.com/Multivit4min/loxone-nexus/blob/main/images/sonos.png?raw=true)
-  ![Variable](https://github.com/Multivit4min/loxone-nexus/blob/main/images/variable.png?raw=true)
+With [pm2](https://pm2.keymetrics.io/):
+```sh
+pm2 start ecosystem.js
+```
 
-</details>
+## Supported Loxone Data Types
+- `DIGITAL`  
+- `ANALOG`  
+- `TEXT`  
+- `SmartActuatorSingleChannel`  
 
-### Supported Loxone Datatypes
- - DIGITAL
- - ANALOG
- - TEXT
- - SmartActuatorSingleChannel
 
-### Available Integrations
+## Integrations
 
-- HomeAssistant
-  - access to all entities which have string, number, boolean attributes
-  - control switch, lights, buttons, counters, valve, lock and many more
- 
-- Sonos
-  - Notifications (mp3 files from web or Network Storage)
-  - various controls, play, pause, set volume, next, previous
+### Home Assistant
+- Entity support: `string`, `number`, `boolean`  
+- Control: switch, light, button, counter, valve, lock, …  
+
+### Sonos
+- Notifications (MP3 from HTTP or SMB)  
+- Media control: play, pause, volume, next, previous  
