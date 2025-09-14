@@ -1,6 +1,8 @@
 Loxone Nexus
 ============
 
+[![codecov](https://codecov.io/github/Multivit4min/loxone-nexus/branch/main/graph/badge.svg?token=QF11M7H8SB)](https://codecov.io/github/Multivit4min/loxone-nexus)
+
 > This project is currently under development
 
 
@@ -9,19 +11,27 @@ This project aims to connect different Integrations like HomeAssistant with Loxo
 ### Setup
 
 #### Prerequisites
-`Nodejs v22`, `npm` and `git` installed
+`NodeJS`, `npm` and `git` installed
 
 #### Installation
-```
+```sh
 git clone https://github.com/Multivit4min/loxone-nexus
 cd loxone-nexus
 npm ci
 npx prisma migrate deploy
 npm start
+#or via pm2:
+#pm2 start ecosystem.js
 ```
+<details>
+  <summary>Screenshots</summary>
 
-if you want to run it with a process manager like pm2 you can start it with `pm2 start ecosystem.js`
+  ![Loxone](https://github.com/Multivit4min/loxone-nexus/blob/main/images/loxone.png?raw=true)
+  ![HomeAssistant](https://github.com/Multivit4min/loxone-nexus/blob/main/images/hass.png?raw=true)
+  ![Sonos](https://github.com/Multivit4min/loxone-nexus/blob/main/images/sonos.png?raw=true)
+  ![Variable](https://github.com/Multivit4min/loxone-nexus/blob/main/images/variable.png?raw=true)
 
+</details>
 
 ### Supported Loxone Datatypes
  - DIGITAL
