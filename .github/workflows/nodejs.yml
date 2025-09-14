@@ -1,6 +1,19 @@
 name: Node CI
 
-on: [push, pull_request]
+on: 
+  push:
+    branches: [ main ]
+    paths:
+      - package.json
+      - src/**
+      - tests/**
+      - .github/workflows/node-ci.yml
+  pull_request:
+    paths:
+      - package.json
+      - src/**
+      - tests/**
+      - .github/workflows/node-ci.yml
 
 jobs:
 
