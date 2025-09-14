@@ -4,7 +4,7 @@
   "description": "managment interfaces to connect different services like homeassistant with loxone with the the loxone intercommunication interface",
   "scripts": {
     "start": "tsx src/index.ts",
-    "test": "vitest"
+    "test": "vitest --coverage"
   },
   "author": "David Kartnaller",
   "license": "MIT",
@@ -38,6 +38,7 @@
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^24.3.0",
     "@types/ws": "^8.18.1",
+    "@vitest/coverage-v8": "^3.2.4",
     "vitest": "^3.2.4",
     "vitest-mock-extended": "^3.1.0"
   }

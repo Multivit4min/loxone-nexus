@@ -1,9 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest"
 import { AuthService } from "../src/user/AuthService"
 import { repositories } from "./__mocks__/repositories"
-import prisma from "./__mocks__/prisma"
-import { User } from "@prisma/client"
-import { createUser } from "./__mocks__/user"
+import { createUser } from "./__mocks__/entities/user"
 
 const secret = "vitest"
 

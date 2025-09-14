@@ -1,4 +1,4 @@
-import { User } from "@prisma/client";
+import { User } from "@prisma/client"
 
 const DEFAULT_USER: User = {
   id: "1",

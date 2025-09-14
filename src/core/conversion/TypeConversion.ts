@@ -25,16 +25,22 @@ export class TypeConversion {
     return num
   }
 
-  static parseSmartActuatorSingleChannel(value: string): SmartActuatorSingleChannelType {
+  /**
+   * Parses a json string to a smart actuator single channel
+   * @param value 
+   * @param fallback fallback value for invalid object or value types
+   * @returns 
+   */
+  static parseSmartActuatorSingleChannel(value: string, fallback = { channel: 0, fadeTime: 2 }): SmartActuatorSingleChannelType {
     try {
       const { fadeTime, channel } = JSON.parse(value)
       return {
-        fadeTime: fadeTime||0,
-        channel: channel||0
+        fadeTime: typeof fadeTime !== "number" ? fallback.fadeTime : fadeTime,
+        channel: typeof channel !== "number" ? fallback.channel : channel
       }
     } catch (e) {
       logger.error({ value }, `could not parse value to SmartActuatorSingleChannel`)
-      return { fadeTime: 0, channel: 0 }
+      return fallback
     }
   }
 
@@ -99,10 +105,20 @@ export class TypeConversion {
     }
   }
 
+  /**
+   * serializes the data type
+   * @param value 
+   * @returns 
+   */
   static SerializeDataType(value: VariableDataTypes|null) {
     return JSON.stringify(TypeConversion.WrapType(value))
   }
 
+  /**
+   * detects the type and returns the object to serialize / deserialize it
+   * @param value 
+   * @returns 
+   */
   static WrapType(value: VariableDataTypes|null): SerializedDataType {
     switch (typeof value) {
       case "number":
@@ -120,6 +136,11 @@ export class TypeConversion {
     }
   }
 
+  /**
+   * deserializes the data type
+   * @param val 
+   * @returns 
+   */
   static DeserializeDataType(val: string|null): SerializedDataType {
     if (val === null) return { type: "null", value: null }
     try {

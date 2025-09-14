@@ -3,7 +3,7 @@ import { SocketClient } from "./SocketClient"
 import { ServiceContainer } from "../container"
 import { LoxoneInstance } from "../loxone/LoxoneInstance"
 import { LoxoneVariableService } from "../loxone/variables/LoxoneVariableService"
-import { IntegrationEntry } from "../core/integration/IntegrationInstance"
+import { IntegrationInstance } from "../core/integration/IntegrationInstance"
 import { IntegrationVariable } from "../core/integration/variables/IntegrationVariable"
 import { logger } from "../logger/pino"
 
@@ -85,7 +85,7 @@ export class SocketManager {
   /**
    * sends the state of the datasource to all connected and authenticated socket clients
    */
-  sendIntegration(integration: IntegrationEntry<any>) {
+  sendIntegration(integration: IntegrationInstance<any>) {
     this.logger.debug(`Sending integration ${integration.label} (${integration.id})`)
     const data = integration.serialize()
     this.getAuthenticated().map(socket => socket.sendIntegration(data))

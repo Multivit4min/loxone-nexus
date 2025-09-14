@@ -1,10 +1,8 @@
 import { IntegrationVariable as VariableEntity } from "@prisma/client"
 import { IntegrationVariable } from "../../core/integration/variables/IntegrationVariable"
 import { IntegrationVariableManager } from "../../core/integration/variables/IntegrationVariableManager"
-import { HomeAssistant } from "./hass/HomeAssistant"
 import { logger } from "../../logger/pino"
 import { HomeAssistantIntegration } from "./HomeAssistantIntegration"
-import { TypeConversion } from "../../core/conversion/TypeConversion"
 import { HomeAssistantEventHandler } from "./hass/events/HomeAssistantEventHandler"
 import { State } from "./hass/commands/HomeAssistantStateCommand"
 

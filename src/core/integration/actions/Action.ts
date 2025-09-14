@@ -15,7 +15,7 @@ export class Action<T extends string = any, S extends z.ZodRawShape = {}> {
   
   private baseSchema: z.ZodObject<ActionBaseSchema<T>>
   private userShape?: S
-  private callback?: ActionCallback<T, S>
+  private callback: ActionCallback<T, S> = () => this.parent.logger.warn("no callback defined")
   description: string = ""
 
   constructor(readonly id: T, readonly parent: ActionBuilder) {
@@ -51,7 +51,6 @@ export class Action<T extends string = any, S extends z.ZodRawShape = {}> {
   }
 
   async request(variable: IntegrationVariable) {
-    if (!this.callback) throw new Error(`no callback handler registered for action id ${this.id}`)
     try {
       await this.callback({
         config: variable.config,

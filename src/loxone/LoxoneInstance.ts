@@ -1,5 +1,5 @@
 import { Loxone } from "@prisma/client"
-import { RunState, State } from "../core/instance/State"
+import { RunState, State } from "./State"
 import { LoxoneManager } from "./LoxoneManager"
 import { LoxoneRemoteSystem, LoxoneServer } from "loxone-ici"
 import { LoxoneVariableManager } from "./variables/LoxoneVariableManager"

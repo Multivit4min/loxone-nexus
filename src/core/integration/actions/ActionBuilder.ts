@@ -1,13 +1,13 @@
 import z from "zod"
 import { Action } from "./Action"
 import { IntegrationVariable } from "../variables/IntegrationVariable"
-import { IntegrationInstance } from "../IntegrationInstance"
+import { ILogger } from "../../../types/ILogger"
 
 export class ActionBuilder {
 
   actions: Record<string, Action> = {}
 
-  constructor(readonly parent: IntegrationInstance<any>) {}
+  constructor(readonly parent: ILogger) {}
   
   get logger() {
     return this.parent.logger
