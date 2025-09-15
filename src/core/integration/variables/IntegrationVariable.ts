@@ -3,7 +3,8 @@ import { IntegrationVariableManager } from "./IntegrationVariableManager"
 import { VariableDataTypes } from "../../../types/general"
 import { Instance } from "../../instance/Instance"
 import { IntegrationVariableEntity } from "../../../drizzle/schema"
-import { SerializedDataType, VariableConverter } from "../../conversion/VariableConverter"
+import { VariableConverter } from "../../conversion/VariableConverter"
+import { SerializedDataType } from "../../conversion/SerializedDataType"
 
 export abstract class IntegrationVariable<T extends object = any> extends Instance<IntegrationVariableEntity> {
 

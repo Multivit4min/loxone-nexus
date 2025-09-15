@@ -1,5 +1,5 @@
-import { DrizzleDatabaseType } from ".."
-import { eq, sql } from "drizzle-orm"
+import type { DrizzleDatabaseType } from "../database"
+import { eq } from "drizzle-orm"
 import { integrationVariables, links } from "../schema"
 import { SerializedDataType } from "../../core/conversion/VariableConverter"
 

@@ -99,12 +99,4 @@ export class LinkManager extends InstanceManager<LinkEntity, Link> implements IA
     return { integrationVariable, loxoneVariable }
   }
 
-  getAvailableLoxoneInputs() {
-    return this.repositories.variables.getInputs()
-  }
-
-  getAvailableLoxoneOutputs() {
-    return this.repositories.variables.getUnusedOutputs()
-  }
-
 }

@@ -1,6 +1,6 @@
 import { relations } from "drizzle-orm"
 import { int, sqliteTable, text } from "drizzle-orm/sqlite-core"
-import { SerializedDataType } from "../../core/conversion/VariableConverter"
+import { SerializedDataType } from "../../core/conversion/SerializedDataType"
 import { loxone } from "./loxone"
 import { links } from "./link"
 import { DATA_TYPE } from "loxone-ici"

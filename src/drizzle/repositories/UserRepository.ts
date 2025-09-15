@@ -1,6 +1,6 @@
-import { DrizzleDatabaseType } from ".."
 import { count, eq } from "drizzle-orm"
 import { users } from "../schema"
+import { DrizzleDatabaseType } from "../database"
 
 export type UpdateUserProps = {
   id: number

@@ -2,7 +2,6 @@ import { describe, expect, it, beforeEach, vi } from "vitest"
 import { ActionBuilder } from "../../src/core/integration/actions/ActionBuilder"
 import { logger } from "../../src/logger/pino"
 import { MockIntegrationVariable } from "../__mocks__/integration/MockIntegrationVariable"
-import { repositories } from "../__mocks__/repositories"
 import { createIntegrationVariable } from "../__mocks__/entities/integrationVariable"
 
 describe("ActionBuilder", () => {
@@ -16,9 +15,9 @@ describe("ActionBuilder", () => {
       createIntegrationVariable({
         config: { "action": "test" }
       }),
-      { logger, repositories } as any
+      { logger } as any
     )
-  })
+  }, 500)
 
 
   it("should retrieve the correct action instance", async () => {
@@ -28,7 +27,7 @@ describe("ActionBuilder", () => {
     expect(builder.actions["test"]).toBe(test)
     expect(builder.actions["foo"]).toBe(foo)
     expect(builder.actions["bar"]).toBe(bar)
-  })
+  }, 500)
   
   it("should call the correct action", async () => {
     let called = false
@@ -38,5 +37,5 @@ describe("ActionBuilder", () => {
     await builder.execute(variable)
     expect(spy).toHaveBeenCalledOnce()
     expect(called).toBe(true)
-  })
+  }, 500)
 })

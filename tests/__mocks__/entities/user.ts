@@ -1,4 +1,4 @@
-import { UserEntity } from "../../../src/drizzle/schema"
+import type { UserEntity } from "../../../src/drizzle/schema"
 
 const DEFAULT_USER: UserEntity = {
   id: 1,

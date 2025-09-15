@@ -1,32 +1,10 @@
 import { SmartActuatorSingleChannelType, VariableDataTypes } from "../../types/general"
+import { SerializedDataType } from "./SerializedDataType"
 import { stringToNumber } from "./stringToNumber"
-import { LoxoneVariableType } from "../../drizzle/schema"
 import { DATA_TYPE } from "loxone-ici"
 
 type Handlers<R> = {
   [K in SerializedDataType["type"]]: (data: Extract<SerializedDataType, { type: K }>) => R
-}
-
-export type SerializedDataType = NumberDataType|BooleanDataType|StringDataType|SmartActuatorSingleChannelDataType|NullDataType
-export type NumberDataType = {
-  type: "number"
-  value: number
-}
-export type BooleanDataType = {
-  type: "boolean"
-  value: boolean
-}
-export type StringDataType = {
-  type: "string"
-  value: string
-}
-export type NullDataType = {
-  type: "null"
-  value: null
-}
-export type SmartActuatorSingleChannelDataType = {
-  type: "SmartActuatorSingleChannel"
-  value: SmartActuatorSingleChannelType
 }
 
 export class VariableConverter {

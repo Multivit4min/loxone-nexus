@@ -1,4 +1,4 @@
-import { IntegrationVariableEntity } from "../../../src/drizzle/schema"
+import type { IntegrationVariableEntity } from "../../../src/drizzle/schema"
 
 const DEFAULT_INTEGRATION_VARIABLE: IntegrationVariableEntity = {
   id: 1,

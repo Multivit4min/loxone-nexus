@@ -1,4 +1,4 @@
-import { DrizzleDatabaseType } from ".."
+import type { DrizzleDatabaseType } from "../database"
 import { eq } from "drizzle-orm"
 import { integrations } from "../schema"
 

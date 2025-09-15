@@ -36,6 +36,10 @@ export class MockIntegration extends IntegrationInstance<{}> {
     return new MockIntegrationVariable(v, parent)
   }
 
+  static getVariableSchema() {
+    return z.object({})
+  }
+
   static configSchema() {
     return z.object({})
   }

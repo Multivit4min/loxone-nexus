@@ -1,4 +1,4 @@
-import { RepositoryContainer } from "../../src/container"
+import type { RepositoryContainer } from "../../src/container"
 import { IntegrationRepository } from "../../src/drizzle/repositories/IntegrationRepository"
 import { IntegrationVariableRepository } from "../../src/drizzle/repositories/IntegrationVariableRepository"
 import { LinkRepository } from "../../src/drizzle/repositories/LinkRepository"

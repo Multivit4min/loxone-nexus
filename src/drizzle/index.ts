@@ -2,8 +2,8 @@ import { join } from "path"
 import { dataDir } from "../setup"
 import { drizzle } from 'drizzle-orm/libsql'
 import * as schema from "./schema"
+import { DrizzleDatabaseType } from "./database"
 
-export type DrizzleDatabaseType = ReturnType<typeof drizzle<typeof schema>>
 export let db: DrizzleDatabaseType
 
 export const createDatabaseConnection = () => {

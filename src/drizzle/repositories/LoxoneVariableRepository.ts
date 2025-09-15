@@ -1,7 +1,7 @@
-import { DrizzleDatabaseType } from ".."
-import { eq, sql } from "drizzle-orm"
-import { loxoneVariables, links } from "../schema"
-import { SerializedDataType } from "../../core/conversion/VariableConverter"
+import type { DrizzleDatabaseType } from "../database"
+import { eq } from "drizzle-orm"
+import { loxoneVariables } from "../schema"
+import { SerializedDataType } from "../../core/conversion/SerializedDataType"
 import { DATA_TYPE } from "loxone-ici"
 
 export type UpdateLoxoneVariableProps = {
@@ -61,34 +61,6 @@ export class LoxoneVariableRepository {
       .values(props)
       .returning()
       .then(([r]) => ({ ...r, links: [] }))
-  }
-
-  getInputs() {
-    return this.db.query.loxoneVariables.findMany({
-      where: (t, { eq }) => eq(t.direction, "INPUT"),
-      columns: {
-        id: true,
-        loxoneId: true
-      }
-    })
-  }
-
-  getUnusedOutputs() {
-    return this.db.query.loxoneVariables.findMany({
-      where: (t, { eq, and }) => and(
-        eq(t.direction, "OUTPUT"),
-        sql<boolean>`
-        not exists (
-          select 1
-          from ${links}
-          where ${links.integrationVariableId} = ${loxoneVariables.id}
-        )`
-      ),
-      columns: {
-        id: true,
-        loxoneId: true
-      }
-    })
   }
   
   remove(id: number) {
