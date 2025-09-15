@@ -115,17 +115,13 @@ export class HomeAssistantSocket extends EventEmitter {
 
   disconnect() {
     this.setState(SocketState.DISCONNECTING)
-    if (this.ws && (this.ws.OPEN || this.ws.CONNECTING)) {
-      this.ws.close()
-    } else {
-      this.handleClose()
-    }
+    this.handleClose("Shutdown")
   }
 
   private async handleClose(msg?: string|Error) {
     if (!this.ws) return this.parent.logger?.debug(msg, `handleClose but no .ws attached`)
-    this.parent.logger?.debug(msg, `handling websocket close`)
-    if (!this.ws.CLOSED || !this.ws.CLOSING) this.ws.close()
+    this.parent.logger?.debug({ msg }, `handling websocket close`)
+    this.ws.terminate()
     this.ws.removeAllListeners()
     this.commands.forEach(cmd => cmd.reset(CommandState.REQUESTED))
     if (!this.disconnected && !this.disconnecting) {

@@ -4,8 +4,9 @@ import { LoxoneConfig } from "../prisma/repositories/LoxoneRepository"
 import { RepositoryContainer, ServiceContainer } from "../container"
 import { logger } from "../logger/pino"
 import { InstanceManager } from "../core/instance/InstanceManager"
+import { IAppService } from "../types/appService"
 
-export class LoxoneManager extends InstanceManager<Loxone, LoxoneInstance> {
+export class LoxoneManager extends InstanceManager<Loxone, LoxoneInstance> implements IAppService {
 
   services!: ServiceContainer
   logger = logger.child({}, { msgPrefix: "[LoxoneManager] " })
@@ -20,6 +21,10 @@ export class LoxoneManager extends InstanceManager<Loxone, LoxoneInstance> {
     const entities = await this.repositories.loxone.findAll()
     this.collection.set(...await Promise.all(entities.map(entity => this.createLoxoneEntry(entity))))
     this.logger.info("initialized")
+  }
+
+  async stop() {
+    await Promise.all(this.collection.map(instance => instance.stop(false)))
   }
 
   /**

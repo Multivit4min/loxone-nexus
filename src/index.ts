@@ -1,3 +1,3 @@
-import "./setup"
-import "./container"
-import "./express"
+import { startApplication } from "./app"
+
+startApplication()

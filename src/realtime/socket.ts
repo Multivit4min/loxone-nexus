@@ -10,5 +10,9 @@ export function createSocketServer(server: http.Server) {
     socket.on("disconnect", () => services.socketManager.remove(socket.id))
   })
 
-  return io
+  const close = () => {
+    io.close()
+  }
+
+  return { io, close }
 }

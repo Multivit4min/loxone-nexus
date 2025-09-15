@@ -6,7 +6,7 @@ import { LinkRepository } from "./prisma/repositories/LinkRepository"
 import { LoxoneManager } from "./loxone/LoxoneManager"
 import { LoxoneRepository } from "./prisma/repositories/LoxoneRepository"
 import { LoxoneVariableRepository } from "./prisma/repositories/LoxoneVariableRepository"
-import { prisma } from "./prisma"
+import { closePrisma, prisma } from "./prisma"
 import { SocketManager } from "./realtime/SocketManager"
 import { AuthService } from "./user/AuthService"
 import { UserRepository } from "./prisma/repositories/UserRepository"
@@ -16,13 +16,7 @@ import { logger } from "./logger/pino"
 import { setupStore } from "./express/api/controllers/setup.controller"
 import { SonosIntegration } from "./integration/sonos/SonosIntegration"
 
-const secret = process.env.SECRET
-if (!secret) {
-  logger.error("SECRET environment variable is not set. Please set it to a secure value.")
-  process.exit(1)
-}
-
-export type ServiceContainer = typeof services
+export type ServiceContainer = typeof services 
 export type RepositoryContainer = typeof repositories
 
 export const repositories = {
@@ -35,7 +29,7 @@ export const repositories = {
 }
 
 export const services = {
-  authService: new AuthService(repositories, secret),
+  authService: new AuthService(repositories),
   userService: new UserService(repositories),
   socketManager: new SocketManager(),
   integrationManager: new IntegrationManager(repositories),
@@ -43,8 +37,9 @@ export const services = {
   linkService: new LinkManager(repositories),
 }
 
-services.userService.init(services).then(async () => {
+export async function setupContainers() {
 
+  await services.userService.init(services)
   const userCount = await repositories.user.count()
   if (userCount === 0) {
     logger.info("No User found, enabling setup")
@@ -59,4 +54,11 @@ services.userService.init(services).then(async () => {
     .init(services)
   await services.loxoneManager.init(services)
   await services.linkService.init(services)
-})
+
+  return {
+    async stop() {
+      await Promise.all(Object.values(services).map(service => service.stop()))
+      await closePrisma()
+    }
+  }
+}

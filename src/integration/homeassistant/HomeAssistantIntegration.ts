@@ -236,7 +236,7 @@ export class HomeAssistantIntegration extends IntegrationInstance<
     if (!this.ha) return true
     try {
       await Promise.all(this.variables.collection.map(v => v.stop()))
-      this.ha.disconnect()
+      this.ha.stop()
       this.ha.removeAllListeners()
       this.ha = undefined
       return true

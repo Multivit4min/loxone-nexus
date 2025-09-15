@@ -10,8 +10,9 @@ import { LinkError } from "./LinkError"
 import { IntegrationVariable } from "../integration/variables/IntegrationVariable"
 import { LoxoneVariableService } from "../../loxone/variables/LoxoneVariableService"
 import { LinkEntity } from "../../prisma/repositories/LinkRepository"
+import { IAppService } from "../../types/appService"
 
-export class LinkManager extends InstanceManager<LinkEntity, Link> {
+export class LinkManager extends InstanceManager<LinkEntity, Link> implements IAppService {
 
   services!: ServiceContainer
   logger = logger.child({}, { msgPrefix: "[LinkManager] " })
@@ -24,6 +25,8 @@ export class LinkManager extends InstanceManager<LinkEntity, Link> {
     this.services = services
     await this.reload()
   }
+
+  async stop() {}
 
   async reload() {
     const entities = await this.repositories.linkRepository.findAll()

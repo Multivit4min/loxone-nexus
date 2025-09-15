@@ -8,53 +8,71 @@ import history from "connect-history-api-fallback"
 import { logger } from "../logger/pino"
 import pinoHttp from "pino-http"
 
-const httpLogger = pinoHttp({
-  logger,
-  autoLogging: false,
-  serializers: {
-    req() { return undefined },
-    res() { return undefined },
-  }
-})
+const timeouts: Record<string, NodeJS.Timeout> = {}
 
-const app = express()
-const server = http.createServer(app)
-
-createSocketServer(server)
-
-app.use(bodyParser.json())
-app.use(bodyParser.urlencoded({ extended: false }))
-
-app.use("/api", httpLogger)
-app.use("/api", (req, res, next) => {
-  const TIMEOUT = 5000 //max expected request duration
-  const start = process.hrtime.bigint()
-
-  const timeout = setTimeout(() => {
-    req.log.debug(`${req.method} ${req.url} takes longer than expected...`)
-  }, TIMEOUT)
-
-  res.on("finish", () => {
-    clearTimeout(timeout)
-    const durationMs = Number(process.hrtime.bigint() - start) / 1e6;
-    req.log.debug(`${req.method} ${req.url}: Code ${res.statusCode} in ${durationMs.toFixed(2)}ms`)
+export async function setupExpress() {
+  const httpLogger = pinoHttp({
+    logger,
+    autoLogging: false,
+    serializers: {
+      req() { return undefined },
+      res() { return undefined },
+    }
   })
 
-  next()
-})
-app.use("/api", apiRouter)
+  const app = express()
+  const server = http.createServer(app)
 
-if (process.env.VITE_PROXY) {
-  logger.warn(`using vite proxy to ${process.env.VITE_PROXY}`)
-  app.use(createProxyMiddleware({
-    target: process.env.VITE_PROXY,
-    changeOrigin: true,
-  }))
-} else {
-  logger.warn(`serving files from public folder`)
-  app.use(express.static("public"))
-  app.use(history())
-  app.use(express.static("public"))
+  const { close: closeWSS } = createSocketServer(server)
+
+  app.use(bodyParser.json())
+  app.use(bodyParser.urlencoded({ extended: false }))
+
+  app.use("/api", httpLogger)
+  app.use("/api", (req, res, next) => {
+    const TIMEOUT = 5000 //max expected request duration
+    const start = process.hrtime.bigint()
+    const id = String(start)
+
+    timeouts[id] = setTimeout(() => {
+      req.log.debug(`${req.method} ${req.url} takes longer than expected...`)
+    }, TIMEOUT)
+
+    res.on("finish", () => {
+      clearTimeout(timeouts[id])
+      delete timeouts[id]
+      const durationMs = Number(process.hrtime.bigint() - start) / 1e6;
+      req.log.debug(`${req.method} ${req.url}: Code ${res.statusCode} in ${durationMs.toFixed(2)}ms`)
+    })
+
+    next()
+  })
+  app.use("/api", apiRouter)
+
+  if (process.env.VITE_PROXY) {
+    logger.warn(`using vite proxy to ${process.env.VITE_PROXY}`)
+    app.use(createProxyMiddleware({
+      target: process.env.VITE_PROXY,
+      changeOrigin: true,
+    }))
+  } else {
+    logger.warn(`serving files from public folder`)
+    app.use(express.static("public"))
+    app.use(history())
+    app.use(express.static("public"))
+  }
+
+  server.listen(process.env.LISTEN_PORT, () => logger.info(`Express listening on ${process.env.LISTEN_PORT}`))
+
+  return {
+    close() {
+      return new Promise<void>(fulfill => {
+        Object.values(timeouts).map(timeout => clearTimeout(timeout))
+        closeWSS()
+        server.closeAllConnections()
+        server.closeAllConnections()
+        server.close(() => fulfill())
+      })
+    }
+  }
 }
-
-server.listen(process.env.LISTEN_PORT, () => logger.info(`Express listening on ${process.env.LISTEN_PORT}`))

@@ -1,15 +1,22 @@
 import { User } from "@prisma/client"
 import jwt from "jsonwebtoken"
 import { RepositoryContainer, ServiceContainer } from "../container"
+import { IAppService } from "../types/appService"
 
-export class AuthService {
+export class AuthService implements IAppService {
 
   constructor(
-    private readonly repositories: RepositoryContainer,
-    private readonly secret: string
+    private readonly repositories: RepositoryContainer
   ) {}
 
+  get secret() {
+    const secret = process.env.SECRET
+    if (!secret) throw new Error("SECRET environment variable is not set. Please set it to a secure value.")
+    return secret
+  }
+
   async init(services: ServiceContainer) {}
+  async stop() {}
 
   private extractUserData({ id, username }: User): TokenData {
     return { id, username }

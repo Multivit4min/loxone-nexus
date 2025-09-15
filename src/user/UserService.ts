@@ -1,7 +1,8 @@
 import { RepositoryContainer, ServiceContainer } from "../container"
 import argon from "argon2"
+import { IAppService } from "../types/appService"
 
-export class UserService {
+export class UserService implements IAppService {
 
   private services!: ServiceContainer
 
@@ -12,6 +13,7 @@ export class UserService {
   async init(services: ServiceContainer) {
     this.services = services
   }
+  async stop() {}
 
 
   all() {

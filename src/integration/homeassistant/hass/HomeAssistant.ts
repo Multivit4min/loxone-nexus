@@ -34,6 +34,11 @@ export class HomeAssistant extends EventEmitter {
     return this.socket.disconnect()
   }
 
+  stop() {
+    this.socket.removeAllListeners()
+    return this.disconnect()
+  }
+
   getStates() {
     return new HomeAssistantStatesCommand(this.socket).send()
   }

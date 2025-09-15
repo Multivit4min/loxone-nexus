@@ -6,8 +6,9 @@ import { LoxoneVariableService } from "../loxone/variables/LoxoneVariableService
 import { IntegrationInstance } from "../core/integration/IntegrationInstance"
 import { IntegrationVariable } from "../core/integration/variables/IntegrationVariable"
 import { logger } from "../logger/pino"
+import { IAppService } from "../types/appService"
 
-export class SocketManager {
+export class SocketManager implements IAppService {
 
   private initialized = false
   private sockets: SocketClient[] = []
@@ -18,9 +19,13 @@ export class SocketManager {
 
   }
 
-  init(services: ServiceContainer) {
+  async init(services: ServiceContainer) {
     this.services = services
     this.initialized = true
+  }
+
+  async stop() {
+    await Promise.all(this.sockets.map(socket => socket.socket.disconnect(true)))
   }
 
   create(socket: Socket) {

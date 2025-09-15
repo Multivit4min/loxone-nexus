@@ -6,9 +6,10 @@ import { logger } from "../../logger/pino"
 import { Logger } from "pino"
 import { InstanceManager } from "../instance/InstanceManager"
 import { CreateIntegrationProps } from "../../prisma/repositories/IntegrationRepository"
+import { IAppService } from "../../types/appService"
 
 
-export class IntegrationManager extends InstanceManager<Integration, IntegrationInstance<any>> {
+export class IntegrationManager extends InstanceManager<Integration, IntegrationInstance<any>> implements IAppService {
 
   registered: Record<string, IntegrationConstructor> = {}
   logger: Logger
@@ -26,6 +27,10 @@ export class IntegrationManager extends InstanceManager<Integration, Integration
     const entities = await this.repositories.integration.findAll()
     this.collection.set(...await Promise.all(entities.map(entity => this.createEntryFromEntity(entity))))
     this.logger.info("initialized")
+  }
+
+  async stop() {
+    await Promise.all(this.collection.map(integration => integration.stop()))
   }
 
   async reload() {

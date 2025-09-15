@@ -103,7 +103,7 @@ export class LoxoneInstance extends Instance<Loxone> {
   }
 
   /** stops the server */
-  stop() {
+  stop(deactivate = true) {
     return this.state.requestChange(RunState.STOPPED, async () => {
       this.state.set(RunState.STOPPING)
       if (this.loxoneServer) {
@@ -111,8 +111,12 @@ export class LoxoneInstance extends Instance<Loxone> {
         this.loxoneServer.removeAllListeners()
         this.loxoneServer = undefined
       }
-      if (this.remoteSystem) this.remoteSystem = undefined
-      await this.setActive(false)
+      if (this.remoteSystem) {
+        await this.remoteSystem.close()
+        this.remoteSystem.removeAllListeners()
+        this.remoteSystem = undefined
+      }
+      if (deactivate) await this.setActive(false)
     })
   }
 
