@@ -5,8 +5,8 @@ import { LinkError } from "../../../core/link/LinkError"
 import { logger } from "../../../logger/pino"
 
 export const createLinkSchema = z.object({
-  integrationVariable: z.string().min(1),
-  loxoneVariable: z.any()
+  integrationVariable: z.number().positive(),
+  loxoneVariable: z.number().positive()
 }).strict()
 
 export const linkController = {
@@ -30,7 +30,7 @@ export const linkController = {
   },
 
   async removeLink(req: Request, res: Response) {
-    await services.linkService.remove(req.params.id)
+    await services.linkService.remove(parseInt(req.params.id, 10))
     res.json({})
   }
 }

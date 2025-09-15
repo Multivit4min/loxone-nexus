@@ -1,9 +1,10 @@
+import { CreateIntegrationVariableProps } from "../../../drizzle/repositories/IntegrationVariableRepository"
+import { IntegrationVariableEntity } from "../../../drizzle/schema"
 import { InstanceManager } from "../../instance/InstanceManager"
 import { IntegrationConstructor, IntegrationInstance } from "../IntegrationInstance"
 import { IntegrationVariable } from "./IntegrationVariable"
-import { type IntegrationVariable as VariableEntity } from "@prisma/client"
 
-export class IntegrationVariableManager extends InstanceManager<VariableEntity, IntegrationVariable> {
+export class IntegrationVariableManager extends InstanceManager<IntegrationVariableEntity, IntegrationVariable> {
 
   constructor(public parent: IntegrationInstance<any>, readonly varConstructor: IntegrationConstructor) {
     super()
@@ -37,28 +38,27 @@ export class IntegrationVariableManager extends InstanceManager<VariableEntity, 
     this.services.socketManager.sendIntegration(this.parent)
   }
 
-  private async createEntryFromEntity(entity: VariableEntity) {
+  private async createEntryFromEntity(entity: IntegrationVariableEntity) {
     const variable = this.varConstructor.createIntegrationVariable(entity, this)
     await variable.start()
     return variable
   }
 
-  async create(props: Pick<VariableEntity, "config"|"direction"|"label">): Promise<IntegrationVariable> {
+  async create(props: Omit<CreateIntegrationVariableProps, "integrationId">): Promise<IntegrationVariable> {
     const entity = await this.repositories.integrationVariable.create({
       integrationId: this.parent.id,
       label: props.label,
       direction: props.direction,
-      config: props.config,
-      version: 1,
-      value: null,
+      config: props.config
     })
     const variable = this.varConstructor.createIntegrationVariable(entity, this)
     this.collection.push(variable)
+    await variable.start()
     this.services.socketManager.sendIntegration(this.parent)
     return variable
   }
 
-  async remove(id: string) {
+  async remove(id: number) {
     const variable = this.getId(id)
     await variable.stop()
     await this.repositories.integrationVariable.remove(variable.id)

@@ -1,11 +1,33 @@
-import { SmartActuatorSingleChannelType } from "../../types/general"
+import { SmartActuatorSingleChannelType, VariableDataTypes } from "../../types/general"
 import { stringToNumber } from "./stringToNumber"
-import { SerializedDataType } from "./TypeConversion"
+import { LoxoneVariableType } from "../../drizzle/schema"
+import { DATA_TYPE } from "loxone-ici"
 
 type Handlers<R> = {
   [K in SerializedDataType["type"]]: (data: Extract<SerializedDataType, { type: K }>) => R
 }
 
+export type SerializedDataType = NumberDataType|BooleanDataType|StringDataType|SmartActuatorSingleChannelDataType|NullDataType
+export type NumberDataType = {
+  type: "number"
+  value: number
+}
+export type BooleanDataType = {
+  type: "boolean"
+  value: boolean
+}
+export type StringDataType = {
+  type: "string"
+  value: string
+}
+export type NullDataType = {
+  type: "null"
+  value: null
+}
+export type SmartActuatorSingleChannelDataType = {
+  type: "SmartActuatorSingleChannel"
+  value: SmartActuatorSingleChannelType
+}
 
 export class VariableConverter {
 
@@ -19,7 +41,14 @@ export class VariableConverter {
     })
   }
 
-  constructor(private valueType: SerializedDataType) {}
+  constructor(private data: SerializedDataType|null) {
+
+  }
+
+  get valueType(): SerializedDataType {
+    if (this.data === null) return { type: "null", value: null }
+    return this.data
+  }
 
   get type() {
     return this.valueType.type
@@ -34,6 +63,20 @@ export class VariableConverter {
       return handler[this.type](this.valueType as any)
     } catch (e) {
       return fallback
+    }
+  }
+
+  toLoxoneType(type: DATA_TYPE) {
+    switch (type) {
+      case DATA_TYPE.ANALOG: return this.toNumber()
+      case DATA_TYPE.DIGITAL: return this.toBoolean()
+      case DATA_TYPE.TEXT: return this.toString()
+      case DATA_TYPE.SmartActuatorSingleChannel: return this.toSmartActuatorSingleChannel()
+      case DATA_TYPE.SmartActuatorRGBW:
+      case DATA_TYPE.SmartActuatorTunableWhite:
+      case DATA_TYPE.T5:
+      default:
+        throw new Error(`type ${type} not implemented`)
     }
   }
 
@@ -97,5 +140,27 @@ export class VariableConverter {
     string: ({ value }) => this.defaults.smartActuatorSingleChannel({ channel: stringToNumber(value) }),
     null: () => this.defaults.smartActuatorSingleChannel(),
     SmartActuatorSingleChannel: ({ value }) => value
+  }
+
+  /**
+   * detects the type and returns the object to serialize / deserialize it
+   * @param value 
+   * @returns 
+   */
+  static SerializeDataType(value: VariableDataTypes|null): SerializedDataType {
+    switch (typeof value) {
+      case "number":
+        value = parseFloat(value.toFixed(5))
+      case "string": 
+      case "boolean":
+        return { type: <any>typeof value, value }
+      case "object":
+        if (value === null) return { type: "null", value: null }
+        if ("channel" in value && "fadeTime" in value) {
+          return { type: "SmartActuatorSingleChannel", value }
+        }
+      default:
+        return { type: "null", value: null }
+    }
   }
 }

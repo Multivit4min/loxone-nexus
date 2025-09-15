@@ -23,11 +23,12 @@ export const userController = {
     res.json(stripPassword(await services.userService.create(body.username, body.password)))
   },
   async delete(req: Request, res: Response) {
-    await services.userService.remove(req.params.userId)
+    await services.userService.remove(parseInt(req.params.userId, 10))
     res.json({})
   },
   async update(req: Request, res: Response) {
     const body = userUpdateSchema.parse(req.body)
-    res.json(stripPassword(await services.userService.updateUser(req.params.userId, body)))
+    const id = parseInt(req.params.userId, 10)
+    res.json(stripPassword(await services.userService.updateUser({ id, ...body })))
   }
 }

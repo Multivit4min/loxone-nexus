@@ -4,7 +4,9 @@ export default defineConfig({
   test: {
     coverage: {
       provider: "v8",
-      include: ["src/*"]
+      include: ["src/*"],
+      reporter: ["text-summary"],
+      skipFull: true
     },
   },
 })

@@ -1,7 +1,3 @@
-import {
-  IntegrationVariable as IntegrationVariableEntity,
-  LoxoneVariable as LoxoneVariableEntity
-} from "@prisma/client"
 import { RepositoryContainer, ServiceContainer } from "../../container"
 import { InstanceManager } from "../instance/InstanceManager"
 import { Link } from "./Link"
@@ -9,8 +5,9 @@ import { logger } from "../../logger/pino"
 import { LinkError } from "./LinkError"
 import { IntegrationVariable } from "../integration/variables/IntegrationVariable"
 import { LoxoneVariableService } from "../../loxone/variables/LoxoneVariableService"
-import { LinkEntity } from "../../prisma/repositories/LinkRepository"
 import { IAppService } from "../../types/appService"
+import { IntegrationVariableEntity, LinkEntity, LoxoneVariableEntity } from "../../drizzle/schema"
+import { CreateLinkProps } from "../../drizzle/repositories/LinkRepository"
 
 export class LinkManager extends InstanceManager<LinkEntity, Link> implements IAppService {
 
@@ -36,7 +33,7 @@ export class LinkManager extends InstanceManager<LinkEntity, Link> implements IA
     this.collection.set(...links)
   }
 
-  async reloadLoxoneInstance(id: string) {
+  async reloadLoxoneInstance(id: number) {
     await Promise.all([
       this.collection
         .filter(link => link.entity.loxoneVariable.loxoneId === id)
@@ -64,7 +61,7 @@ export class LinkManager extends InstanceManager<LinkEntity, Link> implements IA
     })
   }
 
-  async create({ integrationVariableId, loxoneVariableId }: Omit<LinkEntity, "id">) {
+  async create({ integrationVariableId, loxoneVariableId }: Omit<CreateLinkProps, "id">) {
     const { integrationVariable, loxoneVariable } = await this.getVariables(integrationVariableId, loxoneVariableId)
     const entity = await this.repositories.linkRepository.create({
       integrationVariableId: integrationVariable.id,
@@ -76,14 +73,14 @@ export class LinkManager extends InstanceManager<LinkEntity, Link> implements IA
     return link
   }
 
-  async remove(id: string) {
+  async remove(id: number) {
     const [link] = this.collection.removeBy("id", id)
     await this.repositories.linkRepository.remove(id)
     link.reloadReceiverEmitter()
     return link
   }
 
-  async getVariables(intVarId: string, loxVarId: string): Promise<{
+  async getVariables(intVarId: number, loxVarId: number): Promise<{
     integrationVariable: IntegrationVariableEntity,
     loxoneVariable: LoxoneVariableEntity
   }> {
@@ -93,6 +90,12 @@ export class LinkManager extends InstanceManager<LinkEntity, Link> implements IA
     ])
     if (!integrationVariable) throw new LinkError(`no linkable integration variable with id ${intVarId} found`)
     if (!loxoneVariable) throw new LinkError(`no linkable loxone variable with id ${loxVarId} found`)
+    if (
+      (integrationVariable.direction === "OUTPUT" && integrationVariable.links.length > 0) ||
+      (loxoneVariable.direction === "OUTPUT" && loxoneVariable.links.length > 0)
+    ) {
+      throw new LinkError(`Output is already linked`)
+    }
     return { integrationVariable, loxoneVariable }
   }
 

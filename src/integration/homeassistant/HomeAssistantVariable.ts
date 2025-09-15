@@ -1,16 +1,16 @@
-import { IntegrationVariable as VariableEntity } from "@prisma/client"
 import { IntegrationVariable } from "../../core/integration/variables/IntegrationVariable"
 import { IntegrationVariableManager } from "../../core/integration/variables/IntegrationVariableManager"
 import { logger } from "../../logger/pino"
 import { HomeAssistantIntegration } from "./HomeAssistantIntegration"
 import { HomeAssistantEventHandler } from "./hass/events/HomeAssistantEventHandler"
 import { State } from "./hass/commands/HomeAssistantStateCommand"
+import { IntegrationVariableEntity } from "../../drizzle/schema"
 
 export class HomeAssistantVariable extends IntegrationVariable {
 
   triggerEventHandler?: HomeAssistantEventHandler = undefined
 
-  constructor(entity: VariableEntity, parent: IntegrationVariableManager) {
+  constructor(entity: IntegrationVariableEntity, parent: IntegrationVariableManager) {
     super(entity, parent)
   }
 

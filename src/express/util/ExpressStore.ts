@@ -1,11 +1,11 @@
 import { Request, Response } from "express"
 import { UnauthorizedError } from "./UnauthorizedError"
-import { User } from "@prisma/client"
 import { services } from "../../container"
+import { UserEntity } from "../../drizzle/schema"
 
 export class ExpressStore {
 
-  private _authenticated?: User
+  private _authenticated?: UserEntity
   private _token?: string
 
   constructor(
@@ -21,7 +21,7 @@ export class ExpressStore {
     return this._token
   }
 
-  async getAuthentication(): Promise<User> {
+  async getAuthentication(): Promise<UserEntity> {
     if (this._authenticated) return this._authenticated
     if (!this.access_token) throw new UnauthorizedError("Unauthorized")
     const user = await services.userService.getByToken(this.access_token)

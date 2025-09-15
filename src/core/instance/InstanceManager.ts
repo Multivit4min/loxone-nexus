@@ -29,7 +29,7 @@ export abstract class InstanceManager<Y extends EntityType, T extends Instance<Y
   }
   
   abstract init(services: ServiceContainer): Promise<void>
-  abstract remove(id: string): Promise<T>
+  abstract remove(id: number): Promise<T>
   abstract create(props: any): Promise<T>
 
   abstract reload(): Promise<void>

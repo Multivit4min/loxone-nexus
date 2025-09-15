@@ -1,9 +1,9 @@
 import { Instance } from "../instance/Instance"
-import { TypeConversion } from "../conversion/TypeConversion"
 import { IntegrationVariable } from "../integration/variables/IntegrationVariable"
 import { LoxoneVariableService } from "../../loxone/variables/LoxoneVariableService"
-import { LinkEntity } from "../../prisma/repositories/LinkRepository"
 import { LinkManager } from "./LinkManager"
+import { LinkEntity } from "../../drizzle/schema"
+import { VariableConverter } from "../conversion/VariableConverter"
 
 export class Link extends Instance<LinkEntity> {
 
@@ -61,15 +61,14 @@ export class Link extends Instance<LinkEntity> {
   sendToLoxone(variable: IntegrationVariable) {
     if (variable.entity.value === null)
       return this.logger.warn(`integration variable ${variable.entity.label} is null`)
-    return this.loxoneVariable.updateValue(
-      TypeConversion.parseLoxoneTypeFromString(this.loxoneVariable.type, String(variable.value.value))
-    )
+    const converter = new VariableConverter(variable.entity.value)
+    return this.loxoneVariable.updateValue(converter.toLoxoneType(this.loxoneVariable.type))
   }
 
   sendToIntegration(variable: LoxoneVariableService) {
     if (variable.entity.value === null)
       return this.logger.warn(`loxone variable ${variable.entity.label} is null`)
-    this.integrationVariable.updateValue(variable.value.value)
+    this.integrationVariable.updateValue(variable.value)
   }
 
 }

@@ -3,14 +3,14 @@ import { AuthService } from "../src/user/AuthService"
 import { repositories } from "./__mocks__/repositories"
 import { createUser } from "./__mocks__/entities/user"
 
-const secret = "vitest"
+process.env.SECRET = "vitest"
 
 describe("AuthService", () => {
 
   let auth: AuthService
 
   beforeEach(() => {
-    auth = new AuthService(repositories, secret)
+    auth = new AuthService(repositories)
   })
 
   describe("jwt token", () => {

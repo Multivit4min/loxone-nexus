@@ -1,12 +1,14 @@
 import z from "zod"
 import { IntegrationInstance } from "../../core/integration/IntegrationInstance"
 import { HomeAssistant } from "./hass/HomeAssistant"
-import { Integration, IntegrationVariable as VariableEntity } from "@prisma/client"
 import { HomeAssistantVariable } from "./HomeAssistantVariable"
 import { IntegrationVariableManager } from "../../core/integration/variables/IntegrationVariableManager"
 import { VariableDataTypes } from "../../types/general"
 import { IntegrationManager } from "../../core/integration/IntegrationManager"
 import { ActionCallback, ActionProps } from "../../core/integration/actions/Action"
+import { IntegrationEntity, IntegrationVariableEntity } from "../../drizzle/schema"
+
+export type StateEntry = { entityId: string, namespace: string, id: string, values: Record<string, any> }
 
 export class HomeAssistantIntegration extends IntegrationInstance<
   z.infer<ReturnType<typeof HomeAssistantIntegration.configSchema>>
@@ -14,7 +16,7 @@ export class HomeAssistantIntegration extends IntegrationInstance<
 
   ha?: HomeAssistant
 
-  constructor(entity: Integration, parent: IntegrationManager) {
+  constructor(entity: IntegrationEntity, parent: IntegrationManager) {
     super(entity, parent, HomeAssistantIntegration)
     /** domain: switch */
     this.actions.create("switch.set")
@@ -252,7 +254,7 @@ export class HomeAssistantIntegration extends IntegrationInstance<
     return { states }
   }
 
-  async getStates(): Promise<{ entityId: string, namespace: string, id: string, values: Record<string, any> }[]> {
+  async getStates(): Promise<StateEntry[]> {
     if (!this.ha) return []
     const states = await this.ha.getStates()
     return states.map(state => {
@@ -267,7 +269,7 @@ export class HomeAssistantIntegration extends IntegrationInstance<
           state: state.state
         }
       }
-    }).filter(res => res !== null)
+    }).filter(res => res !== null) as StateEntry[]
   }
 
   async getStateByEntityId(id: string) {
@@ -279,7 +281,7 @@ export class HomeAssistantIntegration extends IntegrationInstance<
     return null
   }
 
-  static createIntegrationVariable(v: VariableEntity, parent: IntegrationVariableManager) {
+  static createIntegrationVariable(v: IntegrationVariableEntity, parent: IntegrationVariableManager) {
     return new HomeAssistantVariable(v, parent)
   }
 

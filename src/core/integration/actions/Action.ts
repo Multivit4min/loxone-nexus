@@ -58,7 +58,7 @@ export class Action<T extends string = any, S extends z.ZodRawShape = {}> {
       })
       return true
     } catch (e) {
-      this.parent.logger.warn(e, `failed to execute action ${this.id}`)
+      this.parent.logger.warn(e, `failed to execute action ${String(this.id)}`)
       return false
     }
   }

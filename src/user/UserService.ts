@@ -24,7 +24,7 @@ export class UserService implements IAppService {
   /**
    * retrieves a single user by its id
    */
-  getById(id: string) {
+  getById(id: number) {
     return this.repositories.user.findById(id)
   }
 
@@ -46,7 +46,7 @@ export class UserService implements IAppService {
    * @param id 
    * @returns 
    */
-  async remove(id: string) {
+  async remove(id: number) {
     const user = await this.repositories.user.findById(id)
     if (!user) return
     return this.repositories.user.remove(id)
@@ -84,15 +84,15 @@ export class UserService implements IAppService {
    * @param newPassword 
    * @returns 
    */
-  async updatePassword(id: string, newPassword: string) {
-    return this.repositories.user.update(id, { password: await argon.hash(newPassword) })
+  async updatePassword(id: number, password: string) {
+    return this.repositories.user.update({ id, password: await argon.hash(password) })
   }
 
-  async updateUser(id: string, props: { username?: string, password?: string }) {
+  async updateUser({ id, ...props }: { id: number, username?: string, password?: string }) {
     const user = await this.repositories.user.findById(id)
     if (!user) throw new Error("user not found")
     if (props.password) props.password = await argon.hash(props.password)
-    return this.repositories.user.update(user.id, props)
+    return this.repositories.user.update({ id, ...props })
   }
 
 }

@@ -1,15 +1,15 @@
-import { IntegrationVariable as VariableEntity } from "@prisma/client"
 import { IntegrationVariable } from "../../core/integration/variables/IntegrationVariable"
 import { IntegrationVariableManager } from "../../core/integration/variables/IntegrationVariableManager"
 import { SonosIntegration } from "./SonosIntegration"
 import z from "zod"
 import { UpdateProps } from "../../core/integration/IntegrationInstance"
+import { IntegrationVariableEntity } from "../../drizzle/schema"
 
 export class SonosVariable extends IntegrationVariable<
   z.infer<SonosIntegration["actions"]["schema"]>
 > {
 
-  constructor(entity: VariableEntity, parent: IntegrationVariableManager) {
+  constructor(entity: IntegrationVariableEntity, parent: IntegrationVariableManager) {
     super(entity, parent)
   }
 
@@ -35,7 +35,7 @@ export class SonosVariable extends IntegrationVariable<
   async update({ label, config }: UpdateProps) {
     this.entity.label = label
     this.entity.config = config
-    await this.repositories.integrationVariable.update(this.id, this.entity)
+    await this.repositories.integrationVariable.update(this.entity)
     this.services.socketManager.sendIntegrationVariable(this)
   }
 

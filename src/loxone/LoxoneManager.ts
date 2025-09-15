@@ -1,12 +1,12 @@
-import { Loxone } from "@prisma/client"
 import { LoxoneInstance } from "./LoxoneInstance"
-import { LoxoneConfig } from "../prisma/repositories/LoxoneRepository"
 import { RepositoryContainer, ServiceContainer } from "../container"
 import { logger } from "../logger/pino"
 import { InstanceManager } from "../core/instance/InstanceManager"
 import { IAppService } from "../types/appService"
+import { LoxoneEntity } from "../drizzle/schema"
+import { CreateLoxoneProps } from "../drizzle/repositories/LoxoneRepository"
 
-export class LoxoneManager extends InstanceManager<Loxone, LoxoneInstance> implements IAppService {
+export class LoxoneManager extends InstanceManager<LoxoneEntity, LoxoneInstance> implements IAppService {
 
   services!: ServiceContainer
   logger = logger.child({}, { msgPrefix: "[LoxoneManager] " })
@@ -40,7 +40,7 @@ export class LoxoneManager extends InstanceManager<Loxone, LoxoneInstance> imple
    * @param entity database entity
    * @returns 
    */
-  private async createLoxoneEntry(entity: Loxone) {
+  private async createLoxoneEntry(entity: LoxoneEntity) : Promise<LoxoneInstance> {
     const instance = new LoxoneInstance(entity, this)
     await instance.init()
     return instance
@@ -50,7 +50,7 @@ export class LoxoneManager extends InstanceManager<Loxone, LoxoneInstance> imple
    * creates a new source entry from scratch
    * @param config configuration for the new source
    */
-  async create(config: LoxoneConfig) {
+  async create(config: CreateLoxoneProps) {
     const entity = await this.repositories.loxone.create(config)
     const loxone = await this.createLoxoneEntry(entity)
     this.collection.push(loxone)
@@ -62,7 +62,7 @@ export class LoxoneManager extends InstanceManager<Loxone, LoxoneInstance> imple
    * removes a source entry completely
    * @param id id of the source to remove
    */
-  async remove(id: string) {
+  async remove(id: number) {
     const loxone = this.getId(id)
     this.collection.removeBy("id", id)
     await loxone.stop()

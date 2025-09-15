@@ -1,22 +1,23 @@
-import { LoxoneVariable, VariableDirection, LoxoneVariableType } from "@prisma/client"
 import { LoxoneIOPacket } from "loxone-ici"
 import { VariableDataTypes } from "../../types/general"
-import { TypeConversion } from "../../core/conversion/TypeConversion"
 import { LoxoneVariableManager } from "./LoxoneVariableManager"
 import { Instance } from "../../core/instance/Instance"
 import { Logger } from "pino"
 import { logger } from "../../logger/pino"
+import { LoxoneVariableEntity } from "../../drizzle/schema"
+import { VariableConverter } from "../../core/conversion/VariableConverter"
 
-export class LoxoneVariableService extends Instance<LoxoneVariable> {
+export class LoxoneVariableService extends Instance<LoxoneVariableEntity> {
 
   readonly logger: Logger
 
-  constructor(
-    public entity: LoxoneVariable,
-    readonly manager: LoxoneVariableManager
-  ) {
+  constructor(public entity: LoxoneVariableEntity, readonly manager: LoxoneVariableManager) {
     super(entity, manager)
     this.logger = logger.child({ id: this.id }, { msgPrefix: "[LoxoneVariable] "})
+  }
+
+  get converter() {
+    return new VariableConverter(this.entity.forced ? this.entity.forcedValue : this.entity.value)
   }
 
   get id() {
@@ -34,12 +35,12 @@ export class LoxoneVariableService extends Instance<LoxoneVariable> {
 
   /** true when the variable gets sent from loxone to node */
   get isInput() {
-    return this.entity.direction === VariableDirection.INPUT
+    return this.entity.direction === "INPUT"
   }
 
   /** true when the variable gets sent from node to loxone */
   get isOutput() {
-    return this.entity.direction === VariableDirection.OUTPUT
+    return this.entity.direction === "OUTPUT"
   }
 
   get services() {
@@ -52,8 +53,7 @@ export class LoxoneVariableService extends Instance<LoxoneVariable> {
 
   /** current parsed value */
   get value() {
-    let value = this.entity.forced ? this.entity.forcedValue : this.entity.value
-    return TypeConversion.DeserializeDataType(value)
+    return this.converter.toLoxoneType(this.type)
   }
 
   async start() {
@@ -63,12 +63,12 @@ export class LoxoneVariableService extends Instance<LoxoneVariable> {
     throw new Error("not implemented")
   }
 
-  async update(props: Partial<LoxoneVariable>) {
+  async update(props: Partial<LoxoneVariableEntity>) {
     await this.updateEntity(props)
     this.entity = { ...this.entity, ...props }
   }
 
-  async reload(entity?: LoxoneVariable) {
+  async reload(entity?: LoxoneVariableEntity) {
     if (!entity) entity = await this.parent.repositories.variables.findById(this.id) || undefined
     if (!entity) throw new Error(`loxone variable with id ${this.id} not found`)
     this.entity = entity
@@ -76,13 +76,13 @@ export class LoxoneVariableService extends Instance<LoxoneVariable> {
     return this
   }
 
-  async updateEntity(props: Partial<LoxoneVariable>) {
+  async updateEntity(props: Partial<LoxoneVariableEntity>) {
     this.entity = { ...this.entity, ...props  }
     await this.saveEntity()
   }
 
   async updateValue(value: VariableDataTypes): Promise<any> {
-    const str = TypeConversion.SerializeDataType(value)
+    const str = VariableConverter.SerializeDataType(value)
     if (this.entity.value === str) return
     this.entity.value = str
     await this.saveEntity()
@@ -91,7 +91,7 @@ export class LoxoneVariableService extends Instance<LoxoneVariable> {
   }
 
   async updateValueFromPacket(packet: LoxoneIOPacket): Promise<any> {
-    this.entity.type = TypeConversion.LoxoneDataTypeToVariableType(packet)
+    this.entity.type = packet.dataType
     return this.updateValue(packet.payload.value)
   }
 
@@ -100,15 +100,15 @@ export class LoxoneVariableService extends Instance<LoxoneVariable> {
    * and sets the correct type
   */
   private async saveEntity() {
-    if (this.entity.id.length > 0) {
-      await this.repositories.variables.update(this.entity.id, this.entity)
+    if (this.entity.id > 0) {
+      await this.repositories.variables.update(this.entity)
     }
     this.services.socketManager.sendVariable(this)
   }
 
   async force(value: any) {
     this.entity.forced = true
-    this.entity.forcedValue = TypeConversion.SerializeDataType(value)
+    this.entity.forcedValue = VariableConverter.SerializeDataType(value)
     await this.saveEntity()
     this.send()
   }
@@ -128,7 +128,7 @@ export class LoxoneVariableService extends Instance<LoxoneVariable> {
   serialize() {
     return {
       ...this.entity,
-      value: this.value.value
+      value: this.value
      }
   }
 
@@ -138,14 +138,13 @@ export class LoxoneVariableService extends Instance<LoxoneVariable> {
    */
   static createFromPacket(packet: LoxoneIOPacket, manager: LoxoneVariableManager) {
     return new LoxoneVariableService({
-      id: "",
+      id: 0,
       label: "",
-      direction: VariableDirection.INPUT,
+      direction: "INPUT",
       packetId: packet.packetId,
       loxoneId: manager.parent.id,
-      type: LoxoneVariableType.UNKNOWN,
+      type: packet.dataType,
       value: null,
-      description: null,
       suffix: null,
       forced: false,
       forcedValue: null      

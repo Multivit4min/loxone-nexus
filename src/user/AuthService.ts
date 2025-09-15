@@ -1,7 +1,7 @@
-import { User } from "@prisma/client"
 import jwt from "jsonwebtoken"
 import { RepositoryContainer, ServiceContainer } from "../container"
 import { IAppService } from "../types/appService"
+import { UserEntity } from "../drizzle/schema"
 
 export class AuthService implements IAppService {
 
@@ -18,7 +18,7 @@ export class AuthService implements IAppService {
   async init(services: ServiceContainer) {}
   async stop() {}
 
-  private extractUserData({ id, username }: User): TokenData {
+  private extractUserData({ id, username }: UserEntity): TokenData {
     return { id, username }
   }
 
@@ -27,7 +27,7 @@ export class AuthService implements IAppService {
    * @param data
    * @returns 
    */
-  sign(user: User) {
+  sign(user: UserEntity) {
     const payload = this.extractUserData(user)
     return {
       user: payload,
@@ -51,6 +51,6 @@ export class AuthService implements IAppService {
 }
 
 export type TokenData = {
-  id: string
+  id: number
   username: string
 }

@@ -1,14 +1,13 @@
-import { User } from "@prisma/client"
+import { UserEntity } from "../../../src/drizzle/schema"
 
-const DEFAULT_USER: User = {
-  id: "1",
+const DEFAULT_USER: UserEntity = {
+  id: 1,
   username: "vitest",
   password: "foo",
-  createdAt: new Date(),
-  updatedAt: new Date()
+  createdAt: new Date().toISOString()
 }
 
-export function createUser(user: Partial<User> = {}) {
+export function createUser(user: Partial<UserEntity> = {}) {
   return {
     ...DEFAULT_USER,
     ...user

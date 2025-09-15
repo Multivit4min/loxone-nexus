@@ -1,12 +1,12 @@
-import { LoxoneVariable, VariableDirection } from "@prisma/client"
 import { LoxoneVariableService } from "./LoxoneVariableService"
 import { LoxoneInstance } from "../LoxoneInstance"
 import { InstanceManager } from "../../core/instance/InstanceManager"
 import { Logger } from "pino"
 import { logger } from "../../logger/pino"
 import { ServiceContainer } from "../../container"
+import { LoxoneVariableEntity } from "../../drizzle/schema"
 
-export class LoxoneVariableManager extends InstanceManager<LoxoneVariable, LoxoneVariableService> {
+export class LoxoneVariableManager extends InstanceManager<LoxoneVariableEntity, LoxoneVariableService> {
 
   logger: Logger
 
@@ -25,7 +25,7 @@ export class LoxoneVariableManager extends InstanceManager<LoxoneVariable, Loxon
     return this.parent.parent.repositories
   }
 
-  async create(props: LoxoneVariable) {
+  async create(props: LoxoneVariableEntity) {
     const entity = await this.repositories.variables.create({
       ...props,
       packetId: props.packetId,
@@ -41,7 +41,7 @@ export class LoxoneVariableManager extends InstanceManager<LoxoneVariable, Loxon
   }
 
   async reload() {
-    const variables = await this.parent.parent.repositories.variables.findByInstance(this.parent.id)
+    const variables = await this.parent.parent.repositories.variables.findByInstanceId(this.parent.id)
     this.collection.set(...variables.map(v => new LoxoneVariableService(v, this)))
     this.send()
     this.parent.parent.services.socketManager.sendInstance(this.parent)
@@ -67,7 +67,7 @@ export class LoxoneVariableManager extends InstanceManager<LoxoneVariable, Loxon
    * @param id 
    * @returns 
    */
-  async remove(id: string) {
+  async remove(id: number) {
     const variable = this.collection.removeBy("id", id)[0]
     await this.repositories.variables.remove(variable.id)
     await this.parent.reload()
@@ -79,11 +79,11 @@ export class LoxoneVariableManager extends InstanceManager<LoxoneVariable, Loxon
   }
 
   getInputs() {
-    return this.collection.filterBy("direction", VariableDirection.INPUT)
+    return this.collection.filterBy("direction", "INPUT")
   }
 
   getOutputs() {
-    return this.collection.filterBy("direction", VariableDirection.OUTPUT)
+    return this.collection.filterBy("direction", "OUTPUT")
   }
 
 }

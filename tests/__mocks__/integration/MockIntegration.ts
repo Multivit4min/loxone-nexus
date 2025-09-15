@@ -1,14 +1,14 @@
 import z from "zod"
-import { Integration, IntegrationVariable as VariableEntity } from "@prisma/client"
 import { IntegrationInstance } from "../../../src/core/integration/IntegrationInstance"
 import { IntegrationVariableManager } from "../../../src/core/integration/variables/IntegrationVariableManager"
 import { IntegrationManager } from "../../../src/core/integration/IntegrationManager"
 import { MockIntegrationVariable } from "./MockIntegrationVariable"
+import { IntegrationEntity, IntegrationVariableEntity } from "../../../src/drizzle/schema"
 
 
 export class MockIntegration extends IntegrationInstance<{}> {
 
-  constructor(entity: Integration, parent: IntegrationManager) {
+  constructor(entity: IntegrationEntity, parent: IntegrationManager) {
     super(entity, parent, MockIntegration)
   }
 
@@ -32,7 +32,7 @@ export class MockIntegration extends IntegrationInstance<{}> {
     return null
   }
 
-  static createIntegrationVariable(v: VariableEntity, parent: IntegrationVariableManager) {
+  static createIntegrationVariable(v: IntegrationVariableEntity, parent: IntegrationVariableManager) {
     return new MockIntegrationVariable(v, parent)
   }
 

@@ -4,8 +4,9 @@ import { randomBytes } from "crypto"
 import dotenv from "dotenv"
 import { logger } from "./logger/pino"
 
-export let dataDir: string
-export let envPath: string
+  //base configuration directory
+export const dataDir = join(__dirname, "..", process.env.DATA_DIR || "data")
+export const envPath = join(dataDir, ".env")
 
 //default environment variables
 const environment = {
@@ -17,12 +18,6 @@ const environment = {
 }
 
 export async function runSetup() {
-
-//base configuration directory
-  dataDir = join(__dirname, "..", process.env.DATA_DIR || "data")
-  envPath = join(dataDir, ".env")
-
-  console.log(dataDir)
 
   //create data directory if it does not exist
   try {

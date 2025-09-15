@@ -1,11 +1,11 @@
-import { User } from "@prisma/client"
 import { Socket } from "socket.io"
 import { z } from "zod"
 import { SocketManager } from "./SocketManager"
+import { UserEntity } from "../drizzle/schema"
 
 export class SocketClient {
 
-  private user: User|null = null
+  private user: UserEntity|null = null
 
   constructor(
     readonly parent: SocketManager,
@@ -19,7 +19,7 @@ export class SocketClient {
     return !!this.user
   }
 
-  sendVariable(instanceId: string, variable: object) {
+  sendVariable(instanceId: number, variable: object) {
     this.socket.emit("instance:update.variable", { instanceId, variable })
   }
 

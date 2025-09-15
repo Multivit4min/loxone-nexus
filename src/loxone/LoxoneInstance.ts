@@ -1,16 +1,15 @@
-import { Loxone } from "@prisma/client"
 import { RunState, State } from "./State"
 import { LoxoneManager } from "./LoxoneManager"
 import { LoxoneRemoteSystem, LoxoneServer } from "loxone-ici"
 import { LoxoneVariableManager } from "./variables/LoxoneVariableManager"
 import { LoxoneVariableService } from "./variables/LoxoneVariableService"
-import { TypeConversion } from "../core/conversion/TypeConversion"
 import { Instance } from "../core/instance/Instance"
 import { InstanceManager } from "../core/instance/InstanceManager"
 import { Logger } from "pino"
 import { logger } from "../logger/pino"
+import { LoxoneEntity } from "../drizzle/schema"
 
-export class LoxoneInstance extends Instance<Loxone> {
+export class LoxoneInstance extends Instance<LoxoneEntity> {
 
   readonly state: State
   readonly logger: Logger
@@ -22,7 +21,7 @@ export class LoxoneInstance extends Instance<Loxone> {
   undefinedInputs: LoxoneVariableService[] = []
   readonly variables = new LoxoneVariableManager(this)
 
-  constructor(entity: Loxone, parent: InstanceManager<Loxone, Instance<Loxone>>) {
+  constructor(entity: LoxoneEntity, parent: InstanceManager<LoxoneEntity, Instance<LoxoneEntity>>) {
     super(entity, parent)
     this.logger = logger.child({ id: this.id }, { msgPrefix: "[LoxoneInstance] " })
     this.state = new State({
@@ -42,12 +41,13 @@ export class LoxoneInstance extends Instance<Loxone> {
     return this
   }
 
-  private async updateEntity(entity: Partial<Loxone>) {
-    await this.parent.repositories.loxone.update(this.id, entity)
-    this.entity = {
-      ...this.entity,
-      ...entity
-    }
+  private async updateEntity(props: Partial<LoxoneEntity>) {
+    const entity = await this.parent.repositories.loxone.update({
+      id: this.id,
+      ...props
+    })
+    if (!entity) throw new Error(`entity has been deleted but is still loaded`)
+    this.entity = entity
   }
 
   private async setActive(set: boolean = true) {
@@ -61,7 +61,7 @@ export class LoxoneInstance extends Instance<Loxone> {
   }
 
   /** reloads only the entity from database */
-  async reload(entity?: Loxone) {
+  async reload(entity?: LoxoneEntity) {
     this.logger.info("reloading instance")
     if (!entity) entity = await this.parent.repositories.loxone.findById(this.id) || undefined
     if (!entity) throw new Error(`could not find loxone instance with id ${this.id} while starting`)
@@ -77,7 +77,7 @@ export class LoxoneInstance extends Instance<Loxone> {
    * @param entity 
    * @returns 
    */
-  async update(entity: Partial<Loxone>) {
+  async update(entity: Partial<LoxoneEntity>) {
     await this.updateEntity(entity)
     await this.restart()
     this.parent.services.socketManager.sendInstance(this)
@@ -136,10 +136,11 @@ export class LoxoneInstance extends Instance<Loxone> {
 
   sendVariable(variable: LoxoneVariableService) {
     if (!this.remoteSystem) return
-    const { value } = variable.value
-    if (value === null) return
-    const type = TypeConversion.LoxoneVariableTypeToDataType(variable.entity.type)
-    return this.remoteSystem.createOutput(variable.packetId, type).setValue(value).send()
+    if (variable.value === null) return
+    return this.remoteSystem
+      .createOutput(variable.packetId, variable.type)
+      .setValue(variable.value)
+      .send()
   }
 
   serialize() {
@@ -161,6 +162,6 @@ export class LoxoneInstance extends Instance<Loxone> {
 }
 
 export type Props = {
-  entity: Loxone
+  entity: LoxoneEntity
   parent: LoxoneManager
 }

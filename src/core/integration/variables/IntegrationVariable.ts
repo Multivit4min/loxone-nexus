@@ -1,14 +1,14 @@
-import { VariableDirection, IntegrationVariable as VariableEntity } from "@prisma/client"
 import { IntegrationInstance } from "../IntegrationInstance"
 import { IntegrationVariableManager } from "./IntegrationVariableManager"
 import { VariableDataTypes } from "../../../types/general"
 import { Instance } from "../../instance/Instance"
-import { TypeConversion } from "../../conversion/TypeConversion"
+import { IntegrationVariableEntity } from "../../../drizzle/schema"
+import { SerializedDataType, VariableConverter } from "../../conversion/VariableConverter"
 
-export abstract class IntegrationVariable<T extends object = any> extends Instance<VariableEntity> {
+export abstract class IntegrationVariable<T extends object = any> extends Instance<IntegrationVariableEntity> {
 
   constructor(
-    entity: VariableEntity,
+    entity: IntegrationVariableEntity,
     readonly parent: IntegrationVariableManager
   ) {
     super(entity, parent)
@@ -21,18 +21,18 @@ export abstract class IntegrationVariable<T extends object = any> extends Instan
     return this.entity.config as T
   }
 
-  get value() {
-    return TypeConversion.DeserializeDataType(this.entity.value)
+  get value(): SerializedDataType {
+    return this.entity.value ? this.entity.value : { type: "null", value: null }
   }
   
   /** true when the variable gets sent from loxone to node */
   get isInput() {
-    return this.entity.direction === VariableDirection.INPUT
+    return this.entity.direction === "INPUT"
   }
 
   /** true when the variable gets sent from node to loxone */
   get isOutput() {
-    return this.entity.direction === VariableDirection.OUTPUT
+    return this.entity.direction === "OUTPUT"
   }
 
   get services() {
@@ -44,8 +44,11 @@ export abstract class IntegrationVariable<T extends object = any> extends Instan
   }
 
   async updateValue(value: VariableDataTypes|null) {
-    this.entity.value = TypeConversion.SerializeDataType(value)
-    await this.repositories.integrationVariable.update(this.entity.id, { value: this.entity.value})
+    this.entity.value = VariableConverter.SerializeDataType(value)
+    await this.repositories.integrationVariable.update({
+      id: this.entity.id,
+      value: this.entity.value
+    })
     if (this.isInput) this.services.linkService.sendIntegrationInput(this)
     if (this.isOutput) this.sendValue()
     this.services.socketManager.sendIntegrationVariable(this)
@@ -53,7 +56,7 @@ export abstract class IntegrationVariable<T extends object = any> extends Instan
   }
 
   async sendValue() {
-    if (this.value.value === null) return
+    if ( this.value.value === null) return
     this.parent.actions.execute(this)
   }
 
@@ -67,6 +70,6 @@ export abstract class IntegrationVariable<T extends object = any> extends Instan
 }
 
 export interface IntegrationVariableConstructor {
-  new (entity: VariableEntity, parent: IntegrationVariableManager): IntegrationInstance<any>
+  new (entity: IntegrationVariableEntity, parent: IntegrationVariableManager): IntegrationInstance<any>
 
 }

@@ -1,31 +1,33 @@
 import { IntegrationManager } from "./core/integration/IntegrationManager"
-import { IntegrationRepository } from "./prisma/repositories/IntegrationRepository"
+import { IntegrationRepository } from "./drizzle/repositories/IntegrationRepository"
 import { HomeAssistantIntegration } from "./integration/homeassistant/HomeAssistantIntegration"
-import { IntegrationVariableRepository } from "./prisma/repositories/IntegrationVariableRepository"
-import { LinkRepository } from "./prisma/repositories/LinkRepository"
+import { IntegrationVariableRepository } from "./drizzle/repositories/IntegrationVariableRepository"
+import { LinkRepository } from "./drizzle/repositories/LinkRepository"
 import { LoxoneManager } from "./loxone/LoxoneManager"
-import { LoxoneRepository } from "./prisma/repositories/LoxoneRepository"
-import { LoxoneVariableRepository } from "./prisma/repositories/LoxoneVariableRepository"
-import { closePrisma, prisma } from "./prisma"
+import { LoxoneRepository } from "./drizzle/repositories/LoxoneRepository"
+import { LoxoneVariableRepository } from "./drizzle/repositories/LoxoneVariableRepository"
 import { SocketManager } from "./realtime/SocketManager"
 import { AuthService } from "./user/AuthService"
-import { UserRepository } from "./prisma/repositories/UserRepository"
+import { UserRepository } from "./drizzle/repositories/UserRepository"
 import { UserService } from "./user/UserService"
 import { LinkManager } from "./core/link/LinkManager"
 import { logger } from "./logger/pino"
 import { setupStore } from "./express/api/controllers/setup.controller"
 import { SonosIntegration } from "./integration/sonos/SonosIntegration"
+import { createDatabaseConnection } from "./drizzle"
+
+const db = createDatabaseConnection()
 
 export type ServiceContainer = typeof services 
 export type RepositoryContainer = typeof repositories
 
 export const repositories = {
-  integration: new IntegrationRepository(prisma),
-  user: new UserRepository(prisma),
-  loxone: new LoxoneRepository(prisma),
-  variables: new LoxoneVariableRepository(prisma),
-  integrationVariable: new IntegrationVariableRepository(prisma),
-  linkRepository: new LinkRepository(prisma)
+  integration: new IntegrationRepository(db),
+  user: new UserRepository(db),
+  loxone: new LoxoneRepository(db),
+  variables: new LoxoneVariableRepository(db),
+  integrationVariable: new IntegrationVariableRepository(db),
+  linkRepository: new LinkRepository(db)
 }
 
 export const services = {
@@ -39,9 +41,10 @@ export const services = {
 
 export async function setupContainers() {
 
+
   await services.userService.init(services)
-  const userCount = await repositories.user.count()
-  if (userCount === 0) {
+  const { count } = await repositories.user.count()
+  if (count === 0) {
     logger.info("No User found, enabling setup")
     setupStore.enable = true
   }
@@ -58,7 +61,7 @@ export async function setupContainers() {
   return {
     async stop() {
       await Promise.all(Object.values(services).map(service => service.stop()))
-      await closePrisma()
+      //await closeDatabaseConnection()
     }
   }
 }

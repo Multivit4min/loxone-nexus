@@ -1,16 +1,15 @@
-import { IntegrationVariable, VariableDirection } from "@prisma/client"
+import { IntegrationVariableEntity } from "../../../src/drizzle/schema"
 
-const DEFAULT_INTEGRATION_VARIABLE: IntegrationVariable = {
-  id: "1",
-  direction: VariableDirection.INPUT,
-  integrationId: "0",
+const DEFAULT_INTEGRATION_VARIABLE: IntegrationVariableEntity = {
+  id: 1,
+  direction: "INPUT",
+  integrationId: 0,
   label: "MOCK_VARIABLE_LABEL",
   value: null,
-  version: 1,
   config: null
 }
 
-export function createIntegrationVariable(variable: Partial<IntegrationVariable> = {}) {
+export function createIntegrationVariable(variable: Partial<IntegrationVariableEntity> = {}) {
   return {
     ...DEFAULT_INTEGRATION_VARIABLE,
     ...variable

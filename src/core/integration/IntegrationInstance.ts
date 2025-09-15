@@ -1,4 +1,3 @@
-import { Integration, IntegrationVariable as VariableEntity } from "@prisma/client"
 import { IntegrationManager } from "./IntegrationManager"
 import z from "zod"
 import { IntegrationVariable } from "./variables/IntegrationVariable"
@@ -7,15 +6,16 @@ import { logger } from "../../logger/pino"
 import { Logger } from "pino"
 import { Instance } from "../instance/Instance"
 import { ActionBuilder } from "./actions/ActionBuilder"
+import { IntegrationEntity, IntegrationVariableEntity } from "../../drizzle/schema"
 
 
-export abstract class IntegrationInstance<T extends object> extends Instance<Integration> {
+export abstract class IntegrationInstance<T extends object> extends Instance<IntegrationEntity> {
 
   actions = new ActionBuilder(this)
   variables: IntegrationVariableManager
   logger: Logger
 
-  constructor(entity: Integration, parent: IntegrationManager, varConstructor: IntegrationConstructor) {
+  constructor(entity: IntegrationEntity, parent: IntegrationManager, varConstructor: IntegrationConstructor) {
     super(entity, parent)
     this.variables = new IntegrationVariableManager(this, varConstructor)
     this.logger = logger.child({ id: this.entity.id }, { msgPrefix: "[Integration] " })
@@ -34,8 +34,8 @@ export abstract class IntegrationInstance<T extends object> extends Instance<Int
     return this.entity.id
   }
 
-  get name() {
-    return this.entity.name
+  get type() {
+    return this.entity.type
   }
 
   get label() {
@@ -68,7 +68,7 @@ export abstract class IntegrationInstance<T extends object> extends Instance<Int
   }
 
   private async updateEntity() {
-    await this.repositories.integration.update(this.entity.id, this.entity)
+    await this.repositories.integration.update(this.entity)
     this.services.socketManager.sendIntegration(this)
   }
 
@@ -99,9 +99,9 @@ export type UpdateProps = {
 
 
 export interface IntegrationConstructor {
-  new (entity: Integration, parent: IntegrationManager): IntegrationInstance<any>
+  new (entity: IntegrationEntity, parent: IntegrationManager): IntegrationInstance<any>
 
-  createIntegrationVariable(entity: VariableEntity, parent: IntegrationVariableManager): IntegrationVariable
-  //getVariableSchema(): z.Schema
+  createIntegrationVariable(entity: IntegrationVariableEntity, parent: IntegrationVariableManager): IntegrationVariable
+  getVariableSchema(): z.Schema
   configSchema(): z.ZodObject
 }
