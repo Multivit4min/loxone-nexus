@@ -1,6 +1,9 @@
 # Loxone Nexus
 
 [![codecov](https://codecov.io/github/Multivit4min/loxone-nexus/branch/main/graph/badge.svg?token=QF11M7H8SB)](https://codecov.io/github/Multivit4min/loxone-nexus)
+[![Latest Version](https://img.shields.io/github/v/release/multivit4min/loxone-nexus
+)](https://github.com/multivit4min/loxone-nexus)
+
 
 ⚠️ **Under active development** – expect breaking changes.
 
@@ -25,7 +28,8 @@ Loxone Nexus connects external integrations (currently **Home Assistant** and **
 
 ### Installation
 ```sh
-wget 
+wget https://github.com/multivit4min/loxone-nexus/releases/latest/download/loxone-nexus.tar.gz
+tar -xvf loxone-nexus.tar.gz
 cd loxone-nexus
 npm ci
 npm start
@@ -35,6 +39,8 @@ With [pm2](https://pm2.keymetrics.io/):
 ```sh
 pm2 start ecosystem.js
 ```
+
+You application now runs on Port **8000**, you can change this port by editing **data/.env**
 
 ## Supported Loxone Data Types
 - `DIGITAL`  
