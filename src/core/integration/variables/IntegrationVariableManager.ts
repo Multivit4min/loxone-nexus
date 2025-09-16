@@ -28,7 +28,7 @@ export class IntegrationVariableManager extends InstanceManager<IntegrationVaria
 
   async init() {
     const entities = await this.repositories.integrationVariable.findByIntegrationId(this.parent.id)
-    this.collection.set(...await Promise.all(entities.map(entity => this.createEntryFromEntity(entity))))
+    this.collection.set(...await Promise.all(entities.map(entity => this.createEntryFromEntity(entity, false))))
     this.logger.info("initialized")
   }
 
@@ -38,9 +38,9 @@ export class IntegrationVariableManager extends InstanceManager<IntegrationVaria
     this.services.socketManager.sendIntegration(this.parent)
   }
 
-  private async createEntryFromEntity(entity: IntegrationVariableEntity) {
-    const variable = this.varConstructor.createIntegrationVariable(entity, this)
-    await variable.start()
+  private async createEntryFromEntity(entity: IntegrationVariableEntity, start = true) {
+    const variable = new IntegrationVariable(entity, this)
+    if (start) await variable.start()
     return variable
   }
 
@@ -51,9 +51,8 @@ export class IntegrationVariableManager extends InstanceManager<IntegrationVaria
       direction: props.direction,
       config: props.config
     })
-    const variable = this.varConstructor.createIntegrationVariable(entity, this)
+    const variable = await this.createEntryFromEntity(entity)
     this.collection.push(variable)
-    await variable.start()
     this.services.socketManager.sendIntegration(this.parent)
     return variable
   }

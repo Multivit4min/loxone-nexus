@@ -11,11 +11,17 @@ export const updateIntegrationSchema = z.object({
 
 
 export const createIntegrationVariableSchema = <T extends z.Schema>(integration: IntegrationInstance<any>) => {
-  return z.object({
+  const input = z.object({
     label: z.string().min(1),
-    direction: z.enum(["INPUT", "OUTPUT"]),
-    props: integration.actions.schema.or(integration.getConstructor().getVariableSchema())
+    direction: z.literal("INPUT"),
+    props: integration.inputs.schema
   })
+  const output = z.object({
+    label: z.string().min(1),
+    direction: z.literal("OUTPUT"),
+    props: integration.actions.schema
+  })
+  return z.discriminatedUnion("direction", [input, output])
 }
 
 export type CreateIntegrationVariableProps<T extends z.Schema> = z.infer<ReturnType<typeof createIntegrationVariableSchema<T>>>
@@ -76,18 +82,6 @@ export const integrationController = {
       direction: props.direction,
       config: props.props
     })
-    res.json({ variable: variable.serialize() })
-  },
-
-
-  async updateIntegrationVariable(req: Request, res: Response) {
-    const integration = services.integrationManager.getId(parseInt(req.params.id, 10))
-    const variable = await integration.variables.getId(parseInt(req.params.variableId, 10))
-    const { label, props } = createIntegrationVariableSchema(integration).parse({
-      ...req.body,
-      direction: variable.entity.direction
-    })
-    await variable.update({ label, config: props as any })
     res.json({ variable: variable.serialize() })
   },
 

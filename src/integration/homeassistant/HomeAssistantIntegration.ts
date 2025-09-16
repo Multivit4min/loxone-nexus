@@ -1,12 +1,11 @@
 import z from "zod"
 import { IntegrationInstance } from "../../core/integration/IntegrationInstance"
 import { HomeAssistant } from "./hass/HomeAssistant"
-import { HomeAssistantVariable } from "./HomeAssistantVariable"
-import { IntegrationVariableManager } from "../../core/integration/variables/IntegrationVariableManager"
 import { VariableDataTypes } from "../../types/general"
 import { IntegrationManager } from "../../core/integration/IntegrationManager"
-import { ActionCallback, ActionProps } from "../../core/integration/actions/Action"
-import { IntegrationEntity, IntegrationVariableEntity } from "../../drizzle/schema"
+import { ActionCallback, ActionProps } from "../../core/integration/io/Action"
+import { IntegrationEntity } from "../../drizzle/schema"
+import { State } from "./hass/commands/HomeAssistantStateCommand"
 
 export type StateEntry = { entityId: string, namespace: string, id: string, values: Record<string, any> }
 
@@ -18,6 +17,32 @@ export class HomeAssistantIntegration extends IntegrationInstance<
 
   constructor(entity: IntegrationEntity, parent: IntegrationManager) {
     super(entity, parent, HomeAssistantIntegration)
+    //register state changes
+    this.inputs.create("state")
+      .describe("retrieve the current state")
+      .schema({
+        entityId: z.string().min(1), 
+        key: z.string().min(1)
+      })
+      .currentValue(async ({ config }) => {
+        if (!this.ha) return null
+        return this.getValueFromState(config.key, await this.ha.getState(config.entityId))
+      })
+      .register(async ({ variable, config }) => {
+        if (!this.ha) throw new Error("no homeassistant connection available")
+        console.log(config)
+        const event = await this.ha.subscribeTrigger({
+          platform: "state",
+          entity_id: config.entityId,
+          attribute: config.key !== "state" ? config.key : undefined
+        })
+        event.on(res => {
+          if (!res.to_state) return
+          console.log(res.to_state)
+          variable.updateValue(this.getValueFromState(config.key, res.to_state))
+        })
+        return () => event.unsubscribe()
+      })
     /** domain: switch */
     this.actions.create("switch.set")
       .describe("sets the switch on or off")
@@ -188,28 +213,28 @@ export class HomeAssistantIntegration extends IntegrationInstance<
   }
 
   triggerAction({ domain, service, trigger }: { domain: string, service: string, trigger?: "positive"|"negative" }) {
-    return (({ config, value: converter }: ActionProps<any, any>) => {
+    return (({ config, value: converter }: ActionProps<any>) => {
       if (!this.ha) return
       const value = converter.toBoolean()
       if (trigger === "positive" && !value) return
       if (trigger === "negative" && value) return
       return this.ha.callService({ domain, service, service_data: { entity_id: config.entityId } })
-    }) as ActionCallback<any, any>
+    }) as ActionCallback<any>
   }
 
   numberAction({ domain, service, key }: { domain: string, service: string, key: string }) {
-    return (({ config, value: converter }: ActionProps<any, any>) => {
+    return (({ config, value: converter }: ActionProps<any>) => {
       if (!this.ha) return
       return this.ha.callService({
         domain,
         service,
         service_data: { entity_id: config.entityId, [key]: converter.toNumber() }
       })
-    }) as ActionCallback<any, any>
+    }) as ActionCallback<any>
   }
 
   stringAction({ domain, service, ignoreEmpty, key }: { domain: string, service: string, ignoreEmpty?: boolean, key: string }) {
-    return (({ config, value: converter }: ActionProps<any, any>) => {
+    return (({ config, value: converter }: ActionProps<any>) => {
       if (!this.ha) return
       const value = converter.toString()
       if (ignoreEmpty && value.length === 0) return
@@ -218,7 +243,7 @@ export class HomeAssistantIntegration extends IntegrationInstance<
         service,
         service_data: { entity_id: config.entityId, [key]: value  }
       })
-    }) as ActionCallback<any, any>
+    }) as ActionCallback<any>
   }
 
   getConstructor() {
@@ -276,13 +301,13 @@ export class HomeAssistantIntegration extends IntegrationInstance<
     const states = await this.getStates()
     return states.find(i => i.entityId === id)
   }
+  
+  getValueFromState(key: string, { attributes, state }: State) {
+    return key !== "state" ? attributes[key] : state
+  }
 
   specificSerialize() {
     return null
-  }
-
-  static createIntegrationVariable(v: IntegrationVariableEntity, parent: IntegrationVariableManager) {
-    return new HomeAssistantVariable(v, parent)
   }
 
   static filterRecordsByType(attributes: Record<string, any>, types: string[]) {
@@ -292,13 +317,6 @@ export class HomeAssistantIntegration extends IntegrationInstance<
       result[k] = attributes[k]
     })
     return result
-  }
-
-  static getVariableSchema() {
-    return z.object({
-      entityId: z.string().min(1),
-      key: z.string().min(1)
-    })
   }
 
   static configSchema() {

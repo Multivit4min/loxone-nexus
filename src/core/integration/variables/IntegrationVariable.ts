@@ -5,19 +5,56 @@ import { Instance } from "../../instance/Instance"
 import { IntegrationVariableEntity } from "../../../drizzle/schema"
 import { VariableConverter } from "../../conversion/VariableConverter"
 import { SerializedDataType } from "../../conversion/SerializedDataType"
+import { UnregisterCallback } from "../io/Input"
+import { Logger } from "pino"
 
-export abstract class IntegrationVariable<T extends object = any> extends Instance<IntegrationVariableEntity> {
+export class IntegrationVariable<T extends { action: string } = any> extends Instance<IntegrationVariableEntity> {
+
+  private unregister?: UnregisterCallback
+  logger: Logger
 
   constructor(
     entity: IntegrationVariableEntity,
     readonly parent: IntegrationVariableManager
   ) {
     super(entity, parent)
+    this.logger = this.parent.logger.child({}, { msgPrefix: "[IntegrationVariable] " })
   }
 
-  abstract start(): Promise<void>
-  abstract stop(): Promise<void>
+  async update() {
+    throw new Error("not implemented")
+  }
 
+  async reload() {
+    await this.stop()
+    const entity = await this.repositories.integrationVariable.findById(this.id)
+    if (!entity) throw new Error(`could not find entity with id ${this.id}`)
+    this.entity = entity
+    await this.start()
+    return this
+  }
+
+  async start() {
+    if (this.isOutput) return
+    try {
+      const input = this.parent.parent.inputs.entries[this.config.action]
+      if (!input) return this.logger.warn(`no input found for ${this.config.action}`)
+      this.unregister = await input.handleRegister(this)
+    } catch (e) {
+      this.logger.error(e, "failed to start variable handler")
+    }
+  }
+
+  async stop() {
+    if (this.isOutput) return
+    if (!this.unregister) return
+    try {
+      await this.unregister()
+    } catch (e) {
+      this.logger.error(e, "failed to unregister handler")
+    }
+  }
+  
   get config() {
     return this.entity.config as T
   }

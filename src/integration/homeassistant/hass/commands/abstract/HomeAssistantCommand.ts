@@ -20,9 +20,10 @@ export type CommandProps = {
 
 export class HomeAssistantErrorResponse extends Error {
   readonly code: string
-  constructor(response: CommandErrorResponse) {
+  constructor(response: CommandErrorResponse, stack?: string) {
     super(response.error.message)
     this.code = response.error.code
+    if (stack) this.stack = stack
   }
 }
 
@@ -31,6 +32,7 @@ export abstract class HomeAssistantCommand<P = void, T = any> {
   id?: number
   additionalProps?: P
   state = CommandState.INIT
+  stack?: string
 
   private fulfill?: (value: T) => void
   private reject?: (value: HomeAssistantErrorResponse|Error) => void
@@ -52,6 +54,7 @@ export abstract class HomeAssistantCommand<P = void, T = any> {
   }
 
   send(props: P) {
+    this.stack = (new Error()).stack
     return new Promise<T>((fulfill, reject) => {
       if (this.state !== CommandState.INIT) return reject(new Error("command has already been requested"))
       this.additionalProps = props
@@ -66,7 +69,7 @@ export abstract class HomeAssistantCommand<P = void, T = any> {
     if (!this.reject || !this.fulfill) return this.socket.parent.logger?.error(res, "no promise resolvers attached")
     if (!res.success) {
       this.state = CommandState.RECEIVED_FAILED
-      return this.reject(new HomeAssistantErrorResponse(res))
+      return this.reject(new HomeAssistantErrorResponse(res, this.stack))
     }
     this.state = CommandState.RECEIVED_OK
     return this.fulfill(this.transformResult(res.result))

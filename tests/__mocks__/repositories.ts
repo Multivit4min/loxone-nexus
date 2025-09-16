@@ -11,7 +11,7 @@ export const repositories: RepositoryContainer = {
   integration: new IntegrationRepository(db),
   user: new UserRepository(db),
   loxone: new LoxoneRepository(db),
-  variables: new LoxoneVariableRepository(db),
+  loxoneVariables: new LoxoneVariableRepository(db),
   integrationVariable: new IntegrationVariableRepository(db),
   linkRepository: new LinkRepository(db)
 }

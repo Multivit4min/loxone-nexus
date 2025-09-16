@@ -1,7 +1,7 @@
 import type { DrizzleDatabaseType } from "../database"
 import { eq } from "drizzle-orm"
 import { integrationVariables, links } from "../schema"
-import { SerializedDataType } from "../../core/conversion/VariableConverter"
+import { SerializedDataType } from "../../core/conversion/SerializedDataType"
 
 export type UpdateIntegrationVariableProps = {
   id: number

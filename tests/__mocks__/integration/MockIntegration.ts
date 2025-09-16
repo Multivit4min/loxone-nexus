@@ -2,8 +2,8 @@ import z from "zod"
 import { IntegrationInstance } from "../../../src/core/integration/IntegrationInstance"
 import { IntegrationVariableManager } from "../../../src/core/integration/variables/IntegrationVariableManager"
 import { IntegrationManager } from "../../../src/core/integration/IntegrationManager"
-import { MockIntegrationVariable } from "./MockIntegrationVariable"
 import { IntegrationEntity, IntegrationVariableEntity } from "../../../src/drizzle/schema"
+import { IntegrationVariable } from "../../../src/core/integration/variables/IntegrationVariable"
 
 
 export class MockIntegration extends IntegrationInstance<{}> {
@@ -33,7 +33,7 @@ export class MockIntegration extends IntegrationInstance<{}> {
   }
 
   static createIntegrationVariable(v: IntegrationVariableEntity, parent: IntegrationVariableManager) {
-    return new MockIntegrationVariable(v, parent)
+    return new IntegrationVariable(v, parent)
   }
 
   static getVariableSchema() {

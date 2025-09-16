@@ -1,9 +1,7 @@
 import z from "zod"
 import { IntegrationInstance } from "../../core/integration/IntegrationInstance"
-import { IntegrationVariableManager } from "../../core/integration/variables/IntegrationVariableManager"
 import { VariableDataTypes } from "../../types/general"
 import { IntegrationManager } from "../../core/integration/IntegrationManager"
-import { SonosVariable } from "./SonosVariable"
 import { SonosDevice } from "@svrooij/sonos/lib"
 import { GetZoneInfoResponse } from "@svrooij/sonos/lib/services"
 import { SonosState } from "@svrooij/sonos/lib/models/sonos-state"
@@ -121,14 +119,6 @@ export class SonosIntegration extends IntegrationInstance<
       zone: this.zone,
       state: this.state
     }
-  }
-
-  static createIntegrationVariable(v: IntegrationVariableEntity, parent: IntegrationVariableManager) {
-    return new SonosVariable(v, parent)
-  }
-
-  static getVariableSchema() {
-    return z.object({})
   }
 
   static filterRecordsByType(attributes: Record<string, any>, types: string[]) {

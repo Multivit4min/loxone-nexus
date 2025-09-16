@@ -1,17 +1,18 @@
 import { IntegrationManager } from "./IntegrationManager"
 import z from "zod"
-import { IntegrationVariable } from "./variables/IntegrationVariable"
 import { IntegrationVariableManager } from "./variables/IntegrationVariableManager"
 import { logger } from "../../logger/pino"
 import { Logger } from "pino"
 import { Instance } from "../instance/Instance"
-import { ActionBuilder } from "./actions/ActionBuilder"
-import { IntegrationEntity, IntegrationVariableEntity } from "../../drizzle/schema"
+import { ActionBuilder } from "./io/ActionBuilder"
+import { IntegrationEntity } from "../../drizzle/schema"
+import { InputBuilder } from "./io/InputBuilder"
 
 
 export abstract class IntegrationInstance<T extends object> extends Instance<IntegrationEntity> {
 
   actions = new ActionBuilder(this)
+  inputs = new InputBuilder(this)
   variables: IntegrationVariableManager
   logger: Logger
 
@@ -101,7 +102,5 @@ export type UpdateProps = {
 export interface IntegrationConstructor {
   new (entity: IntegrationEntity, parent: IntegrationManager): IntegrationInstance<any>
 
-  createIntegrationVariable(entity: IntegrationVariableEntity, parent: IntegrationVariableManager): IntegrationVariable
-  getVariableSchema(): z.Schema
   configSchema(): z.ZodObject
 }
