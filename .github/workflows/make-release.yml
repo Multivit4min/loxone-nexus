@@ -55,9 +55,9 @@ jobs:
           tar \
             --mtime='UTC 2020-01-01' \
             --owner=0 --group=0 \
-            -czf loxone-nexus-${TAG}.tar.gz loxone-nexus
+            -czf loxone-nexus.tar.gz loxone-nexus
           # Create zip
-          zip -r -q -X "loxone-nexus-${TAG}.zip" loxone-nexus
+          zip -r -q -X "loxone-nexus.zip" loxone-nexus
       - name: Create release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -75,16 +75,16 @@ jobs:
               --target "$TARGET" \
               --title "${TITLE:-Manual release}" \
               --notes "$NOTES" \
-              "loxone-nexus-${TAG}.tar.gz" \
-              "loxone-nexus-${TAG}.zip" \
+              "loxone-nexus.tar.gz" \
+              "loxone-nexus.zip" \
               --prerelease
           else
             gh release create "$TAG" \
               --target "$TARGET" \
               --title "${TITLE:-Manual release}" \
               --notes "$NOTES" \
-              "loxone-nexus-${TAG}.tar.gz" \
-              "loxone-nexus-${TAG}.zip"
+              "loxone-nexus.tar.gz" \
+              "loxone-nexus.zip"
           fi
 
           echo "Created release $TAG → ${TITLE:-Manual release}"

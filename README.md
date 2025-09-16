@@ -21,15 +21,13 @@ Loxone Nexus connects external integrations (currently **Home Assistant** and **
 
 ### Requirements
 - [Node.js](https://nodejs.org/en/download/)
-- npm  
-- git (just for cloning of the repo)
+- npm
 
 ### Installation
 ```sh
-git clone https://github.com/Multivit4min/loxone-nexus
+wget 
 cd loxone-nexus
 npm ci
-npx prisma migrate deploy
 npm start
 ```
 
