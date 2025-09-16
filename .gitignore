@@ -3,3 +3,6 @@ node_modules
 /data
 /tests/data
 /coverage
+/loxone-nexus
+/loxone-nexus.tar.gz
+/loxone-nexus.zip

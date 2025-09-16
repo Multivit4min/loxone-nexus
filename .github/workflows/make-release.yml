@@ -1,0 +1,90 @@
+name: Make Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag name (e.g. v1.2.3)"
+        required: true
+        type: string
+      title:
+        description: "Release title"
+        required: false
+        type: string
+      changes:
+        description: "What changed? Paste your release notes/changelog (multiline allowed)"
+        required: true
+        type: string
+      target:
+        description: "Commitish to tag (branch, SHA). Defaults to the current commit."
+        required: false
+        type: string
+      prerelease:
+        description: "Mark as pre-release?"
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: write
+
+jobs:
+  create:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Create release archives
+        env:
+          TAG: ${{ inputs.tag }}
+        run: |
+          set -euo pipefail
+          npm ci
+          mkdir -p loxone-nexus
+          cp package.json package-lock.json README.md tsconfig.json ecosystem.config.js loxone-nexus/
+          cp -r public src loxone-nexus/
+          npx --yes drizzle-kit@0.31.4 push \
+            --url "file:loxone-nexus/clean.sqlite" \
+            --dialect sqlite \
+            --schema ./src/drizzle/schema/index.ts
+          # Craete tar
+          tar \
+            --mtime='UTC 2020-01-01' \
+            --owner=0 --group=0 \
+            -czf loxone-nexus-${TAG}.tar.gz loxone-nexus
+          # Create zip
+          zip -r -q -X "loxone-nexus-${TAG}.zip" loxone-nexus
+      - name: Create release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ inputs.tag }}
+          TITLE: ${{ inputs.title }}
+          NOTES: ${{ inputs.changes }}
+          TARGET: ${{ inputs.target }}
+          PRERELEASE: ${{ inputs.prerelease }}
+        run: |
+          set -euo pipefail
+          TARGET="${TARGET:-${GITHUB_SHA}}"
+
+          if [ "${PRERELEASE}" = "true" ]; then
+            gh release create "$TAG" \
+              --target "$TARGET" \
+              --title "${TITLE:-Manual release}" \
+              --notes "$NOTES" \
+              "loxone-nexus-${TAG}.tar.gz" \
+              "loxone-nexus-${TAG}.zip" \
+              --prerelease
+          else
+            gh release create "$TAG" \
+              --target "$TARGET" \
+              --title "${TITLE:-Manual release}" \
+              --notes "$NOTES" \
+              "loxone-nexus-${TAG}.tar.gz" \
+              "loxone-nexus-${TAG}.zip"
+          fi
+
+          echo "Created release $TAG → ${TITLE:-Manual release}"

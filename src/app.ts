@@ -1,10 +1,12 @@
 import { runSetup } from "./setup"
-import { setupContainers } from "./container"
-import { setupExpress } from "./express"
 
 export async function startApplication() {
 
   runSetup()
+
+  const { setupContainers } = require("./container")
+  const { setupExpress } = require("./express")
+  
   const { stop: stopServices } = await setupContainers()
   const { close: closeExpress } = await setupExpress()
 

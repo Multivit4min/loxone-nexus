@@ -26,7 +26,7 @@ export class LoxoneVariableManager extends InstanceManager<LoxoneVariableEntity,
   }
 
   async create(props: LoxoneVariableEntity) {
-    const entity = await this.repositories.variables.create({
+    const entity = await this.repositories.loxoneVariables.create({
       ...props,
       packetId: props.packetId,
       loxoneId: this.parent.id,
@@ -41,7 +41,7 @@ export class LoxoneVariableManager extends InstanceManager<LoxoneVariableEntity,
   }
 
   async reload() {
-    const variables = await this.parent.parent.repositories.variables.findByInstanceId(this.parent.id)
+    const variables = await this.parent.parent.repositories.loxoneVariables.findByInstanceId(this.parent.id)
     this.collection.set(...variables.map(v => new LoxoneVariableService(v, this)))
     this.send()
     this.parent.parent.services.socketManager.sendInstance(this.parent)
@@ -69,7 +69,7 @@ export class LoxoneVariableManager extends InstanceManager<LoxoneVariableEntity,
    */
   async remove(id: number) {
     const variable = this.collection.removeBy("id", id)[0]
-    await this.repositories.variables.remove(variable.id)
+    await this.repositories.loxoneVariables.remove(variable.id)
     await this.parent.reload()
     return variable
   }

@@ -5,8 +5,10 @@ import dotenv from "dotenv"
 import { logger } from "./logger/pino"
 
   //base configuration directory
-export const dataDir = join(__dirname, "..", process.env.DATA_DIR || "data")
+export const dataDir = join(__dirname, "..", "data")
 export const envPath = join(dataDir, ".env")
+export const databasePath = join(dataDir, "database.sqlite")
+export const cleanDatabasePath = join(dataDir, "..", "clean.sqlite")
 
 //default environment variables
 const environment = {
@@ -56,5 +58,13 @@ export async function runSetup() {
   }
   dotenv.config({ path: envPath, override: true })
 
+  if (!fs.existsSync(databasePath)) {
+    logger.info("No Database found in data dir, trying to copy...")
+    if (!fs.existsSync(cleanDatabasePath)) {
+      throw new Error(`clean database not found`)
+    }
+    fs.copyFileSync(cleanDatabasePath, databasePath)
+    logger.info("copy successfull")
+  }
 
 }

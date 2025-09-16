@@ -7,7 +7,7 @@ import { DrizzleDatabaseType } from "./database"
 export let db: DrizzleDatabaseType
 
 export const createDatabaseConnection = () => {
-  db = drizzle(join("file://", dataDir, "sqlite.db"), { schema })
+  db = drizzle(join("file://", dataDir, "database.sqlite"), { schema })
   return db
 }
 

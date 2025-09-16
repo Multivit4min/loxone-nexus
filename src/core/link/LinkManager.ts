@@ -86,7 +86,7 @@ export class LinkManager extends InstanceManager<LinkEntity, Link> implements IA
   }> {
     const [integrationVariable, loxoneVariable] = await Promise.all([
       this.repositories.integrationVariable.findLinkableById(intVarId),
-      this.repositories.variables.findLinkableById(loxVarId)
+      this.repositories.loxoneVariables.findLinkableById(loxVarId)
     ])
     if (!integrationVariable) throw new LinkError(`no linkable integration variable with id ${intVarId} found`)
     if (!loxoneVariable) throw new LinkError(`no linkable loxone variable with id ${loxVarId} found`)

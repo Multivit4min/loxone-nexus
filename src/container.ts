@@ -25,7 +25,7 @@ export const repositories = {
   integration: new IntegrationRepository(db),
   user: new UserRepository(db),
   loxone: new LoxoneRepository(db),
-  variables: new LoxoneVariableRepository(db),
+  loxoneVariables: new LoxoneVariableRepository(db),
   integrationVariable: new IntegrationVariableRepository(db),
   linkRepository: new LinkRepository(db)
 }
@@ -40,15 +40,12 @@ export const services = {
 }
 
 export async function setupContainers() {
-
-
   await services.userService.init(services)
   const { count } = await repositories.user.count()
   if (count === 0) {
     logger.info("No User found, enabling setup")
     setupStore.enable = true
   }
-
   await services.authService.init(services)
   await services.socketManager.init(services)
   await services.integrationManager
