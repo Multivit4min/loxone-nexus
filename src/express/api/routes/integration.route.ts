@@ -11,6 +11,7 @@ router.patch("/integration/:id", integrationController.updateIntegration)
 router.delete("/integration/:id", integrationController.removeIntegration)
 router.get("/integration/:id/internalVariables", integrationController.internalVariables)
 router.post("/integration/:id/variable", integrationController.createIntegrationVariable)
+router.patch("/integration/:id/variable/:variableId", integrationController.updateIntegrationVariable)
 router.delete("/integration/:id/variable/:variableId", integrationController.deleteIntegrationVariable)
 
 export default router

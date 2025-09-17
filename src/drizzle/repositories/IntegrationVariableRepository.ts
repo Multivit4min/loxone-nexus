@@ -67,6 +67,7 @@ export class IntegrationVariableRepository {
       .update(integrationVariables)
       .set(props)
       .where(eq(integrationVariables.id, id))
+      .then(() => this.findById(id))
   }
 
 }

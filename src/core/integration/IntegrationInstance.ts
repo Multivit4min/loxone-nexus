@@ -79,7 +79,8 @@ export abstract class IntegrationInstance<T extends object> extends Instance<Int
       specific: this.specificSerialize(),
       variables: this.variables.serialize(),
       configSchema: z.toJSONSchema(constructor.configSchema()),
-      variableSchema: z.toJSONSchema(this.actions.schema),
+      outputVariableSchema: z.toJSONSchema(this.actions.schema),
+      inputVariableSchema: z.toJSONSchema(this.inputs.schema),
       actions: this.actions.serialize(),
       ...this.entity
     }

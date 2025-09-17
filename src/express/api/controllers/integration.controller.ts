@@ -83,6 +83,17 @@ export const integrationController = {
       config: props.props
     })
     res.json({ variable: variable.serialize() })
+  },  
+  
+  async updateIntegrationVariable(req: Request, res: Response) {
+    const integration = services.integrationManager.getId(parseInt(req.params.id, 10))
+    const variable = await integration.variables.getId(parseInt(req.params.variableId, 10))
+    const { label, props } = createIntegrationVariableSchema(integration).parse({
+      ...req.body,
+      direction: variable.entity.direction
+    })
+    await variable.update({ label, config: props as any })
+    res.json({ variable: variable.serialize() })
   },
 
   async deleteIntegrationVariable(req: Request, res: Response) {

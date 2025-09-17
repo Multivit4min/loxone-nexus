@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "description": "managment interfaces to connect different services like homeassistant with loxone with the the loxone intercommunication interface",
   "scripts": {
+    "typecheck": "tsc --noEmit",
     "start": "tsx src/index.ts",
     "test": "DATA_DIR=tests/data vitest --coverage"
   },

@@ -15,6 +15,10 @@ export class InstanceCollection<Y extends EntityType, T extends Instance<Y>> {
     return this.props.uniqueKey
   }
 
+  get length() {
+    return this.items.length
+  }
+
   findIndex(predicate: (value: T, index: number, obj: T[]) => unknown) {
     return this.items.findIndex(predicate)
   }

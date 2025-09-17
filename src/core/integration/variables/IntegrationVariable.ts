@@ -7,6 +7,7 @@ import { VariableConverter } from "../../conversion/VariableConverter"
 import { SerializedDataType } from "../../conversion/SerializedDataType"
 import { UnregisterCallback } from "../io/Input"
 import { Logger } from "pino"
+import { UpdateIntegrationVariableProps } from "../../../drizzle/repositories/IntegrationVariableRepository"
 
 export class IntegrationVariable<T extends { action: string } = any> extends Instance<IntegrationVariableEntity> {
 
@@ -21,8 +22,12 @@ export class IntegrationVariable<T extends { action: string } = any> extends Ins
     this.logger = this.parent.logger.child({}, { msgPrefix: "[IntegrationVariable] " })
   }
 
-  async update() {
-    throw new Error("not implemented")
+  async update(props: Partial<UpdateIntegrationVariableProps>) {
+    this.entity = await this.repositories.integrationVariable.update({
+      ...props,
+      id: this.id
+    }) as any
+    await this.reload()
   }
 
   async reload() {

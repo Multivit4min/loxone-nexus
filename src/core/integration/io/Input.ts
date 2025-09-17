@@ -7,6 +7,7 @@ import { VariableConverter } from "../../conversion/VariableConverter"
 export type CallbackProps<S extends z.ZodRawShape> = {
   variable: IntegrationVariable
   config: z.infer<CompiledSchema<string, S>>
+  getCurrentValue: () => any
 }
 export type UnregisterCallback = () => Promise<any>|any
 export type RegisterCallback<S extends z.ZodRawShape> = (props: CallbackProps<S>) => Promise<UnregisterCallback>|UnregisterCallback
@@ -40,7 +41,14 @@ export class Input<T extends string = any, S extends z.ZodRawShape = {}> extends
 
   async handleRegister(variable: IntegrationVariable): Promise<UnregisterCallback> {
     try {
-      const props = { variable, config: variable.config }
+      const props: CallbackProps<S> = {
+        variable,
+        config: variable.config,
+        getCurrentValue: async () => {
+          if (!this.currentValueCallback) return variable.value.value
+          return this.currentValueCallback(props)
+        }
+      }
       let value = variable.value
       if (this.currentValueCallback) value = await this.currentValueCallback(props)
       variable.updateValue(value.value)

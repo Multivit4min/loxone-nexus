@@ -5,7 +5,8 @@ import { IntegrationManager } from "../../core/integration/IntegrationManager"
 import { SonosDevice } from "@svrooij/sonos/lib"
 import { GetZoneInfoResponse } from "@svrooij/sonos/lib/services"
 import { SonosState } from "@svrooij/sonos/lib/models/sonos-state"
-import { IntegrationEntity, IntegrationVariableEntity } from "../../drizzle/schema"
+import { IntegrationEntity } from "../../drizzle/schema"
+import { TransportState } from "@svrooij/sonos/lib/models"
 
 
 export class SonosIntegration extends IntegrationInstance<
@@ -14,13 +15,31 @@ export class SonosIntegration extends IntegrationInstance<
 
   device: SonosDevice
   private pollInterval?: NodeJS.Timeout
-  static POLL_INTERVAL = 10 * 1000
+  static POLL_INTERVAL = 4 * 1000
   private zone?: GetZoneInfoResponse
   private state?: SonosState
 
   constructor(entity: IntegrationEntity, parent: IntegrationManager) {
     super(entity, parent, SonosIntegration)
     this.device = new SonosDevice(this.config.address)
+    this.inputs
+      .create("media info")
+      .schema({ type: z.enum(["title", "playing state", "volume"]) })
+      .currentValue(({ config }) => {
+        if (config.type === "title") return this.title
+        if (config.type === "playing state") return this.playingState
+        if (config.type === "volume") return this.volume
+      })
+      .register(({ variable, getCurrentValue }) => {
+        let previous: string = ""
+        const interval = setInterval(async () => {
+          const value = await getCurrentValue()
+          if (previous === JSON.stringify(value)) return
+          previous = JSON.stringify(value)
+          await variable.updateValue(value.value)
+        }, 1000)
+        return () => clearInterval(interval)
+    })
     this.actions
       .create("notification")
       .describe("plays a notification on the sonos speaker")
@@ -81,6 +100,24 @@ export class SonosIntegration extends IntegrationInstance<
         await this.device.Previous()
       })
       
+  }
+
+  get title() {
+    if (!this.state) return ""
+    if (typeof this.state.mediaInfo.CurrentURIMetaData === "string") {
+      return this.state.mediaInfo.CurrentURIMetaData
+    }
+    return this.state.mediaInfo.CurrentURIMetaData.Title || ""
+  }
+
+  get playingState() {
+    if (!this.state) return false
+    return this.state.transportState === TransportState.Playing
+  }
+
+  get volume() {
+    if (!this.state) return -1
+    return this.state.volume
   }
 
   getConstructor() {
