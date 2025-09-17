@@ -71,6 +71,7 @@ export class LoxoneVariableManager extends InstanceManager<LoxoneVariableEntity,
     const variable = this.collection.removeBy("id", id)[0]
     await this.repositories.loxoneVariables.remove(variable.id)
     await this.parent.reload()
+    this.services.linkService.receiveRemoveLoxoneVariable(variable)
     return variable
   }
 

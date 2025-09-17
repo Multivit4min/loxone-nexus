@@ -30,7 +30,6 @@ export class HomeAssistantIntegration extends IntegrationInstance<
       })
       .register(async ({ variable, config }) => {
         if (!this.ha) throw new Error("no homeassistant connection available")
-        console.log(config)
         const event = await this.ha.subscribeTrigger({
           platform: "state",
           entity_id: config.entityId,
@@ -38,7 +37,6 @@ export class HomeAssistantIntegration extends IntegrationInstance<
         })
         event.on(res => {
           if (!res.to_state) return
-          console.log(res.to_state)
           variable.updateValue(this.getValueFromState(config.key, res.to_state))
         })
         return () => event.unsubscribe()

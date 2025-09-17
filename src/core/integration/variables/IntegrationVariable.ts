@@ -28,6 +28,7 @@ export class IntegrationVariable<T extends { action: string } = any> extends Ins
   async reload() {
     await this.stop()
     const entity = await this.repositories.integrationVariable.findById(this.id)
+    this.logger.debug(entity, "reloading integration variable")
     if (!entity) throw new Error(`could not find entity with id ${this.id}`)
     this.entity = entity
     await this.start()

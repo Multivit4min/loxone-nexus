@@ -63,6 +63,7 @@ export class IntegrationVariableManager extends InstanceManager<IntegrationVaria
     await this.repositories.integrationVariable.remove(variable.id)
     this.collection.removeBy("id", id)
     this.services.socketManager.sendIntegration(this.parent)
+    this.services.linkService.receiveRemoveIntegrationVariable(variable)
     return variable
   }
 

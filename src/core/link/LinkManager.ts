@@ -41,6 +41,26 @@ export class LinkManager extends InstanceManager<LinkEntity, Link> implements IA
     ])
   }
 
+  async receiveRemoveLoxoneVariable(variable: LoxoneVariableService) {
+    const [link] = this.collection.removeBy("loxoneVariableId", variable.id)
+    if (!link) return
+    return link.reloadIntegrationVariable()
+  }
+
+  async receiveRemoveIntegrationVariable(variable: IntegrationVariable) {
+    const [link] = this.collection.removeBy("integrationVariableId", variable.id)
+    if (!link) return
+    return link.reloadLoxoneVariable()
+  }
+
+  getLinkByIntegrationVariableId(id: number) {
+    return this.collection.findBy("integrationVariableId", id)
+  }
+
+  getLinkByLoxoneVariableId(id: number) {
+    return this.collection.findBy("loxoneVariableId", id)
+  }
+
   sendIntegrationInput(variable: IntegrationVariable) {
     return Promise.all(
       this.collection
@@ -76,7 +96,7 @@ export class LinkManager extends InstanceManager<LinkEntity, Link> implements IA
   async remove(id: number) {
     const [link] = this.collection.removeBy("id", id)
     await this.repositories.linkRepository.remove(id)
-    link.reloadReceiverEmitter()
+    link.reloadVariables()
     return link
   }
 
