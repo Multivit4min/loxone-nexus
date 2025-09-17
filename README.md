@@ -27,17 +27,15 @@ Loxone Nexus connects external integrations (currently **Home Assistant** and **
 - npm
 
 ### Installation
+
 ```sh
 wget https://github.com/multivit4min/loxone-nexus/releases/latest/download/loxone-nexus.tar.gz
 tar -xvf loxone-nexus.tar.gz
 cd loxone-nexus
 npm ci
-npm start
-```
-
-With [pm2](https://pm2.keymetrics.io/):
-```sh
 pm2 start ecosystem.js
+#if you dont use pm2 start via
+#npm start
 ```
 
 You application now runs on Port **8000**, you can change this port by editing **data/.env**
