@@ -3,15 +3,6 @@ import { z } from "zod"
 import { services } from "../../../container"
 import { DATA_TYPE } from "loxone-ici"
 
-export const instanceSchema = z.object({
-  label: z.string().min(1),
-  host: z.ipv4().or(z.ipv6()),
-  port: z.number().int().min(1024).max(65535),
-  listenPort: z.number().int().min(1024).max(65535),
-  remoteId: z.string().min(1).max(8),
-  ownId: z.string().min(1).max(8)
-}).strict()
-
 export const createVariableSchema = z.object({
   packetId: z.string().min(1).max(8),
   direction: z.enum(["INPUT", "OUTPUT"]),
@@ -51,7 +42,7 @@ export const loxoneController = {
 
   //retrieve a single instance
   async updateInstance(req: Request, res: Response) {
-    const body = instanceSchema.parse(req.body)
+    const body = services.loxoneManager.schema().parse(req.body)
     const instance = services.loxoneManager.getId(parseInt(req.params.id, 10))
     await instance.update(body)
     res.json(instance.serialize())
@@ -59,7 +50,7 @@ export const loxoneController = {
 
   //create a loxone Instance
   async createInstance(req: Request, res: Response) {
-    const body = instanceSchema.parse(req.body)
+    const body = services.loxoneManager.schema().parse(req.body)
     const instance = await services.loxoneManager.create({ active: false, ...body })
     res.json(instance.serialize())
   },

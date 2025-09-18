@@ -27,12 +27,12 @@ export class SocketClient {
     this.socket.emit("instance:update.single", { instance })
   }
 
-  sendInstances(instances = this.parent.services.loxoneManager.serialize()) {
-    this.socket.emit("instance:update.all", { instances })
+  sendInstances({ entries, schema } = this.parent.services.loxoneManager.serialize()) {
+    this.socket.emit("instance:update.all", { instances: entries, schema })
   }
 
-  sendIntegrations(integrations = this.parent.services.integrationManager.serialize()) {
-    this.socket.emit("integrations:update.all", { integrations })
+  sendIntegrations({ entries } = this.parent.services.integrationManager.serialize()) {
+    this.socket.emit("integrations:update.all", { integrations: entries })
   }
 
   sendIntegration(integration: object) {

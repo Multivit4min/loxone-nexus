@@ -154,7 +154,7 @@ export class LoxoneInstance extends Instance<LoxoneEntity> {
       state: this.state.current,
       ownId: this.entity.ownId,
       remoteId: this.entity.remoteId,
-      variables: this.variables.serialize(),
+      variables: this.variables.serialize().entries,
       additionalInputs: this.undefinedInputs.map(v => v.serialize())
     }
   }

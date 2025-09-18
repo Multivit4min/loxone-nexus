@@ -49,6 +49,7 @@ export class UserRepository {
       .update(users)
       .set(props)
       .where(eq(users.id, id))
+      .then(() => this.findById(id))
   }
 
   count() {

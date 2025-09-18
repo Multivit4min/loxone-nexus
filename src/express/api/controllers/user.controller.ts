@@ -29,6 +29,8 @@ export const userController = {
   async update(req: Request, res: Response) {
     const body = userUpdateSchema.parse(req.body)
     const id = parseInt(req.params.userId, 10)
-    res.json(stripPassword(await services.userService.updateUser({ id, ...body })))
+    const user = await services.userService.updateUser({ id, ...body })
+    if (!user) return res.sendStatus(404)
+    res.json(stripPassword(user))
   }
 }

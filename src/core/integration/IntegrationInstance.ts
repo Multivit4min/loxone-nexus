@@ -77,7 +77,7 @@ export abstract class IntegrationInstance<T extends object> extends Instance<Int
     const constructor = this.getConstructor()
     return {
       specific: this.specificSerialize(),
-      variables: this.variables.serialize(),
+      variables: this.variables.serialize().entries,
       configSchema: z.toJSONSchema(constructor.configSchema()),
       outputVariableSchema: z.toJSONSchema(this.actions.schema),
       inputVariableSchema: z.toJSONSchema(this.inputs.schema),

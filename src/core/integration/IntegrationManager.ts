@@ -54,8 +54,8 @@ export class IntegrationManager extends InstanceManager<IntegrationEntity, Integ
   getCommonIntegrationSchema() {
     const options = this.mappedConstructors.map(c => {
       return (c.constructor.configSchema() as z.ZodObject<any>).extend({
-        type: z.literal(c.key),
-        label: z.string().min(1).describe("name to identify this integration")
+        label: z.string().min(1).describe("name to identify this integration"),
+        type: z.literal(c.key)
       })
     })
     if (options.length === 0) throw new Error(`no registered integrations`)
@@ -93,7 +93,7 @@ export class IntegrationManager extends InstanceManager<IntegrationEntity, Integ
     if (!constructorClass) throw new Error(`Integration with name ${entity.type} not found`)
     const integration = new constructorClass(entity, this)
     await integration.variables.init()
-    await integration.start()
+    integration.start()
     return integration
   }
 

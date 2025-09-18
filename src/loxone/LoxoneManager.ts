@@ -5,6 +5,7 @@ import { InstanceManager } from "../core/instance/InstanceManager"
 import { IAppService } from "../types/appService"
 import { LoxoneEntity } from "../drizzle/schema"
 import { CreateLoxoneProps } from "../drizzle/repositories/LoxoneRepository"
+import z from "zod"
 
 export class LoxoneManager extends InstanceManager<LoxoneEntity, LoxoneInstance> implements IAppService {
 
@@ -69,6 +70,23 @@ export class LoxoneManager extends InstanceManager<LoxoneEntity, LoxoneInstance>
     await this.repositories.loxone.remove(id)
     this.services.socketManager.sendInstances()
     return loxone
+  }
+
+  additionalSerialize() {
+    return {
+      schema: z.toJSONSchema(this.schema())
+    }
+  }
+
+  schema() {
+    return z.object({
+      label: z.string().min(1).describe("arbitary name"),
+      host: z.union([z.ipv4(), z.ipv6(), z.hostname()]).describe("address of the miniserver"),
+      port: z.number().int().min(1024).max(65535).describe("port of the miniserver (default: 61263)").default(61263),
+      listenPort: z.number().int().min(1024).max(65535).describe("port on which loxone-nexus listens").default(61263),
+      remoteId: z.string().min(1).max(8).describe("id of the miniserver (see loxone-intercommunication settings inside loxone config)"),
+      ownId: z.string().min(1).max(8).describe("arbitary id of loxone-nexus")
+    }).strict()
   }
 
 }

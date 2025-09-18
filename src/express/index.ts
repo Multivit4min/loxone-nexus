@@ -54,6 +54,7 @@ export async function setupExpress() {
     app.use(createProxyMiddleware({
       target: process.env.VITE_PROXY,
       changeOrigin: true,
+      ws: true
     }))
   } else {
     logger.warn(`serving files from public folder`)
