@@ -92,6 +92,7 @@ export class LoxoneVariableService extends Instance<LoxoneVariableEntity> {
   }
 
   async updateValueFromPacket(packet: LoxoneIOPacket): Promise<any> {
+    if (packet.payload.value === this.entity.value?.value) return
     this.entity.type = packet.dataType
     return this.updateValue(packet.payload.value)
   }
@@ -128,8 +129,7 @@ export class LoxoneVariableService extends Instance<LoxoneVariableEntity> {
 
   serialize() {
     return {
-      ...this.entity,
-      value: this.value
+      ...this.entity
      }
   }
 

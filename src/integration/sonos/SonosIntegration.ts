@@ -125,6 +125,7 @@ export class SonosIntegration extends IntegrationInstance<
   }
 
   async start() {
+    this.device = new SonosDevice(this.config.address)
     await this.variables.reload()
     this.pollInterval = setInterval(() => this.pollDevice(), SonosIntegration.POLL_INTERVAL)
     await this.pollDevice()

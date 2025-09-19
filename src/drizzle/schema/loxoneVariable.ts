@@ -23,10 +23,10 @@ export const loxoneVariables = sqliteTable("loxone_variables", {
   label: text("label"),
   direction: text("direction", { enum: ["OUTPUT", "INPUT"] }).notNull(),
   packetId: text("packet_id", { length: 8 }).notNull(),
-  value: text("value", { mode: "json" }).$type<SerializedDataType>(),
+  value: text("value", { mode: "json" }).$type<SerializedDataType>().default({ type: "null", value: null }),
   suffix: text("suffix"),
   forced: int("forced", { mode: "boolean" }).notNull().default(false),
-  forcedValue: text("forced_value", { mode: "json" }).$type<SerializedDataType>(),
+  forcedValue: text("forced_value", { mode: "json" }).$type<SerializedDataType>().default({ type: "null", value: null }),
   type: int("type").notNull().$type<DATA_TYPE>()
 })
 

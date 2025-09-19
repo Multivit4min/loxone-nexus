@@ -13,7 +13,7 @@ export const integrationVariables = sqliteTable("integration_variable", {
     .notNull(),
   label: text("label"),
   direction: text("direction", { enum: ["OUTPUT", "INPUT"] }).notNull(),
-  value: text("value", { mode: "json" }).$type<SerializedDataType>(),
+  value: text("value", { mode: "json" }).$type<SerializedDataType>().default({ type: "null", value: null }),
   config: text("config", { mode: "json" }).notNull(),
 })
 

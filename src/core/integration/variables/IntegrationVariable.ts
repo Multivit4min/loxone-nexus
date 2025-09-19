@@ -28,6 +28,7 @@ export class IntegrationVariable<T extends { action: string } = any> extends Ins
       id: this.id
     }) as any
     await this.reload()
+    this.services.socketManager.sendIntegrationVariable(this)
   }
 
   async reload() {
@@ -107,7 +108,7 @@ export class IntegrationVariable<T extends { action: string } = any> extends Ins
   serialize() {
     return {
       ...this.entity,
-      value: this.value.value
+      value: this.value
      }
   }
 

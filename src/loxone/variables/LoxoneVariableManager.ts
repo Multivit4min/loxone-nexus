@@ -4,7 +4,9 @@ import { InstanceManager } from "../../core/instance/InstanceManager"
 import { Logger } from "pino"
 import { logger } from "../../logger/pino"
 import { ServiceContainer } from "../../container"
-import { LoxoneVariableEntity } from "../../drizzle/schema"
+import { LoxoneVariableEntity, LoxoneVariableType } from "../../drizzle/schema"
+import { DATA_TYPE } from "loxone-ici"
+import { SerializedDataType } from "../../core/conversion/SerializedDataType"
 
 export class LoxoneVariableManager extends InstanceManager<LoxoneVariableEntity, LoxoneVariableService> {
 
@@ -32,12 +34,22 @@ export class LoxoneVariableManager extends InstanceManager<LoxoneVariableEntity,
       loxoneId: this.parent.id,
       forced: false,
       forcedValue: null,
-      value: null
+      value: LoxoneVariableManager.defaultValueForType(props.type)
     })
     const variable = new LoxoneVariableService(entity, this)
     this.collection.push(variable)
     this.services.socketManager.sendInstance(this.parent)
     return variable
+  }
+
+  static defaultValueForType(type: DATA_TYPE): SerializedDataType {
+    switch (type) {
+      case DATA_TYPE.DIGITAL: return { type: "boolean", value: false }
+      case DATA_TYPE.ANALOG: return { type: "number", value: 0 }
+      case DATA_TYPE.TEXT: return { type: "string", value: "" }
+      case DATA_TYPE.SmartActuatorSingleChannel: return { type: "SmartActuatorSingleChannel", value: { channel: 0, fadeTime: 0 } }
+      default: return { type: "null", value: null }
+    }
   }
 
   async reload() {
