@@ -49,6 +49,7 @@ cd loxone-nexus
 npm ci
 pm2 restart ecosystem.config.js
 ```
+</details>
 
 You application now runs on Port **8000**, you can change this port by editing **data/.env**
 
