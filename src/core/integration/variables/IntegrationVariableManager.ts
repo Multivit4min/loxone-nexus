@@ -35,7 +35,6 @@ export class IntegrationVariableManager extends InstanceManager<IntegrationVaria
 
   async reload() {
     await Promise.all(this.collection.map(v => v.reload()))
-    this.services.socketManager.sendIntegration(this.parent)
   }
 
   private async createEntryFromEntity(entity: IntegrationVariableEntity, start = true) {

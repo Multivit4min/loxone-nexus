@@ -38,6 +38,7 @@ export class IntegrationVariable<T extends { action: string } = any> extends Ins
     if (!entity) throw new Error(`could not find entity with id ${this.id}`)
     this.entity = entity
     await this.start()
+    this.services.socketManager.sendIntegrationVariable(this)
     return this
   }
 
