@@ -34,10 +34,32 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Checkout frontend repository
+        uses: actions/checkout@v4
+        with:
+          repository: multivit4min/loxone-nexus-frontend
+          path: frontend
+          token: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 22
+          cache: 'npm'
+          cache-dependency-path: |
+            package-lock.json
+            frontend/package-lock.json
+
+      - name: Build frontend (Vite)
+        working-directory: frontend
+        run: |
+          set -euo pipefail
+          npm ci
+          npm run build
+          # optional: reproducible timestamps bei statischen Assets vereinheitlichen
+          find dist -exec touch -d '2020-01-01T00:00:00Z' {} +
+
       - name: Create release archives
         env:
           TAG: ${{ inputs.tag }}
@@ -46,7 +68,9 @@ jobs:
           npm ci
           mkdir -p loxone-nexus
           cp package.json package-lock.json README.md tsconfig.json ecosystem.config.js loxone-nexus/
-          cp -r public src loxone-nexus/
+          cp -r src loxone-nexus/
+          mkdir -p loxone-nexus/public
+          cp -r frontend/dist/* loxone-nexus/public/
           npx --yes drizzle-kit@0.31.4 push \
             --url "file:loxone-nexus/clean.sqlite" \
             --dialect sqlite \
@@ -58,6 +82,7 @@ jobs:
             -czf loxone-nexus.tar.gz loxone-nexus
           # Create zip
           zip -r -q -X "loxone-nexus.zip" loxone-nexus
+
       - name: Create release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
