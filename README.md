@@ -25,17 +25,29 @@ Loxone Nexus connects external integrations (currently **Home Assistant** and **
 ### Requirements
 - [Node.js](https://nodejs.org/en/download/)
 - npm
+- pm2 (`npm install -g pm2`) **recommended but optional**
 
-### Installation
+<details>
+  <summary>Installation</summary>
 
 ```sh
 wget https://github.com/multivit4min/loxone-nexus/releases/latest/download/loxone-nexus.tar.gz
 tar -xvf loxone-nexus.tar.gz
 cd loxone-nexus
 npm ci
-pm2 start ecosystem.js
-#if you dont use pm2 start via
-#npm start
+pm2 start ecosystem.configjs
+```
+</details>
+
+<details>
+  <summary>Update</summary>
+
+```sh
+wget https://github.com/multivit4min/loxone-nexus/releases/latest/download/loxone-nexus.tar.gz
+tar -xvf loxone-nexus.tar.gz
+cd loxone-nexus
+npm ci
+pm2 restart ecosystem.config.js
 ```
 
 You application now runs on Port **8000**, you can change this port by editing **data/.env**
