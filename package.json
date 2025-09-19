@@ -22,14 +22,14 @@
     "http-proxy-middleware": "^3.0.5",
     "jsonwebtoken": "^9.0.2",
     "loxone-ici": "^0.0.14",
-    "node-ical": "^0.20.1",
-    "pino": "^9.9.5",
+    "node-ical": "^0.21.0",
+    "pino": "^9.10.0",
     "pino-http": "^10.5.0",
     "pino-pretty": "^13.1.1",
     "socket.io": "^4.8.1",
     "tsx": "^4.20.5",
     "ws": "^8.18.3",
-    "zod": "^4.1.8"
+    "zod": "^4.1.9"
   },
   "devDependencies": {
     "@types/connect-history-api-fallback": "^1.5.4",
@@ -37,7 +37,7 @@
     "@types/http-proxy": "^1.17.16",
     "@types/http-proxy-middleware": "^1.0.0",
     "@types/jsonwebtoken": "^9.0.10",
-    "@types/node": "^24.4.0",
+    "@types/node": "^24.5.2",
     "@types/ws": "^8.18.1",
     "@vitest/coverage-v8": "^3.2.4",
     "drizzle-kit": "^0.31.4",
