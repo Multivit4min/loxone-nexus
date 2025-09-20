@@ -27,24 +27,20 @@ Loxone Nexus connects external integrations (currently **Home Assistant** and **
 - npm
 - pm2 (`npm install -g pm2`) **recommended but optional**
 
-<details>
-  <summary>Installation</summary>
-
 ```sh
-wget https://github.com/multivit4min/loxone-nexus/releases/latest/download/loxone-nexus.tar.gz
-tar -xvf loxone-nexus.tar.gz
+wget https://github.com/multivit4min/loxone-nexus/releases/latest/download/loxone-nexus.tar.gz -O - |
+tar -xzvf -
 cd loxone-nexus
 npm ci
 pm2 start ecosystem.configjs
 ```
-</details>
 
 <details>
   <summary>Update</summary>
 
 ```sh
-wget https://github.com/multivit4min/loxone-nexus/releases/latest/download/loxone-nexus.tar.gz
-tar -xvf loxone-nexus.tar.gz
+wget https://github.com/multivit4min/loxone-nexus/releases/latest/download/loxone-nexus.tar.gz -O - |
+tar -xzvf -
 cd loxone-nexus
 npm ci
 pm2 restart ecosystem.config.js

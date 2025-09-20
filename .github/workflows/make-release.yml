@@ -67,20 +67,18 @@ jobs:
           set -euo pipefail
           npm ci
           mkdir -p loxone-nexus
+          mkdir -p loxone-nexus/public
           cp package.json package-lock.json README.md tsconfig.json ecosystem.config.js loxone-nexus/
           cp -r src loxone-nexus/
-          mkdir -p loxone-nexus/public
           cp -r frontend/dist/* loxone-nexus/public/
           npx --yes drizzle-kit@0.31.4 push \
             --url "file:loxone-nexus/clean.sqlite" \
             --dialect sqlite \
             --schema ./src/drizzle/schema/index.ts
-          # Craete tar
           tar \
             --mtime='UTC 2020-01-01' \
             --owner=0 --group=0 \
             -czf loxone-nexus.tar.gz loxone-nexus
-          # Create zip
           zip -r -q -X "loxone-nexus.zip" loxone-nexus
 
       - name: Create release
