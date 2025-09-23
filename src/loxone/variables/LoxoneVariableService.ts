@@ -71,7 +71,7 @@ export class LoxoneVariableService extends Instance<LoxoneVariableEntity> {
   async reload(entity?: LoxoneVariableEntity) {
     if (!entity) entity = await this.parent.repositories.loxoneVariables.findById(this.id)
     if (!entity) throw new Error(`loxone variable with id ${this.id} not found while trying to reload`)
-    this.logger.debug(entity, "reloading loxone variable")
+    this.logger.debug({ id: this.id }, "reloading loxone variable")
     this.entity = entity
     this.services.socketManager.sendVariable(this)
     return this

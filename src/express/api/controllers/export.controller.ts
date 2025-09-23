@@ -1,6 +1,7 @@
 import { Request, Response } from "express"
 import { services } from "../../../container"
 import { Exporter } from "../../../core/exporter/Exporter"
+import { appService } from "../../.."
 
 
 export const exportController = {
@@ -13,5 +14,6 @@ export const exportController = {
     const body = Exporter.parseSchema(req.body)
     await services.exporter.import(body)
     res.json({ message: "ok" })
+    await appService.restart()
   }
 }

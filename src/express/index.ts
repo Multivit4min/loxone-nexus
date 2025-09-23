@@ -71,7 +71,7 @@ export async function setupExpress() {
         Object.values(timeouts).map(timeout => clearTimeout(timeout))
         closeWSS()
         server.closeAllConnections()
-        server.closeAllConnections()
+        server.closeIdleConnections()
         server.close(() => fulfill())
       })
     }

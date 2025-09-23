@@ -1,3 +1,5 @@
-import { startApplication } from "./app"
+import { AppService } from "./core/app/AppService"
 
-startApplication()
+export const appService = new AppService()
+
+appService.start()
