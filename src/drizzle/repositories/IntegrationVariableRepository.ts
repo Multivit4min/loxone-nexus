@@ -19,6 +19,10 @@ export class IntegrationVariableRepository {
 
   constructor(private readonly db: DrizzleDatabaseType) {}
 
+  export() {
+    return this.db.query.integrationVariables.findMany()
+  }
+
   findAll() {
     return this.db.query.integrationVariables
       .findMany()

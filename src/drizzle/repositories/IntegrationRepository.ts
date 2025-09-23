@@ -16,6 +16,10 @@ export class IntegrationRepository {
 
   constructor(private readonly db: DrizzleDatabaseType) {}
 
+  export() {
+    return this.db.query.integrations.findMany()
+  }
+
   findAll() {
     return this.db.query.integrations
       .findMany()

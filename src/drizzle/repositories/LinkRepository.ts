@@ -15,6 +15,10 @@ export class LinkRepository {
 
   constructor(private readonly db: DrizzleDatabaseType) {}
 
+  export() {    
+    return this.db.query.links.findMany()
+  }
+
   findAll() {
     return this.db.query.links
       .findMany({

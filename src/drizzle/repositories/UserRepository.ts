@@ -15,6 +15,10 @@ export class UserRepository {
 
   constructor(private readonly db: DrizzleDatabaseType) {}
 
+  export() {    
+    return this.db.query.users.findMany()
+  }
+
   findAll() {
     return this.db.query.users
       .findMany()

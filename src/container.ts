@@ -15,6 +15,7 @@ import { logger } from "./logger/pino"
 import { setupStore } from "./express/api/controllers/setup.controller"
 import { SonosIntegration } from "./integration/sonos/SonosIntegration"
 import { createDatabaseConnection } from "./drizzle"
+import { Exporter } from "./core/exporter/Exporter"
 
 const db = createDatabaseConnection()
 
@@ -37,6 +38,7 @@ export const services = {
   integrationManager: new IntegrationManager(repositories),
   loxoneManager: new LoxoneManager(repositories),
   linkService: new LinkManager(repositories),
+  exporter: new Exporter(repositories)
 }
 
 export async function setupContainers() {
@@ -57,8 +59,10 @@ export async function setupContainers() {
 
   return {
     async stop() {
-      await Promise.all(Object.values(services).map(service => service.stop()))
-      //await closeDatabaseConnection()
+      await Promise.all(Object.values(services).map(service => {
+        if ("stop" in service && typeof service.stop === "function") return service.stop()
+        return null
+      }))
     }
   }
 }

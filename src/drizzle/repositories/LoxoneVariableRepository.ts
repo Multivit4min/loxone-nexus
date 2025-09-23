@@ -24,6 +24,10 @@ export class LoxoneVariableRepository {
 
   constructor(private readonly db: DrizzleDatabaseType) {}
 
+  export() {    
+    return this.db.query.loxoneVariables.findMany()
+  }
+
   findAll() {
     return this.db.query.loxoneVariables
       .findMany({

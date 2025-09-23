@@ -7,6 +7,7 @@ import configRoutes from "./routes/config.route"
 import datasourceRoutes from "./routes/integration.route"
 import userRoutes from "./routes/user.route"
 import linkRoutes from "./routes/link.route"
+import exporterRoutes from "./routes/exporter.route"
 import { isAuthenticated } from "../util/isAuthenticated"
 import { ExpressStore } from "../util/ExpressStore"
 import { CollectionItemNotFoundError } from "../../core/errors/CollectionItemNotFoundError"
@@ -31,6 +32,7 @@ apiRouter.use(isAuthenticated(), configRoutes)
 apiRouter.use(isAuthenticated(), loxoneRoutes)
 apiRouter.use(isAuthenticated(), datasourceRoutes)
 apiRouter.use(isAuthenticated(), linkRoutes)
+apiRouter.use(isAuthenticated(), exporterRoutes)
 
 //404 catch all handler
 apiRouter.use((req, res) => {

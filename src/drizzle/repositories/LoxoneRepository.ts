@@ -20,6 +20,10 @@ export class LoxoneRepository {
 
   constructor(private readonly db: DrizzleDatabaseType) {}
 
+  export() {    
+    return this.db.query.loxone.findMany()
+  }
+
   findAll() {
     return this.db.query.loxone.findMany()
   }
