@@ -10,6 +10,7 @@ export const createVariableSchema = z.object({
     "DIGITAL": DATA_TYPE.DIGITAL,
     "ANALOG": DATA_TYPE.ANALOG,
     "TEXT": DATA_TYPE.TEXT,
+    "SMART_ACTUATOR_RGBW": DATA_TYPE.SmartActuatorRGBW,
     "SMART_ACTUATOR_SINGLE_CHANNEL": DATA_TYPE.SmartActuatorSingleChannel
   }),
   label: z.string().optional(),
