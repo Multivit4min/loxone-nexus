@@ -178,6 +178,15 @@ export class VariableConverter {
         if ("channel" in value && "fadeTime" in value) {
           return { type: "SmartActuatorSingleChannel", value }
         }
+        if (
+          "red" in value &&
+          "green" in value &&
+          "blue" in value &&
+          "white" in value &&
+          "fadeTime" in value
+        ) {
+          return { type: "SmartActuatorRGBW", value }
+        }
       default:
         return { type: "null", value: null }
     }

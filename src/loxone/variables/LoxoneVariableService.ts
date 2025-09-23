@@ -145,7 +145,7 @@ export class LoxoneVariableService extends Instance<LoxoneVariableEntity> {
       packetId: packet.packetId,
       loxoneId: manager.parent.id,
       type: packet.dataType,
-      value: null,
+      value: VariableConverter.SerializeDataType(packet.payload.value),
       suffix: null,
       forced: false,
       forcedValue: null      
