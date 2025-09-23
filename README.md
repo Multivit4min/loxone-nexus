@@ -53,7 +53,8 @@ You application now runs on Port **8000**, you can change this port by editing *
 - `DIGITAL`  
 - `ANALOG`  
 - `TEXT`  
-- `SmartActuatorSingleChannel`  
+- `SmartActuatorRGBW`
+- `SmartActuatorSingleChannel`
 
 
 ## Integrations

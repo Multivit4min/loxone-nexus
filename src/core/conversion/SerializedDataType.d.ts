@@ -1,5 +1,14 @@
-export type SerializedDataType = NumberDataType|BooleanDataType|StringDataType|SmartActuatorSingleChannelDataType|NullDataType
-export type NumberDataType = {
+import { SmartActuatorRGBWType, SmartActuatorSingleChannelType } from "../../types/general"
+
+export type SerializedDataType = 
+  NumberDataType |
+  BooleanDataType |
+  StringDataType |
+  SmartActuatorSingleChannelDataType |
+  SmartActuatorRGBWDataType |
+  NullDataType
+
+  export type NumberDataType = {
   type: "number"
   value: number
 }
@@ -18,4 +27,8 @@ export type NullDataType = {
 export type SmartActuatorSingleChannelDataType = {
   type: "SmartActuatorSingleChannel"
   value: SmartActuatorSingleChannelType
+}
+export type SmartActuatorRGBWDataType = {
+  type: "SmartActuatorRGBW",
+  value: SmartActuatorRGBWType
 }

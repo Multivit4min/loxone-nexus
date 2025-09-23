@@ -1,4 +1,4 @@
-import { SmartActuatorSingleChannelType, VariableDataTypes } from "../../types/general"
+import { SmartActuatorRGBWType, SmartActuatorSingleChannelType, VariableDataTypes } from "../../types/general"
 import { SerializedDataType } from "./SerializedDataType"
 import { stringToNumber } from "./stringToNumber"
 import { DATA_TYPE } from "loxone-ici"
@@ -16,6 +16,14 @@ export class VariableConverter {
     smartActuatorSingleChannel: ({ channel, fadeTime}: Partial<SmartActuatorSingleChannelType> = {}): SmartActuatorSingleChannelType => ({
       channel: channel !== undefined ? channel : 0,
       fadeTime: fadeTime !== undefined ? fadeTime : 2
+    }),
+    smartActuatorRGBW: ({ red, green, blue, white, fadeTime, bits }: Partial<SmartActuatorRGBWType> = {}): SmartActuatorRGBWType => ({
+      red: red || 0,
+      green: green || 0,
+      blue: blue || 0,
+      white: white || 0,
+      fadeTime: fadeTime || 2,
+      bits: bits || 0
     })
   }
 
@@ -50,7 +58,7 @@ export class VariableConverter {
       case DATA_TYPE.DIGITAL: return this.toBoolean()
       case DATA_TYPE.TEXT: return this.toString()
       case DATA_TYPE.SmartActuatorSingleChannel: return this.toSmartActuatorSingleChannel()
-      case DATA_TYPE.SmartActuatorRGBW:
+      case DATA_TYPE.SmartActuatorRGBW: return this.toSmartActuatorRGBW()
       case DATA_TYPE.SmartActuatorTunableWhite:
       case DATA_TYPE.T5:
       default:
@@ -68,7 +76,14 @@ export class VariableConverter {
     boolean: ({ value }) => String(value),
     string: ({ value }) => value,
     null: () => this.defaults.string(),
-    SmartActuatorSingleChannel: ({ value }) => `${value.channel}% ${value.fadeTime}s`
+    SmartActuatorSingleChannel: ({ value }) => `${value.channel}% ${value.fadeTime}s`,
+    SmartActuatorRGBW: ({ value }) => {
+      const r = VariableConverter.getHexValue(value.red)
+      const g = VariableConverter.getHexValue(value.green)
+      const b = VariableConverter.getHexValue(value.blue)
+      const w = VariableConverter.getHexValue(value.white)
+      return `#${r}${g}${b}${w} fade: ${value.fadeTime}`
+    }
   }
 
   /** converts the datatype into a number */
@@ -81,7 +96,14 @@ export class VariableConverter {
     boolean: ({ value }) => value ? 1 : 0,
     string: ({ value }) => stringToNumber(value),
     null: () => this.defaults.number(),
-    SmartActuatorSingleChannel: ({ value }) => value.channel
+    SmartActuatorSingleChannel: ({ value }) => value.channel,
+    SmartActuatorRGBW: ({ value }) => {
+      const r = VariableConverter.getHexValue(value.red)
+      const g = VariableConverter.getHexValue(value.green)
+      const b = VariableConverter.getHexValue(value.blue)
+      const w = VariableConverter.getHexValue(value.white)
+      return parseInt(`${r}${g}${b}${w}`, 16)
+    }
   }
 
   /** converts the datatype into a boolean */
@@ -104,7 +126,8 @@ export class VariableConverter {
       "cleaning", "returning"
     ].includes(value.toLowerCase().trim()),
     null: () => this.defaults.boolean(),
-    SmartActuatorSingleChannel: ({ value }) => value.channel !== 0
+    SmartActuatorSingleChannel: ({ value }) => value.channel !== 0,
+    SmartActuatorRGBW: ({ value }) => (value.red + value.green + value.blue + value.white) !== 0
   }
 
   /** converts any datatype into a SmartActuatorSingleChannelType */
@@ -117,7 +140,25 @@ export class VariableConverter {
     boolean: ({ value }) => this.defaults.smartActuatorSingleChannel({ channel: value ? 100 : 0 }),
     string: ({ value }) => this.defaults.smartActuatorSingleChannel({ channel: stringToNumber(value) }),
     null: () => this.defaults.smartActuatorSingleChannel(),
-    SmartActuatorSingleChannel: ({ value }) => value
+    SmartActuatorSingleChannel: ({ value }) => value,
+    SmartActuatorRGBW: ({ value }) => ({
+      channel: (value.red + value.green + value.blue + value.white) / 5,
+      fadeTime: value.fadeTime
+    })
+  }
+
+  /** converts any datatype into a SmartActuatorSingleChannelType */
+  toSmartActuatorRGBW(): SmartActuatorRGBWType {
+    return this.safeConvert(this.toSmartActuatorRGBWHandler, { red: 0, green: 0, blue: 0, white: 0, fadeTime: 2, bits: 0 })
+  }
+
+  private toSmartActuatorRGBWHandler: Handlers<SmartActuatorRGBWType> = {
+    number: ({ value }) => this.defaults.smartActuatorRGBW({ white: value }),
+    boolean: ({ value }) => this.defaults.smartActuatorRGBW({ white: value ? 100 : 0 }),
+    string: ({ value }) => this.defaults.smartActuatorRGBW({ white: stringToNumber(value) }),
+    null: () => this.defaults.smartActuatorRGBW(),
+    SmartActuatorSingleChannel: ({ value }) => this.defaults.smartActuatorRGBW({ white: value.channel, fadeTime: value.fadeTime }),
+    SmartActuatorRGBW: ({ value }) => value
   }
 
   /**
@@ -140,5 +181,9 @@ export class VariableConverter {
       default:
         return { type: "null", value: null }
     }
+  }
+
+  static getHexValue(n: number, padLen: number = 2) {
+    return Math.max(0, Math.min(255, n)).toString(16).padStart(padLen, "0")
   }
 }
