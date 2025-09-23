@@ -7,6 +7,7 @@ import { createSocketServer } from "../realtime/socket"
 import history from "connect-history-api-fallback"
 import { logger } from "../logger/pino"
 import pinoHttp from "pino-http"
+import { Socket } from "net"
 
 const timeouts: Record<string, NodeJS.Timeout> = {}
 
@@ -23,7 +24,17 @@ export async function setupExpress() {
   const app = express()
   const server = http.createServer(app)
 
+
+  
+  const sockets = new Set<Socket>()
+  server.on("connection", socket => {
+    sockets.add(socket)
+    socket.on("close", () => sockets.delete(socket))
+  })
+
+
   const { close: closeWSS } = createSocketServer(server)
+
 
   app.use(bodyParser.json())
   app.use(bodyParser.urlencoded({ extended: false }))
@@ -68,11 +79,14 @@ export async function setupExpress() {
   return {
     close() {
       return new Promise<void>(fulfill => {
+        server.close(() => fulfill()) 
         Object.values(timeouts).map(timeout => clearTimeout(timeout))
         closeWSS()
         server.closeAllConnections()
         server.closeIdleConnections()
-        server.close(() => fulfill())
+        for (const socket of sockets) {
+          socket.destroy()
+        }
       })
     }
   }
