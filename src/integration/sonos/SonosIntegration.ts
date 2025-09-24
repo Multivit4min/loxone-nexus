@@ -160,7 +160,7 @@ export class SonosIntegration extends IntegrationInstance<
   }
 
   async tree() {
-    return null
+    return []
   }
 
   static filterRecordsByType(attributes: Record<string, any>, types: string[]) {
