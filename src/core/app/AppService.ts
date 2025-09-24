@@ -29,9 +29,7 @@ export class AppService {
    */
   async stop() {
     if (!this.stopHandler) throw new Error("not started")
-    console.log("awaiting callback for stop")
     const cb = await this.stopHandler
-    console.log("callback stop")
     await cb()
     this.stopHandler = undefined
   }

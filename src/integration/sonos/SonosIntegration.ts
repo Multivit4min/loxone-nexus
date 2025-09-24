@@ -159,6 +159,10 @@ export class SonosIntegration extends IntegrationInstance<
     }
   }
 
+  async tree() {
+    return null
+  }
+
   static filterRecordsByType(attributes: Record<string, any>, types: string[]) {
     const result: Record<string, VariableDataTypes> = {}
     Object.keys(attributes).forEach(k => {

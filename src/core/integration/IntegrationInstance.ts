@@ -7,6 +7,7 @@ import { Instance } from "../instance/Instance"
 import { ActionBuilder } from "./io/ActionBuilder"
 import { IntegrationEntity } from "../../drizzle/schema"
 import { InputBuilder } from "./io/InputBuilder"
+import { TreeProps } from "../../types/tree"
 
 
 export abstract class IntegrationInstance<T extends object> extends Instance<IntegrationEntity> {
@@ -86,6 +87,7 @@ export abstract class IntegrationInstance<T extends object> extends Instance<Int
     }
   }
 
+  abstract tree(): Promise<TreeProps|null>
   abstract getConstructor(): IntegrationConstructor
   abstract getInternalVariables(): Promise<any>
   abstract specificSerialize(): any

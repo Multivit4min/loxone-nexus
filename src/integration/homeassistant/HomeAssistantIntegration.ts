@@ -6,6 +6,7 @@ import { IntegrationManager } from "../../core/integration/IntegrationManager"
 import { ActionCallback, ActionProps } from "../../core/integration/io/Action"
 import { IntegrationEntity } from "../../drizzle/schema"
 import { State } from "./hass/commands/HomeAssistantStateCommand"
+import { TreeCategory, InputTreeEndpoint, TreeProps, InputTreeEntry, OutputTreeEntry, OutputTreeEndpoint } from "../../types/tree"
 
 export type StateEntry = { entityId: string, namespace: string, id: string, values: Record<string, any> }
 
@@ -306,6 +307,78 @@ export class HomeAssistantIntegration extends IntegrationInstance<
 
   specificSerialize() {
     return null
+  }
+
+  async tree(): Promise<TreeProps> {
+    const states = await this.getStates()
+    return {
+      inputs: await this.inputTree(states),
+      outputs: await this.outputTree(states)
+    }
+  }
+
+  async inputTree(states: StateEntry[]): Promise<InputTreeEntry[]> {
+    return states.reduce((acc, state) => {
+      //build endpoints
+      const children: InputTreeEndpoint[] = Object.keys(state.values).map(k => ({
+        label: k,
+        value: state.values[k],
+        config: {
+          label: `${state.entityId} > ${k}`,
+          action: "state",
+          entityId: state.entityId,
+          key: k
+        }
+      }))
+      if (children.length === 0) return acc
+      //build categories
+      let index = acc.findIndex(e => e.label === state.namespace)
+      if (index < 0) index = acc.push({
+        label: state.namespace,
+        class: "text-red",
+        children: []
+      }) - 1
+      ;(acc[index] as InputTreeEntry).children.push({
+        label: state.id,
+        class: "text-light-blue",
+        children
+      })
+      return acc
+    }, [] as InputTreeEntry[])
+  }
+
+  async outputTree(states: StateEntry[]): Promise<OutputTreeEntry[]> {
+    return states.reduce((acc, state) => {
+      //build endpoints
+      const actionKeys = Object.keys(this.actions.entries).filter(key => key.startsWith(`${state.namespace}.`))
+      if (actionKeys.length === 0) return acc
+      const children: OutputTreeEndpoint[] = actionKeys.map(action => {
+        const [_, type] = action.split(".")
+        return {
+          label: type,
+          comment: this.actions.entries[action].description,
+          config: {
+            label: `${state.entityId} > ${type}`,
+            action,
+            entityId: state.entityId
+          }
+        }
+      })
+      if (children.length === 0) return acc
+      //build categories
+      let index = acc.findIndex(e => e.label === state.namespace)
+      if (index < 0) index = acc.push({
+        label: state.namespace,
+        class: "text-red",
+        children: []
+      }) - 1
+      ;(acc[index] as OutputTreeEntry).children.push({
+        label: state.id,
+        class: "text-light-blue",
+        children
+      })
+      return acc
+    }, [] as OutputTreeEntry[])
   }
 
   static filterRecordsByType(attributes: Record<string, any>, types: string[]) {
