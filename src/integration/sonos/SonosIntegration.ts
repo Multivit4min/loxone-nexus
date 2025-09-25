@@ -7,6 +7,9 @@ import { GetZoneInfoResponse } from "@svrooij/sonos/lib/services"
 import { SonosState } from "@svrooij/sonos/lib/models/sonos-state"
 import { IntegrationEntity } from "../../drizzle/schema"
 import { TransportState } from "@svrooij/sonos/lib/models"
+import { TreeBuilder } from "../../core/integration/tree/TreeBuilder"
+import { InputTreeEndpoint } from "../../core/integration/tree/InputTreeEndpoint"
+import { TreeCategory } from "../../core/integration/tree/TreeCategory"
 
 
 export class SonosIntegration extends IntegrationInstance<
@@ -24,11 +27,12 @@ export class SonosIntegration extends IntegrationInstance<
     this.device = new SonosDevice(this.config.address)
     this.inputs
       .create("media info")
-      .schema({ type: z.enum(["title", "playing state", "volume"]) })
+      .schema({ type: z.enum(["title", "playing", "volume", "muted"]) })
       .currentValue(({ config }) => {
         if (config.type === "title") return this.title
-        if (config.type === "playing state") return this.playingState
+        if (config.type === "playing") return this.playingState
         if (config.type === "volume") return this.volume
+        if (config.type === "muted") return this.muted
       })
       .register(({ variable, getCurrentValue }) => {
         let previous: string = ""
@@ -42,6 +46,7 @@ export class SonosIntegration extends IntegrationInstance<
     })
     this.actions
       .create("notification")
+      .setLabel("Play Notification")
       .describe("plays a notification on the sonos speaker")
       .schema({
         volume: z.number().min(0).max(100).describe("Volume level in %").optional(),
@@ -64,6 +69,7 @@ export class SonosIntegration extends IntegrationInstance<
       })
     this.actions
       .create("play")
+      .setLabel("Start Playback")
       .describe("starts playback")
       .execute(async props => {
         if (!props.value.toBoolean()) return
@@ -71,6 +77,7 @@ export class SonosIntegration extends IntegrationInstance<
       })
     this.actions
       .create("pause")
+      .setLabel("Pause Playback")
       .describe("pauses playback")
       .execute(async props => {
         if (!props.value.toBoolean()) return
@@ -78,7 +85,8 @@ export class SonosIntegration extends IntegrationInstance<
       })
     this.actions
       .create("volume")
-      .describe("set volume")
+      .setLabel("Set Volume")
+      .describe("set volume (0 to 100%)")
       .execute(async props => {
         let volume = Math.round(props.value.toNumber())
         if (volume < 0) volume = 0
@@ -87,6 +95,7 @@ export class SonosIntegration extends IntegrationInstance<
       })
     this.actions
       .create("next")
+      .setLabel("Play next Track")
       .describe("next track")
       .execute(async props => {
         if (!props.value.toBoolean()) return
@@ -94,6 +103,7 @@ export class SonosIntegration extends IntegrationInstance<
       })
     this.actions
       .create("previous")
+      .setLabel("Play previous Track")
       .describe("previous track")
       .execute(async props => {
         if (!props.value.toBoolean()) return
@@ -118,6 +128,11 @@ export class SonosIntegration extends IntegrationInstance<
   get volume() {
     if (!this.state) return -1
     return this.state.volume
+  }
+
+  get muted() {
+    if (!this.state) return false
+    return this.state.muted
   }
 
   getConstructor() {
@@ -160,7 +175,21 @@ export class SonosIntegration extends IntegrationInstance<
   }
 
   async tree() {
-    return []
+    const tree = new TreeBuilder()
+    const input = tree.addInputCategory("status")
+    this.addMediaInfo(input, "title", this.title)
+    this.addMediaInfo(input, "playing", this.playingState)
+    this.addMediaInfo(input, "volume", this.volume)
+    this.addMediaInfo(input, "muted", this.muted)
+    tree.addOutputCategory("action").addActions(this.actions)
+    return tree.serialize()
+  }
+
+  addMediaInfo(cat: TreeCategory, type: string, value: any) {
+    cat
+      .add(InputTreeEndpoint, type)
+      .setValue(value)
+      .setConfig({ label: type, action: "media info", type })
   }
 
   static filterRecordsByType(attributes: Record<string, any>, types: string[]) {

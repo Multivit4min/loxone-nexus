@@ -1,6 +1,8 @@
+import { ActionBuilder } from "../io/ActionBuilder"
+import { OutputTreeEndpoint } from "./OutputTreeEndpoint"
 import { TreeBase } from "./TreeBase"
 
-export class TreeCategory<T extends TreeBase = any> extends TreeBase<TreeCategoryProps<T>> {
+export class TreeCategory extends TreeBase<TreeCategoryProps> {
 
   constructor(
     label: string,
@@ -14,16 +16,25 @@ export class TreeCategory<T extends TreeBase = any> extends TreeBase<TreeCategor
   addCategory(label: string) {
     let category = this.props.children.find(c => c.props.label === label)
     if (!category || !(category instanceof TreeCategory)) {
-      category = new TreeCategory<T>(label, this)
+      category = new TreeCategory(label, this)
       this.props.children.push(category)
     }
-    return category
+    return category as TreeCategory
   }
 
-  add(construct: TreeEndpointConstructor<T>, label: string): T {
+  add<T extends TreeBase>(construct: TreeEndpointConstructor<T>, label: string): T {
     const endpoint = new construct(label, this)
     this.props.children.push(endpoint)
     return endpoint
+  }
+
+  async addActions(actions: ActionBuilder) {
+    Object.values(actions.entries).forEach(action => {
+      const label = action.label || action.id
+      this.add(OutputTreeEndpoint, label)
+        .comment(action.description)
+        .setConfig({ label, action: action.id })
+    })
   }
 
   serialize(): Record<string, any> {
@@ -37,8 +48,8 @@ export class TreeCategory<T extends TreeBase = any> extends TreeBase<TreeCategor
 
 }
 
-export type TreeCategoryProps<T extends TreeBase> = {
-  children: (TreeCategory<T>|T)[]
+export type TreeCategoryProps = {
+  children: (TreeCategory|TreeBase)[]
 }
 
 export interface TreeEndpointConstructor<T extends TreeBase> {

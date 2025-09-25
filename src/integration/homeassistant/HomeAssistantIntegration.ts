@@ -7,7 +7,6 @@ import { ActionCallback, ActionProps } from "../../core/integration/io/Action"
 import { IntegrationEntity } from "../../drizzle/schema"
 import { State } from "./hass/commands/HomeAssistantStateCommand"
 import { TreeBuilder } from "../../core/integration/tree/TreeBuilder"
-import { TreeCategory } from "../../core/integration/tree/TreeCategory"
 import { OutputTreeEndpoint } from "../../core/integration/tree/OutputTreeEndpoint"
 import { InputTreeEndpoint } from "../../core/integration/tree/InputTreeEndpoint"
 

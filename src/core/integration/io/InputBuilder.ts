@@ -1,4 +1,3 @@
-import { IntegrationVariable } from "../variables/IntegrationVariable"
 import { Builder } from "./abstract/Builder"
 import { Input } from "./Input"
 

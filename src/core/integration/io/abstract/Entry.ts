@@ -11,10 +11,20 @@ export class Entry<
   
   protected baseSchema: z.ZodObject<ActionBaseSchema<T>>
   protected userShape?: S
+  label?: string
   description: string = ""
 
   constructor(readonly id: T, readonly parent: Builder<Entry>) {
     this.baseSchema = z.object({ action: z.literal(id) })
+  }
+
+  /**
+   * sets a default label for this entry
+   * @param label 
+   */
+  setLabel(label: string): this {
+    this.label = label
+    return this
   }
 
   /**

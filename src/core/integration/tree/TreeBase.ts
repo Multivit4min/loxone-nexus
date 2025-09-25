@@ -1,8 +1,8 @@
-export abstract class TreeBase<T extends {} = {}> {
+export abstract class TreeBase<T extends {} = any> {
 
   readonly props: TreeBaseProps & T
 
-  constructor(props: T, readonly parent?: TreeBase, defaults: Partial<TreeBaseProps & T> = {}) {
+  constructor(props: T, readonly parent?: TreeBase<any>, defaults: Partial<TreeBaseProps & T> = {}) {
     this.props = {
       label: "NO_LABEL_SET",
       comment: undefined,
@@ -15,7 +15,7 @@ export abstract class TreeBase<T extends {} = {}> {
     }
   }
 
-  getPath(path: string[] = [], node: TreeBase = this): string {
+  getPath(path: string[] = [], node: TreeBase<any> = this): string {
     path.unshift(node.props.label)
     if (!node.parent) return path.join(".")
     return node.getPath(path, node.parent)
