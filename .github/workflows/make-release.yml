@@ -11,14 +11,6 @@ on:
         description: "Release title"
         required: false
         type: string
-      changes:
-        description: "What changed? Paste your release notes/changelog (multiline allowed)"
-        required: true
-        type: string
-      target:
-        description: "Commitish to tag (branch, SHA). Defaults to the current commit."
-        required: false
-        type: string
       prerelease:
         description: "Mark as pre-release?"
         required: false
@@ -71,10 +63,6 @@ jobs:
           cp package.json package-lock.json README.md tsconfig.json ecosystem.config.js loxone-nexus/
           cp -r src drizzle loxone-nexus/
           cp -r frontend/dist/* loxone-nexus/public/
-          npx --yes drizzle-kit@0.31.4 push \
-            --url "file:loxone-nexus/clean.sqlite" \
-            --dialect sqlite \
-            --schema ./src/drizzle/schema/index.ts
           tar \
             --mtime='UTC 2020-01-01' \
             --owner=0 --group=0 \
@@ -86,8 +74,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAG: ${{ inputs.tag }}
           TITLE: ${{ inputs.title }}
-          NOTES: ${{ inputs.changes }}
-          TARGET: ${{ inputs.target }}
           PRERELEASE: ${{ inputs.prerelease }}
         run: |
           set -euo pipefail
@@ -97,7 +83,6 @@ jobs:
             gh release create "$TAG" \
               --target "$TARGET" \
               --title "${TITLE:-Manual release}" \
-              --notes "$NOTES" \
               "loxone-nexus.tar.gz" \
               "loxone-nexus.zip" \
               --prerelease
@@ -105,7 +90,6 @@ jobs:
             gh release create "$TAG" \
               --target "$TARGET" \
               --title "${TITLE:-Manual release}" \
-              --notes "$NOTES" \
               "loxone-nexus.tar.gz" \
               "loxone-nexus.zip"
           fi

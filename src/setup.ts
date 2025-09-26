@@ -86,13 +86,4 @@ export async function runSetup() {
   }
   dotenv.config({ path: envPath, override: true })
 
-  if (!fs.existsSync(databasePath)) {
-    logger.info("No Database found in data dir, trying to copy...")
-    if (!fs.existsSync(cleanDatabasePath)) {
-      throw new Error(`clean database not found`)
-    }
-    fs.copyFileSync(cleanDatabasePath, databasePath)
-    logger.info("copy successfull")
-  }
-
 }
