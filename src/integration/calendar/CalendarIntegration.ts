@@ -13,6 +13,7 @@ export class CalendarIntegration extends IntegrationInstance<
 > {
 
   data?: CalendarResponse
+  refreshInterval?: NodeJS.Timeout
 
   constructor(entity: IntegrationEntity, parent: IntegrationManager) {
     super(entity, parent, CalendarIntegration)
@@ -123,20 +124,38 @@ export class CalendarIntegration extends IntegrationInstance<
   }
 
   async start() {
-    await this.getCalendar()
+    this.refreshInterval = setInterval(() => {
+      this.fetchCalendar()
+    }, this.getRefreshInterval())
+    await this.fetchCalendar()
     await this.variables.reload()
   }
 
   async stop() {
-    
+    clearInterval(this.refreshInterval)
   }
 
-  async getCalendar() {
+  getRefreshInterval(interval = this.config.refetch): number {
+    let HOUR = 60 * 60 * 1000 //hourly interval as base
+    switch (interval) {
+      case "HOURLY": return HOUR
+      case "DAILY": return HOUR * 24
+      case "WEEKLY": return HOUR * 24 * 7
+      case "MONTHLY": return HOUR * 24 * 30
+      default:
+        this.logger.warn(`invalid refresh interval ${interval} using HOURLY instead`)
+        return this.getRefreshInterval("HOURLY")
+    }
+  }
+
+  async fetchCalendar() {
     const res = await fetch(this.config.url)
-    if (res.status !== 200) throw new Error(`received non 200 status code while fetching calendar at ${this.config.url}`)
+    if (res.status !== 200) {
+      this.logger.error(`failed to refresh calendar from ${this.config.url} got http status code ${res.status}`)
+      return
+    }
     const content = await res.text()
     this.data = ical.parseICS(content)
-    return this.data
   }
 
   async getInternalVariables() {
@@ -173,7 +192,7 @@ export class CalendarIntegration extends IntegrationInstance<
   static configSchema() {
     return z.object({
       url: z.url().describe("url of the calendar to fetch"),
-      refetch: z.enum(["HOURLY", "DAILY", "WEEKLY", "MONTHLY"]).describe("how often should the calendar be reloaded")
+      refetch: z.enum(["HOURLY", "DAILY", "WEEKLY", "MONTHLY"]).describe("how often should the calendar be reloaded (data will also reload on application restarts)")
     })
   }
 }
