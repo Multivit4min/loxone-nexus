@@ -57,17 +57,17 @@ You application now runs on Port **8000**, you can change this port by editing *
 - `SmartActuatorSingleChannel`
 
 
-## Integrations
+## Current Integrations
 
-### Home Assistant
+### 🏠 Home Assistant
 - Entity support: `string`, `number`, `boolean`  
 - Control: switch, light, button, counter, valve, lock, …  
 
-### Sonos
+### 🎵 Sonos
 - Notifications (MP3 from HTTP or SMB)  
 - Media control: play, pause, volume, next, previous  
 
-### Calendar
+### 📅 Calendar
 - Import calendar events directly from an iCal web source.
 - Control visibility of events via a Loxone variable (e.g. hide events once completed).
 
