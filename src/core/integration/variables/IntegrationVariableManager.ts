@@ -15,7 +15,7 @@ export class IntegrationVariableManager extends InstanceManager<IntegrationVaria
   }
 
   get logger() {
-    return this.parent.logger.child({ module: "IntegrationVariableManager" })
+    return this.parent.logger.child({}, { msgPrefix: "[VariableManager] "})
   }
 
   get services() {
