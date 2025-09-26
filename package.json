@@ -5,7 +5,7 @@
   "scripts": {
     "typecheck": "tsc --noEmit",
     "start": "tsx src/index.ts",
-    "test": "DATA_DIR=tests/data vitest --coverage"
+    "test": "vitest --run --coverage"
   },
   "author": "David Kartnaller",
   "license": "MIT",
