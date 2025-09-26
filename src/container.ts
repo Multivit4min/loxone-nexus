@@ -17,32 +17,55 @@ import { SonosIntegration } from "./integration/sonos/SonosIntegration"
 import { createDatabaseConnection, initDatabase } from "./drizzle"
 import { Exporter } from "./core/exporter/Exporter"
 import { CalendarIntegration } from "./integration/calendar/CalendarIntegration"
+import { AppService } from "./core/app/AppService"
 
-const db = createDatabaseConnection()
-
-export type ServiceContainer = typeof services 
-export type RepositoryContainer = typeof repositories
-
-export const repositories = {
-  integration: new IntegrationRepository(db),
-  user: new UserRepository(db),
-  loxone: new LoxoneRepository(db),
-  loxoneVariables: new LoxoneVariableRepository(db),
-  integrationVariable: new IntegrationVariableRepository(db),
-  linkRepository: new LinkRepository(db)
+export type ServiceContainer = {
+  authService: AuthService
+  userService: UserService
+  socketManager: SocketManager
+  integrationManager: IntegrationManager
+  loxoneManager: LoxoneManager
+  linkService: LinkManager
+  exporter: Exporter
+  appService: AppService
 }
 
-export const services = {
-  authService: new AuthService(repositories),
-  userService: new UserService(repositories),
-  socketManager: new SocketManager(),
-  integrationManager: new IntegrationManager(repositories),
-  loxoneManager: new LoxoneManager(repositories),
-  linkService: new LinkManager(repositories),
-  exporter: new Exporter(repositories)
+export type RepositoryContainer = {
+  integration: IntegrationRepository
+  user: UserRepository
+  loxone: LoxoneRepository
+  loxoneVariables: LoxoneVariableRepository
+  integrationVariable: IntegrationVariableRepository
+  linkRepository: LinkRepository
 }
 
-export async function setupContainers() {
+export let repositories: RepositoryContainer
+export let services: ServiceContainer
+
+export async function setupContainers(appService: AppService) {
+
+  const db = createDatabaseConnection()
+
+  repositories = {
+    integration: new IntegrationRepository(db),
+    user: new UserRepository(db),
+    loxone: new LoxoneRepository(db),
+    loxoneVariables: new LoxoneVariableRepository(db),
+    integrationVariable: new IntegrationVariableRepository(db),
+    linkRepository: new LinkRepository(db)
+  }
+
+  services = {
+    authService: new AuthService(repositories),
+    userService: new UserService(repositories),
+    socketManager: new SocketManager(),
+    integrationManager: new IntegrationManager(repositories),
+    loxoneManager: new LoxoneManager(repositories),
+    linkService: new LinkManager(repositories),
+    exporter: new Exporter(repositories),
+    appService
+  }
+
   await initDatabase()
   await services.userService.init(services)
   const { count } = await repositories.user.count()
@@ -63,7 +86,11 @@ export async function setupContainers() {
   return {
     async stop() {
       await Promise.all(Object.values(services).map(service => {
-        if ("stop" in service && typeof service.stop === "function") return service.stop()
+        if (
+          "stop" in service &&
+          typeof service.stop === "function" &&
+          !(service instanceof AppService)
+        ) return service.stop()
         return null
       }))
     }

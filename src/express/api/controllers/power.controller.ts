@@ -1,10 +1,10 @@
 import { Request, Response } from "express"
-import { appService } from "../../.."
+import { services } from "../../../container"
 
 export const powerController = {
 
   async restart(req: Request, res: Response) {
-    process.nextTick(() => appService.restart())
+    process.nextTick(() => services.appService.restart())
     res.sendStatus(200)
   }
 

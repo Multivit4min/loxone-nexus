@@ -20,7 +20,6 @@ export abstract class IntegrationInstance<T extends object> extends Instance<Int
     super(entity, parent)
     this.variables = new IntegrationVariableManager(this, varConstructor)
     this.logger = logger.child({ id: this.entity.id }, { msgPrefix: "[Integration] " })
-    this.variables.init()
   }
 
   get services() {

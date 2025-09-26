@@ -1,4 +1,6 @@
 import { runSetup } from "../../setup"
+import { setupContainers } from "../../container"
+import { setupExpress } from "../../express"
 
 export class AppService {
 
@@ -9,10 +11,8 @@ export class AppService {
    */
   async start() {
     this.stopHandler = new Promise<() => Promise<void>>(async (fulfill) => {
-      runSetup() //init functions
-      const { setupContainers } = require("../../container")
-      const { setupExpress } = require("../../express")
-      const { stop: stopServices } = await setupContainers()
+      runSetup()
+      const { stop: stopServices } = await setupContainers(this)
       const { close: closeExpress } = await setupExpress()
 
       //stop handler

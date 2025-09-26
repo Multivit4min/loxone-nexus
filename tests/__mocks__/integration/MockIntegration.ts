@@ -32,6 +32,10 @@ export class MockIntegration extends IntegrationInstance<{}> {
     return null
   }
 
+  async tree() {
+    return []
+  }
+
   static createIntegrationVariable(v: IntegrationVariableEntity, parent: IntegrationVariableManager) {
     return new IntegrationVariable(v, parent)
   }

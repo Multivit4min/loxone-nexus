@@ -1,5 +1,4 @@
 import { join } from "path"
-import { dataDir } from "../setup"
 import { drizzle } from 'drizzle-orm/libsql'
 import { migrate } from "drizzle-orm/libsql/migrator"
 import * as schema from "./schema"
@@ -10,12 +9,12 @@ export let db: DrizzleDatabaseType
 let client: Client
 
 export const createDatabaseConnection = () => {
-  client = createClient({
-    url: `file:${join(dataDir, "database.sqlite")}`
-  })
+  const url = process.env.DATABASE_PATH
+  const defaultUrl = `file:${join(process.cwd(), "data", "database.sqlite")}`
+  client = createClient({ url: url ?? defaultUrl })
   db = drizzle(client, { schema })
-  return db
-}
+  return db;
+};
 
 export const initDatabase = async () => {
   if (!db) createDatabaseConnection()
