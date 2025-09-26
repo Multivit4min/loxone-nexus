@@ -3,20 +3,50 @@ import { join } from "path"
 import { randomBytes } from "crypto"
 import dotenv from "dotenv"
 import { logger } from "./logger/pino"
+import { NetworkInterfaceInfo, networkInterfaces } from "os"
 
-  //base configuration directory
+//base configuration directory
 export const dataDir = join(__dirname, "..", "data")
 export const envPath = join(dataDir, ".env")
 export const databasePath = join(dataDir, "database.sqlite")
 export const cleanDatabasePath = join(dataDir, "..", "clean.sqlite")
 
+const localAddress = ((fallback = "127.0.0.1") => {
+  const ifaces = networkInterfaces()
+  const config: NetworkInterfaceInfo[] = []
+  Object.values(ifaces).forEach(iface => iface ? config.push(...iface) : undefined)
+  const iface = config
+    .filter(({ internal }) => !internal)
+    .sort((a, b) => (a.family === "IPv4" ? 1 : -1) - (b.family === "IPv4" ? -1 : 1))[0]
+  return iface ? iface.address : fallback 
+})()
+
 //default environment variables
 const environment = {
-  CONFIG_VERSION: 1,
-  LISTEN_PORT: 8000,
-  ICI_START_PORT: 61263,
-  SECRET: randomBytes(32).toString("hex"),
-  TZ: "Europe/Vienna"
+  APP_NAME: {
+    value: "loxone-nexus",
+    comment: "https://github.com/Multivit4min/loxone-nexus"
+  },
+  LISTEN_PORT: {
+    value: 8000,
+    comment: "Web Server Listen Port"
+  },
+  SECRET: {
+    value: randomBytes(32).toString("hex"),
+    comment: "Secret which is being used for json web token"
+  },
+  TZ: {
+    value: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    comment: "For a list of timezones refer to https://en.wikipedia.org/wiki/List_of_tz_database_time_zones"
+  },
+  LOCAL_ADDRESS: {
+    value: localAddress,
+    comment: "local address which is being used to display in frontend as connection information"
+  },
+  VITE_PROXY: {
+    value: "",
+    comment: "development proxy to frontend"
+  }
 }
 
 export async function runSetup() {
@@ -40,20 +70,18 @@ export async function runSetup() {
   //create .env file if it does not exist
   if (!fs.existsSync(envPath)) {
     const defaultEnvironment = Object.keys(environment).map((key) => { //create config
-      const value = environment[key as keyof typeof environment]
-      return `${key}=${value}`
+      const { value, comment } = environment[key as keyof typeof environment]
+      return `${key}=${value} #${comment}`
     }).join("\n")
     logger.info(`Creating default .env file at ${envPath}`)
     fs.writeFileSync(envPath, defaultEnvironment, "utf8")
-  } else if (parseInt(process.env.CONFIG_VERSION || "0") < environment.CONFIG_VERSION) { //update config
-    const updatedEnv: any = { ...environment }
+  } else { //update config
+    const env: any = { ...environment }
     Object.keys(environment).forEach((key) => {
       if (!(key in process.env)) return
-      updatedEnv[key!] = process.env[key]
+      env[key!].value = process.env[key]
     })
-    updatedEnv.CONFIG_VERSION = environment.CONFIG_VERSION
-    logger.info(`Updating .env file at ${envPath}`)
-    fs.writeFileSync(envPath, Object.keys(updatedEnv).map((k: any) => `${k}=${updatedEnv[k]}`).join("\n"), "utf8")
+    fs.writeFileSync(envPath, Object.keys(env).map((k: any) => `${k}=${env[k].value} #${env[k].comment}`).join("\n"), "utf8")
 
   }
   dotenv.config({ path: envPath, override: true })

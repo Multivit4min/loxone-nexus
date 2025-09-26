@@ -14,8 +14,9 @@ import { LinkManager } from "./core/link/LinkManager"
 import { logger } from "./logger/pino"
 import { setupStore } from "./express/api/controllers/setup.controller"
 import { SonosIntegration } from "./integration/sonos/SonosIntegration"
-import { createDatabaseConnection } from "./drizzle"
+import { createDatabaseConnection, initDatabase } from "./drizzle"
 import { Exporter } from "./core/exporter/Exporter"
+import { CalendarIntegration } from "./integration/calendar/CalendarIntegration"
 
 const db = createDatabaseConnection()
 
@@ -42,6 +43,7 @@ export const services = {
 }
 
 export async function setupContainers() {
+  await initDatabase()
   await services.userService.init(services)
   const { count } = await repositories.user.count()
   if (count === 0) {
@@ -53,6 +55,7 @@ export async function setupContainers() {
   await services.integrationManager
     .register("HomeAssistant", HomeAssistantIntegration)
     .register("Sonos", SonosIntegration)
+    .register("Calendar", CalendarIntegration)
     .init(services)
   await services.loxoneManager.init(services)
   await services.linkService.init(services)

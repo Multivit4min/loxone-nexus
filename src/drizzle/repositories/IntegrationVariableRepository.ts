@@ -13,6 +13,7 @@ export type CreateIntegrationVariableProps = {
   direction: "INPUT"|"OUTPUT"
   value?: SerializedDataType|null
   config: any
+  store?: Record<string, any>
 }
 
 export class IntegrationVariableRepository {

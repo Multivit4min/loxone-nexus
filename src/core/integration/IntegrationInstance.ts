@@ -7,7 +7,6 @@ import { Instance } from "../instance/Instance"
 import { ActionBuilder } from "./io/ActionBuilder"
 import { IntegrationEntity } from "../../drizzle/schema"
 import { InputBuilder } from "./io/InputBuilder"
-import { TreeProps } from "./tree/tree"
 
 
 export abstract class IntegrationInstance<T extends object> extends Instance<IntegrationEntity> {

@@ -22,6 +22,10 @@ export class IntegrationVariable<T extends { action: string } = any> extends Ins
     this.logger = this.parent.logger.child({}, { msgPrefix: "[IntegrationVariable] " })
   }
 
+  /**
+   * updates the whole variable entity
+   * @param props partial entity data
+   */
   async update(props: Partial<UpdateIntegrationVariableProps>) {
     this.entity = await this.repositories.integrationVariable.update({
       ...props,
@@ -31,6 +35,13 @@ export class IntegrationVariable<T extends { action: string } = any> extends Ins
     this.services.socketManager.sendIntegrationVariable(this)
   }
 
+  /**
+   * reloads the variable by
+   * - stopping it
+   * - load new entity from database
+   * - start again
+   * - send data via socketmanager
+   */
   async reload() {
     await this.stop()
     const entity = await this.repositories.integrationVariable.findById(this.id)
@@ -42,6 +53,12 @@ export class IntegrationVariable<T extends { action: string } = any> extends Ins
     return this
   }
 
+  /**
+   * starts handling the variable
+   * if its an output this does not do anything
+   * if its an input this will register the input handler
+   * @returns 
+   */
   async start() {
     if (this.isOutput) return
     try {
@@ -53,6 +70,11 @@ export class IntegrationVariable<T extends { action: string } = any> extends Ins
     }
   }
 
+  /**
+   * stops the handling of the variable
+   * if its an output this does not do anything
+   * if its an input this will unregister from the input handler
+   */
   async stop() {
     if (this.isOutput) return
     if (!this.unregister) return
@@ -63,10 +85,12 @@ export class IntegrationVariable<T extends { action: string } = any> extends Ins
     }
   }
   
+  /** retrieve variable configuration */
   get config() {
     return this.entity.config as T
   }
 
+  /** retrieve variable value */
   get value(): SerializedDataType {
     return this.entity.value ? this.entity.value : { type: "null", value: null }
   }
@@ -81,14 +105,21 @@ export class IntegrationVariable<T extends { action: string } = any> extends Ins
     return this.entity.direction === "OUTPUT"
   }
 
+  /** retrieves the service container */
   get services() {
     return this.parent.services
   }
 
+  /** retrieves the repository container */
   get repositories() {
     return this.parent.repositories
   }
 
+  /**
+   * updates the value of the entity
+   * @param value new value to set
+   * @returns 
+   */
   async updateValue(value: VariableDataTypes|null) {
     this.entity.value = VariableConverter.SerializeDataType(value)
     await this.repositories.integrationVariable.update({
@@ -96,16 +127,52 @@ export class IntegrationVariable<T extends { action: string } = any> extends Ins
       value: this.entity.value
     })
     if (this.isInput) this.services.linkService.sendIntegrationInput(this)
-    if (this.isOutput) this.sendValue()
+    if (this.isOutput && this.value.value !== null) this.parent.actions.execute(this)
     this.services.socketManager.sendIntegrationVariable(this)
     return this
   }
 
-  async sendValue() {
-    if ( this.value.value === null) return
-    this.parent.actions.execute(this)
+  /**
+   * updates store data without reloading the entity
+   * @param store 
+   */
+  async updateStore(store: Record<string, any>) {    
+    this.entity = await this.repositories.integrationVariable.update({
+      id: this.id,
+      store
+    }) as any
+    this.services.socketManager.sendIntegrationVariable(this)
   }
 
+  /**
+   * retrieves a stored key
+   * this can be used to save persistent data
+   * @param key the key to retrieve
+   * @param fallback fallback data to initialize
+   * @returns 
+   */
+  getStoreProperty<T extends any>(key: string, fallback?: T): T {
+    if (!this.entity.store[key]) this.entity.store[key] = fallback
+    return this.entity.store[key]
+  }
+
+  /**
+   * sets the store key to the specified value
+   * this can be used to save persistent data
+   * @param key the key to store data to
+   * @param value the value to save
+   * @returns 
+   */
+  async setStoreProperty<T extends any>(key: string, value: T): Promise<T> {
+    this.entity.store[key] = value
+    await this.updateStore(this.entity.store)
+    return this.entity.store[key]
+  }
+
+  /**
+   * prepares data to be serialized with JSON.stringify()
+   * @returns 
+   */
   serialize() {
     return {
       ...this.entity,

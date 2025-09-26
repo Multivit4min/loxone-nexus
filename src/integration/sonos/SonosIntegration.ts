@@ -207,8 +207,3 @@ export class SonosIntegration extends IntegrationInstance<
     })
   }
 }
-
-export type HomeAssistantDataSourceConfig = {
-  ws: string
-  token: string
-}

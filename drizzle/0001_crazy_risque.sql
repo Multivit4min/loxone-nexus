@@ -1,0 +1,1 @@
+ALTER TABLE `integration_variable` ADD `store` text DEFAULT '{}';

@@ -15,6 +15,7 @@ export const integrationVariables = sqliteTable("integration_variable", {
   direction: text("direction", { enum: ["OUTPUT", "INPUT"] }).notNull(),
   value: text("value", { mode: "json" }).$type<SerializedDataType>().default({ type: "null", value: null }),
   config: text("config", { mode: "json" }).notNull(),
+  store: text("store", { mode: "json" }).$type<Record<string, any>>().default({}).notNull()
 })
 
 export const integrationVariableRelations = relations(integrationVariables, ({ one, many }) => ({

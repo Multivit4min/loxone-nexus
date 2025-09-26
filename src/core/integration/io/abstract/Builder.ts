@@ -26,6 +26,7 @@ export abstract class Builder<T extends Entry> {
   }
 
   get schema() {
+    if (Object.keys(this.entries).length === 0) return z.object({})
     const [schema, ...schemas] = Object.values(this.entries).map(e => e.zodSchema)
     return z.discriminatedUnion("action", [schema, ...schemas])
   }

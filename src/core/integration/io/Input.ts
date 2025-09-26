@@ -1,8 +1,6 @@
 import z from "zod"
 import { CompiledSchema, Entry } from "./abstract/Entry"
 import { IntegrationVariable } from "../variables/IntegrationVariable"
-import { SerializedDataType } from "../../conversion/SerializedDataType"
-import { VariableConverter } from "../../conversion/VariableConverter"
 
 export type CallbackProps<S extends z.ZodRawShape> = {
   variable: IntegrationVariable
@@ -15,7 +13,7 @@ export type CurrentValueCallback<S extends z.ZodRawShape, R = any> = (props: Cal
 
 export class Input<T extends string = any, S extends z.ZodRawShape = {}> extends Entry<T, S> {
   
-  private currentValueCallback?: CurrentValueCallback<S, Promise<SerializedDataType>>
+  private currentValueCallback?: CurrentValueCallback<S, Promise<any>>
   private callback: RegisterCallback<S> = () => {
     this.parent.logger.warn("no callback defined")
     return () => {}
@@ -29,7 +27,7 @@ export class Input<T extends string = any, S extends z.ZodRawShape = {}> extends
 
   currentValue(currentValueCallback: CurrentValueCallback<S, any>) {
     this.currentValueCallback = async (props: CallbackProps<S>) => {
-      return VariableConverter.SerializeDataType(await currentValueCallback(props))
+      return await currentValueCallback(props)
     }
     return this
   }
@@ -49,9 +47,9 @@ export class Input<T extends string = any, S extends z.ZodRawShape = {}> extends
           return this.currentValueCallback(props)
         }
       }
-      let value = variable.value
+      let value = variable.value.value
       if (this.currentValueCallback) value = await this.currentValueCallback(props)
-      variable.updateValue(value.value)
+      variable.updateValue(value)
       return await this.callback(props)
     } catch (e) {
       this.parent.logger.warn(e, `failed to register handler for ${String(this.id)}`)
