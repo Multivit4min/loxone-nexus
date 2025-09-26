@@ -15,7 +15,10 @@ describe("E2E Test", () => {
     await app.stop()
   })
 
-  it("should test runtime", async () => {
-    expect(true).toBe(true)
+  it("should test if setup is enabled", async () => {
+    const res = await fetch("http://localhost:8000/api")
+    expect(res.status).toBe(200)
+    const data = await res.json()
+    expect(data.setup).toBe(true)
   })
 })
