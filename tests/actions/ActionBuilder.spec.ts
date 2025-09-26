@@ -17,7 +17,7 @@ describe("ActionBuilder", () => {
       }),
       { logger } as any
     )
-  }, 500)
+  })
 
 
   it("should retrieve the correct action instance", async () => {
@@ -27,7 +27,7 @@ describe("ActionBuilder", () => {
     expect(builder.entries["test"]).toBe(test)
     expect(builder.entries["foo"]).toBe(foo)
     expect(builder.entries["bar"]).toBe(bar)
-  }, 500)
+  })
   
   it("should call the correct action", async () => {
     let called = false
@@ -37,5 +37,5 @@ describe("ActionBuilder", () => {
     await builder.execute(variable as any)
     expect(spy).toHaveBeenCalledOnce()
     expect(called).toBe(true)
-  }, 500)
+  })
 })

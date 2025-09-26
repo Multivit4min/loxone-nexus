@@ -14,15 +14,15 @@ export class VariableConverter {
     number: () => 0,
     boolean: () => false,
     smartActuatorSingleChannel: ({ channel, fadeTime}: Partial<SmartActuatorSingleChannelType> = {}): SmartActuatorSingleChannelType => ({
-      channel: channel !== undefined ? channel : 0,
-      fadeTime: fadeTime !== undefined ? fadeTime : 2
+      channel: VariableConverter.getMinMaxValue({ value: channel, min: 0, max: 100 }),
+      fadeTime: VariableConverter.getMinMaxValue({ value: fadeTime, min: 0, fallback: 2 })
     }),
     smartActuatorRGBW: ({ red, green, blue, white, fadeTime, bits }: Partial<SmartActuatorRGBWType> = {}): SmartActuatorRGBWType => ({
-      red: red || 0,
-      green: green || 0,
-      blue: blue || 0,
-      white: white || 0,
-      fadeTime: fadeTime || 2,
+      red: VariableConverter.getMinMaxValue({ value: red, min: 0, max: 100 }),
+      green: VariableConverter.getMinMaxValue({ value: green, min: 0, max: 100 }),
+      blue: VariableConverter.getMinMaxValue({ value: blue, min: 0, max: 100 }),
+      white: VariableConverter.getMinMaxValue({ value: white, min: 0, max: 100 }),
+      fadeTime: VariableConverter.getMinMaxValue({ value: fadeTime, min: 0, fallback: 2 }),
       bits: bits || 0
     })
   }
@@ -78,11 +78,11 @@ export class VariableConverter {
     null: () => this.defaults.string(),
     SmartActuatorSingleChannel: ({ value }) => `${value.channel}% ${value.fadeTime}s`,
     SmartActuatorRGBW: ({ value }) => {
-      const r = VariableConverter.getHexValue(value.red)
-      const g = VariableConverter.getHexValue(value.green)
-      const b = VariableConverter.getHexValue(value.blue)
-      const w = VariableConverter.getHexValue(value.white)
-      return `#${r}${g}${b}${w} fade: ${value.fadeTime}`
+      const r = VariableConverter.getHexValue(value.red, 0, 100)
+      const g = VariableConverter.getHexValue(value.green, 0, 100)
+      const b = VariableConverter.getHexValue(value.blue, 0, 100)
+      const w = VariableConverter.getHexValue(value.white, 0, 100)
+      return `#${r}${g}${b}${w} ${value.fadeTime}s`
     }
   }
 
@@ -98,11 +98,11 @@ export class VariableConverter {
     null: () => this.defaults.number(),
     SmartActuatorSingleChannel: ({ value }) => value.channel,
     SmartActuatorRGBW: ({ value }) => {
-      const r = VariableConverter.getHexValue(value.red)
-      const g = VariableConverter.getHexValue(value.green)
-      const b = VariableConverter.getHexValue(value.blue)
-      const w = VariableConverter.getHexValue(value.white)
-      return parseInt(`${r}${g}${b}${w}`, 16)
+      const r = VariableConverter.getHexValue(value.red, 0, 100)
+      const g = VariableConverter.getHexValue(value.green, 0, 100)
+      const b = VariableConverter.getHexValue(value.blue, 0, 100)
+      const w = VariableConverter.getHexValue(value.white, 0, 100)
+      return Math.floor(parseInt(`${r}${g}${b}${w}`, 16))
     }
   }
 
@@ -142,7 +142,7 @@ export class VariableConverter {
     null: () => this.defaults.smartActuatorSingleChannel(),
     SmartActuatorSingleChannel: ({ value }) => value,
     SmartActuatorRGBW: ({ value }) => ({
-      channel: (value.red + value.green + value.blue + value.white) / 5,
+      channel: Math.floor((value.red + value.green + value.blue + value.white) / 4),
       fadeTime: value.fadeTime
     })
   }
@@ -192,7 +192,34 @@ export class VariableConverter {
     }
   }
 
-  static getHexValue(n: number, padLen: number = 2) {
-    return Math.max(0, Math.min(255, n)).toString(16).padStart(padLen, "0")
+  static getHexValue(n: number, fromMin = 0, fromMax = 255) {
+    const value = VariableConverter.scaleNumber(n, fromMin, fromMax, 0, 255)
+    return Math.floor(Math.max(0, Math.min(255, value))).toString(16).padStart(2, "0")
   }
+
+  /**
+   * scales a number from a specified scale
+   * @param value number to scale
+   * @param min start minimum number
+   * @param max end maximum number
+   * @param toMin new start of the number
+   * @param toMax new end of the number
+   */
+  static scaleNumber(value: number, min: number, max: number, toMin: number, toMax: number) {
+    return ((value - min) * (toMax - toMin)) / (max - min) + toMin
+  }
+
+  static getMinMaxValue({ value, fallback, min, max }: MinMaxValueProps) {
+    if (value === undefined) return fallback || 0
+    if (min !== undefined && value < min) return min
+    if (max !== undefined && value > max) return max
+    return value || 0
+  }
+}
+
+export type MinMaxValueProps = {
+  value?: number
+  min?: number
+  max?: number
+  fallback?: number
 }
