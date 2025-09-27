@@ -4,7 +4,7 @@ import { stringToNumber } from "./stringToNumber"
 import { DATA_TYPE } from "loxone-ici"
 
 type Handlers<R> = {
-  [K in SerializedDataType["type"]]: (data: Extract<SerializedDataType, { type: K }>) => R
+  [K in SerializedDataType["type"]]: (data: Extract<SerializedDataType, { type: K }>, defaults: R) => R
 }
 
 export class VariableConverter {
@@ -46,7 +46,7 @@ export class VariableConverter {
 
   private safeConvert<T = any>(handler: Handlers<T>, fallback: T) {
     try {
-      return handler[this.type](this.valueType as any)
+      return handler[this.type](this.valueType as any, fallback)
     } catch (e) {
       return fallback
     }
@@ -67,17 +67,17 @@ export class VariableConverter {
   }
 
   /** converts the datatype into a string */
-  toString(): string {
-    return this.safeConvert(this.toStringHandler, "")
+  toString(defaults: string = ""): string {
+    return this.safeConvert(this.toStringHandler, defaults)
   }
 
   private toStringHandler: Handlers<string> = {
-    number: ({ value }) => String(value),
-    boolean: ({ value }) => String(value),
-    string: ({ value }) => value,
-    null: () => this.defaults.string(),
-    SmartActuatorSingleChannel: ({ value }) => `${value.channel}% ${value.fadeTime}s`,
-    SmartActuatorRGBW: ({ value }) => {
+    number: ({ value }, defaults) => String(value),
+    boolean: ({ value }, defaults) => String(value),
+    string: ({ value }, defaults) => value,
+    null: (_, defaults) => defaults,
+    SmartActuatorSingleChannel: ({ value }, defaults) => `${value.channel}% ${value.fadeTime}s`,
+    SmartActuatorRGBW: ({ value }, defaults) => {
       const r = VariableConverter.getHexValue(value.red, 0, 100)
       const g = VariableConverter.getHexValue(value.green, 0, 100)
       const b = VariableConverter.getHexValue(value.blue, 0, 100)
@@ -87,17 +87,17 @@ export class VariableConverter {
   }
 
   /** converts the datatype into a number */
-  toNumber(): number {
-    return this.safeConvert(this.toNumberHandler, 0)
+  toNumber(defaults: number = 0): number {
+    return this.safeConvert(this.toNumberHandler, defaults)
   }
 
   private toNumberHandler: Handlers<number> = {
-    number: ({ value }) => value,
-    boolean: ({ value }) => value ? 1 : 0,
+    number: ({ value }, defaults) => value,
+    boolean: ({ value }, defaults) => value ? 1 : 0,
     string: ({ value }) => stringToNumber(value),
-    null: () => this.defaults.number(),
-    SmartActuatorSingleChannel: ({ value }) => value.channel,
-    SmartActuatorRGBW: ({ value }) => {
+    null: (_, defaults) => defaults,
+    SmartActuatorSingleChannel: ({ value }, defaults) => value.channel,
+    SmartActuatorRGBW: ({ value }, defaults) => {
       const r = VariableConverter.getHexValue(value.red, 0, 100)
       const g = VariableConverter.getHexValue(value.green, 0, 100)
       const b = VariableConverter.getHexValue(value.blue, 0, 100)
@@ -107,14 +107,14 @@ export class VariableConverter {
   }
 
   /** converts the datatype into a boolean */
-  toBoolean(): boolean {
-    return this.safeConvert(this.toBooleanHandler, false)
+  toBoolean(defaults: boolean = false): boolean {
+    return this.safeConvert(this.toBooleanHandler, defaults)
   }
 
   private toBooleanHandler: Handlers<boolean> = {
-    number: ({ value }) => value !== 0 && !Number.isNaN(value),
-    boolean: ({ value }) => value,
-    string: ({ value }) => [
+    number: ({ value }, defaults) => value !== 0 && !Number.isNaN(value),
+    boolean: ({ value }, defaults) => value,
+    string: ({ value }, defaults) => [
       "on", "true", "1", "ok", "active",
       "open", "opening",
       "unlocked", "unlocking",
@@ -125,39 +125,39 @@ export class VariableConverter {
       "above_horizon",
       "cleaning", "returning"
     ].includes(value.toLowerCase().trim()),
-    null: () => this.defaults.boolean(),
-    SmartActuatorSingleChannel: ({ value }) => value.channel !== 0,
-    SmartActuatorRGBW: ({ value }) => (value.red + value.green + value.blue + value.white) !== 0
+    null: (_, defaults) => defaults,
+    SmartActuatorSingleChannel: ({ value }, defaults) => value.channel !== 0,
+    SmartActuatorRGBW: ({ value }, defaults) => (value.red + value.green + value.blue + value.white) !== 0
   }
 
   /** converts any datatype into a SmartActuatorSingleChannelType */
-  toSmartActuatorSingleChannel(): SmartActuatorSingleChannelType {
-    return this.safeConvert(this.toSmartActuatorSingleChannelHandler, { channel: 0, fadeTime: 2 })
+  toSmartActuatorSingleChannel(defaults: Partial<SmartActuatorSingleChannelType> = {}): SmartActuatorSingleChannelType {
+    return this.safeConvert(this.toSmartActuatorSingleChannelHandler, { channel: 0, fadeTime: 2, ...defaults })
   }
 
   private toSmartActuatorSingleChannelHandler: Handlers<SmartActuatorSingleChannelType> = {
-    number: ({ value }) => this.defaults.smartActuatorSingleChannel({ channel: value }),
-    boolean: ({ value }) => this.defaults.smartActuatorSingleChannel({ channel: value ? 100 : 0 }),
-    string: ({ value }) => this.defaults.smartActuatorSingleChannel({ channel: stringToNumber(value) }),
-    null: () => this.defaults.smartActuatorSingleChannel(),
-    SmartActuatorSingleChannel: ({ value }) => value,
-    SmartActuatorRGBW: ({ value }) => ({
+    number: ({ value }, defaults) => this.defaults.smartActuatorSingleChannel({ ...defaults, channel: value }),
+    boolean: ({ value }, defaults) => this.defaults.smartActuatorSingleChannel({ ...defaults, channel: value ? 100 : 0 }),
+    string: ({ value }, defaults) => this.defaults.smartActuatorSingleChannel({ ...defaults, channel: stringToNumber(value) }),
+    null: (_, defaults) => defaults,
+    SmartActuatorSingleChannel: ({ value }, defaults) => value,
+    SmartActuatorRGBW: ({ value }, defaults) => ({
       channel: Math.floor((value.red + value.green + value.blue + value.white) / 4),
       fadeTime: value.fadeTime
     })
   }
 
   /** converts any datatype into a SmartActuatorSingleChannelType */
-  toSmartActuatorRGBW(): SmartActuatorRGBWType {
-    return this.safeConvert(this.toSmartActuatorRGBWHandler, { red: 0, green: 0, blue: 0, white: 0, fadeTime: 2, bits: 0 })
+  toSmartActuatorRGBW(defaults: Partial<SmartActuatorRGBWType> = {}): SmartActuatorRGBWType {
+    return this.safeConvert(this.toSmartActuatorRGBWHandler, { red: 0, green: 0, blue: 0, white: 0, fadeTime: 2, bits: 0, ...defaults })
   }
 
   private toSmartActuatorRGBWHandler: Handlers<SmartActuatorRGBWType> = {
-    number: ({ value }) => this.defaults.smartActuatorRGBW({ white: value }),
-    boolean: ({ value }) => this.defaults.smartActuatorRGBW({ white: value ? 100 : 0 }),
-    string: ({ value }) => this.defaults.smartActuatorRGBW({ white: stringToNumber(value) }),
-    null: () => this.defaults.smartActuatorRGBW(),
-    SmartActuatorSingleChannel: ({ value }) => this.defaults.smartActuatorRGBW({ white: value.channel, fadeTime: value.fadeTime }),
+    number: ({ value }, defaults) => this.defaults.smartActuatorRGBW({ ...defaults, white: value }),
+    boolean: ({ value }, defaults) => this.defaults.smartActuatorRGBW({ ...defaults, white: value ? 100 : 0 }),
+    string: ({ value }, defaults) => this.defaults.smartActuatorRGBW({ ...defaults, white: stringToNumber(value) }),
+    null: (_, defaults) => this.defaults.smartActuatorRGBW(defaults),
+    SmartActuatorSingleChannel: ({ value }, defaults) => this.defaults.smartActuatorRGBW({ ...defaults, white: value.channel, fadeTime: value.fadeTime }),
     SmartActuatorRGBW: ({ value }) => value
   }
 

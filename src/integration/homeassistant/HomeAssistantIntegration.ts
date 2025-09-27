@@ -65,19 +65,38 @@ export class HomeAssistantIntegration extends IntegrationInstance<
       })
       .execute(async ({ value, config }) => {
         if (!this.ha) return
-        const sma = value.toSmartActuatorSingleChannel()
+        const sma = value.toSmartActuatorSingleChannel({ fadeTime: config.fadeTime })
         let transition = sma.fadeTime
-        if (value.type !== "SmartActuatorSingleChannel" && config.fadeTime !== undefined) {
-          transition = config.fadeTime
-        }
         const serviceData: Record<string, any> = { entity_id: config.entityId, transition }
-        const service = sma.channel > 0 ? "turn_on" : "turn_off"
-        if (service === "turn_on") {
-          serviceData.brightness = Math.round(sma.channel * 2.55)
-          if (serviceData.brightness < 0) serviceData.brightness = 0
-          if (serviceData.brightness > 255) serviceData.brightness = 255
-        }
+        const service = value.toBoolean() ? "turn_on" : "turn_off"
+        if (service === "turn_on") serviceData.brightness = Math.round(sma.channel * 2.55)
         return this.ha.callService({ domain: "light", service, service_data: serviceData })
+      })
+    this.actions.create("light.rgbw")
+      .describe("sets the rgba color of the light")
+      .schema({
+        entityId: z.string().min(1),
+        red: z.number().min(0).max(100).describe("red color (0 to 100%)").optional(),
+        green: z.number().min(0).max(100).describe("green color (0 to 100%)").optional(),
+        blue: z.number().min(0).max(100).describe("blue color (0 to 100%)").optional(),
+        white: z.number().min(0).max(100).describe("white color (0 to 100%)").optional(),
+        fadeTime: z.number().min(0).describe("fade time in seconds").optional()
+      })
+      .execute(async ({ value, config }) => {
+        if (!this.ha) return
+        const rgbw = value.toSmartActuatorRGBW({ red: config.red, green: config.green, blue: config.blue, white: config.white, fadeTime: config.fadeTime })
+        let transition = rgbw.fadeTime
+        const serviceData: Record<string, any> = { entity_id: config.entityId, transition }
+        const service = value.toBoolean() ? "turn_on" : "turn_off"
+        if (service === "turn_on") {
+          serviceData.rgbw_color = [
+            Math.floor(rgbw.red * 2.55),
+            Math.floor(rgbw.green * 2.55),
+            Math.floor(rgbw.blue * 2.55),
+            Math.floor(rgbw.white * 2.55)
+          ]
+        }
+        await this.ha.callService({ domain: "light", service, service_data: serviceData})
       })
     this.actions.create("light.set")
       .describe("sets the brightness of a light in % (0 = off)")
