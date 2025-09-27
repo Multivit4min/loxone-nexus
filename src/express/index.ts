@@ -22,9 +22,8 @@ export async function setupExpress() {
   })
 
   const app = express()
+  app.set("trust proxy", true)
   const server = http.createServer(app)
-
-
   
   const sockets = new Set<Socket>()
   server.on("connection", socket => {
@@ -32,9 +31,7 @@ export async function setupExpress() {
     socket.on("close", () => sockets.delete(socket))
   })
 
-
   const { close: closeWSS } = createSocketServer(server)
-
 
   app.use(bodyParser.json())
   app.use(bodyParser.urlencoded({ extended: false }))
@@ -44,18 +41,15 @@ export async function setupExpress() {
     const TIMEOUT = 5000 //max expected request duration
     const start = process.hrtime.bigint()
     const id = String(start)
-
     timeouts[id] = setTimeout(() => {
       req.log.debug(`${req.method} ${req.url} takes longer than expected...`)
     }, TIMEOUT)
-
     res.on("finish", () => {
       clearTimeout(timeouts[id])
       delete timeouts[id]
       const durationMs = Number(process.hrtime.bigint() - start) / 1e6;
       req.log.debug(`${req.method} ${req.url}: Code ${res.statusCode} in ${durationMs.toFixed(2)}ms`)
     })
-
     next()
   })
   app.use("/api", apiRouter)

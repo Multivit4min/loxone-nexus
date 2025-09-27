@@ -3,6 +3,7 @@ import { authController } from "../controllers/auth.controller"
 import rateLimit from "express-rate-limit"
 
 const limiter = rateLimit({
+	validate: { trustProxy: false },
 	windowMs: 5 * 60 * 1000,
 	limit: 10,
 	standardHeaders: "draft-8",

@@ -1,0 +1,131 @@
+import { ApiError } from "./ApiError"
+import { ApiResponse } from "./types/api"
+import { LoginResponse, WhoAmIResponse } from "./types/auth"
+import { UpdateUserProps, User, Users } from "./types/users"
+
+export class NexusApi {
+
+  private token?: string
+
+  /**
+   * @param address address on where the server is reachable
+   */
+  constructor(readonly address: string) {
+
+  }
+
+  /**
+   * Makes a request to the API with the specified method and URL.
+   * @param method The HTTP method to use (GET, POST, PATCH, DELETE).
+   * @param url The URL to request.
+   */
+  private async request<T>(method: "GET"|"POST"|"PATCH"|"DELETE", path: string, payload?: object): Promise<T> {
+    let body: string | undefined
+    const headers: Record<string, string> = {}
+    if (payload) {
+      headers["Content-Type"] = "application/json"
+      body = JSON.stringify(payload)
+    }
+    if (this.token) headers.Authorization = `Bearer ${this.token}`
+    const res = await fetch(`${this.address}${path}`, { method, headers, body })
+    let data: T|undefined
+    if (res.headers.get("Content-Type")?.includes("application/json")) {
+      data = await res.json()
+    }
+    if (!res.ok) throw new ApiError(res, data)
+    return data as T
+  }
+
+  private get<T = any>(url: string) {
+    return this.request<T>("GET", url)
+  }
+
+  private post<T = any>(url: string, data: object) {
+    return this.request<T>("POST", url, data)
+  }
+
+  private patch<T = any>(url: string, data?: object) {
+    return this.request<T>("PATCH", url, data)
+  }
+
+  private delete<T = any>(url: string) {
+    return this.request<T>("DELETE", url)
+  }
+
+  /**
+   * retrieve current user data
+   * @returns 
+   */
+  whoami() {
+    return this.get<WhoAmIResponse>("/api/whoami")
+  }
+
+  /**
+   * login with the selected username
+   * @param username username to login
+   * @param password password for the user
+   */
+  async login(username: string, password: string) {
+    const response = await this.post<LoginResponse>("/api/auth/login", { username, password })
+    if (response.token) this.token = response.token
+    return response
+  }
+
+  /**
+   * retrieve public api information
+   * @returns 
+   */
+  apiConfig() {
+    return this.get<ApiResponse>("/api/")
+  }
+
+  /**
+   * runs the setup process for the application
+   * this can only be run if no user exists
+   * @param username username of the new user
+   * @param password password of the new user
+   * @returns 
+   */
+  async setup(username: string, password: string) {
+    const response = await this.post<LoginResponse>("/api/setup", { username, password })
+    if (response.token) this.token = response.token
+    return response
+  }
+
+  /**
+   * retrieves the userlist
+   * @returns 
+   */
+  getUsers() {
+    return this.get<Users>("/api/users")
+  }
+
+  /**
+   * creates a new user
+   * @param username username of the new user
+   * @param password password of the new user
+   */
+  createUser(username: string, password: string) {
+    return this.post<User>("/api/users", { username, password })
+  }
+
+  /**
+   * deletes the user with the selected userid
+   * @param id user id to delete
+   * @returns 
+   */
+  deleteUser(id: number) {
+    return this.delete<{}>(`/api/users/${id}`)
+  }
+
+  /**
+   * deletes the user with the selected userid
+   * @param id user id to delete
+   * @returns 
+   */
+  updateUser(id: number, props: UpdateUserProps) {
+    return this.patch<User>(`/api/users/${id}`, props)
+  }
+  
+
+}
