@@ -5,7 +5,7 @@
 )](https://github.com/multivit4min/loxone-nexus)
 
 
-Loxone Nexus connects external integrations (currently **Home Assistant** and **Sonos**) to **Loxone Miniservers** using the **Loxone Intercommunication Interface** for variable exchange.
+Loxone Nexus connects external integrations to **Loxone Miniservers** using the **Loxone Intercommunication Interface** for variable exchange.
 
 <details>
   <summary>Screenshots</summary>
