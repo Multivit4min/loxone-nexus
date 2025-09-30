@@ -55,6 +55,7 @@ You application now runs on Port **8000**, you can change this port by editing *
 - `TEXT`  
 - `SmartActuatorRGBW`
 - `SmartActuatorSingleChannel`
+- `SmartActuatorTunableWhite`
 
 
 ## Current Integrations
@@ -62,6 +63,9 @@ You application now runs on Port **8000**, you can change this port by editing *
 ### 🏠 Home Assistant
 - Entity support: `string`, `number`, `boolean`  
 - Control: switch, light, button, counter, valve, lock, …  
+
+### 💡 Hue Lights via Hue Bridge
+- Basic Support for Single Hue Lights, (rgb, color temperature or just turn on and off)
 
 ### 🎵 Sonos
 - Notifications (MP3 from HTTP or SMB)  
