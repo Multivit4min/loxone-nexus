@@ -8,12 +8,14 @@ on:
       - src/**
       - tests/**
       - .github/workflows/node-ci.yml
+      - vitest.config.js
   pull_request:
     paths:
       - package.json
       - src/**
       - tests/**
       - .github/workflows/node-ci.yml
+      - vitest.config.js
 
 jobs:
 
