@@ -65,14 +65,16 @@ export const loxoneController = {
 
   //starts the loxone instance
   async start(req: Request, res: Response) {
-    await services.loxoneManager.getId(parseInt(req.params.id, 10)).start()
-    res.sendStatus(200)
+    const instance = services.loxoneManager.getId(parseInt(req.params.id, 10))
+    await instance.start()
+    res.json(instance.serialize())
   },
 
   //stops the loxone instance
   async stop(req: Request, res: Response) {
-    await services.loxoneManager.getId(parseInt(req.params.id, 10)).stop()
-    res.sendStatus(200)
+    const instance = services.loxoneManager.getId(parseInt(req.params.id, 10))
+    await instance.stop()
+    res.json(instance.serialize())
   },
 
   async createVariable(req: Request, res: Response) {
@@ -84,23 +86,18 @@ export const loxoneController = {
 
   async updateVariable(req: Request, res: Response) {
     const body = updateInputVariableSchema.parse(req.body)
-    await services.loxoneManager
+    const variable = services.loxoneManager
       .getId(parseInt(req.params.id, 10))
       .variables
       .getId(parseInt(req.params.variableId, 10))
-      .update(body)
-    res.sendStatus(200)
+    await variable.update(body)
+    res.json(variable.serialize())
   },
 
   async deleteVariable(req: Request, res: Response) {
     const instance = services.loxoneManager.getId(parseInt(req.params.id, 10))
     await instance.variables.remove(parseInt(req.params.variableId, 10))
-    res.sendStatus(200)
-  },
-
-  async variables(req: Request, res: Response) {
-    const instance = services.loxoneManager.getId(parseInt(req.params.id, 10))
-    res.json(instance.serialize().variables)
+    res.json(instance.serialize())
   },
 
   async forceVariable(req: Request, res: Response) {

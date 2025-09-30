@@ -1,7 +1,7 @@
 import { ApiError } from "./ApiError"
 import { ApiResponse } from "./types/api"
 import { LoginResponse, WhoAmIResponse } from "./types/auth"
-import { LoxoneInstanceCreateProps, LoxoneInstanceUpdateProps, LoxoneInstance, LoxoneInstancesResponse, LoxoneInstanceVariableCreateProps, LoxoneVariable } from "./types/loxone"
+import { LoxoneInstanceCreateProps, LoxoneInstanceVariableUpdateProps, LoxoneInstanceUpdateProps, LoxoneInstance, LoxoneInstancesResponse, LoxoneInstanceVariableCreateProps, LoxoneVariable } from "./types/loxone"
 import { UpdateUserProps, User, Users } from "./types/users"
 
 export class NexusApi {
@@ -199,6 +199,27 @@ export class NexusApi {
    */
   createLoxoneVariable(loxoneId: number, props: LoxoneInstanceVariableCreateProps) {
     return this.post<LoxoneVariable>(`/api/loxone/${loxoneId}/variables`, props)
+  }
+
+  /**
+   * updates the specified loxone variable with new data
+   * @param loxoneId loxone instance the variable belongs to
+   * @param variableId loxone variable to update
+   * @param props data
+   * @returns 
+   */
+  updateLoxoneVariable(loxoneId: number, variableId: number, props: LoxoneInstanceVariableUpdateProps) {
+    return this.patch<LoxoneVariable>(`/api/loxone/${loxoneId}/variables/${variableId}`, props)
+  }
+
+  /**
+   * deletes the specified loxone variable
+   * @param loxoneId loxone instance the variable belongs to
+   * @param variableId loxone variable to delete
+   * @returns 
+   */
+  deleteLoxoneVariable(loxoneId: number, variableId: number) {
+    return this.delete<LoxoneInstance>(`/api/loxone/${loxoneId}/variables/${variableId}`)
   }
   
 

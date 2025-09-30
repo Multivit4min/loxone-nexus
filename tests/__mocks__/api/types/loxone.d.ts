@@ -53,6 +53,12 @@ export type LoxoneInstanceVariableCreateProps = {
   description?: string
 }
 
+export type LoxoneInstanceVariableUpdateProps = {
+  label?: string
+  suffix?: string
+  description?: string
+}
+
 export type LoxoneVariable = {
   id: number
   loxoneId: number

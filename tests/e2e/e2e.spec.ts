@@ -116,8 +116,7 @@ describe("E2E Test", () => {
     })
 
     it("should start the loxone instance", async () => {
-      await api.startLoxoneInstance(1)
-      const instance = await api.getLoxoneInstance(1)
+      const instance = await api.startLoxoneInstance(1)
       expect(instance.id).toBe(1)
       expect(instance.state).toBe(4)
       expect(instance.active).toBe(true)
@@ -158,22 +157,33 @@ describe("E2E Test", () => {
         expect(instance.variables.length).toBe(1)
       })
 
+      it("should validate an updated loxone variable", async () => {
+        const variable = await api.updateLoxoneVariable(1, 1, { label: "foo" })
+        expect(variable.id).toBe(1)
+        expect(variable.loxoneId).toBe(1)
+        expect(variable.label).toBe("foo")
+      })
 
       it("should validate an updated loxone variable value", async () => {
         remote.sendOnce(INPUT_PACKET_ID, DATA_TYPE.ANALOG).setValue(4).send()
-        await sleep(500)
+        await sleep(100)
         const resA = await api.getLoxoneInstance(1)
         expect(resA.variables[0].value.value).toBe(4)
         remote.sendOnce(INPUT_PACKET_ID, DATA_TYPE.ANALOG).setValue(6).send()
-        await sleep(500)
+        await sleep(100)
         const resB = await api.getLoxoneInstance(1)
         expect(resB.variables[0].value.value).toBe(6)
+      }, 1000)
+
+      it("should delete the variable", async () => {
+        const instance = await api.deleteLoxoneVariable(1, 1)
+        expect(instance.id).toBe(1)
+        expect(instance.variables.length).toBe(0)
       })
     })
 
     it("should stop the loxone instance", async () => {
-      await api.stopLoxoneInstance(1)
-      const instance = await api.getLoxoneInstance(1)
+      const instance = await api.stopLoxoneInstance(1)
       expect(instance.id).toBe(1)
       expect(instance.state).toBe(1)
       expect(instance.active).toBe(false)

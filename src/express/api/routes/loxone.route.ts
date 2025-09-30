@@ -15,6 +15,5 @@ router.delete("/loxone/:id/variables/:variableId", loxoneController.deleteVariab
 router.patch("/loxone/:id/variables/:variableId", loxoneController.updateVariable)
 router.patch("/loxone/:id/variables/:variableId/force", loxoneController.forceVariable)
 router.delete("/loxone/:id/variables/:variableId/force", loxoneController.unforceVariable)
-router.get("/loxone/:id/variables", loxoneController.variables)
 
 export default router
