@@ -5,8 +5,6 @@
 )](https://github.com/multivit4min/loxone-nexus)
 
 
-⚠️ **Under active development** – expect breaking changes.
-
 Loxone Nexus connects external integrations (currently **Home Assistant** and **Sonos**) to **Loxone Miniservers** using the **Loxone Intercommunication Interface** for variable exchange.
 
 <details>
@@ -18,45 +16,6 @@ Loxone Nexus connects external integrations (currently **Home Assistant** and **
   ![Variable](https://github.com/Multivit4min/loxone-nexus/blob/main/images/variable.png?raw=true)
 
 </details>
-
-
-## Setup
-
-### Requirements
-- [Node.js](https://nodejs.org/en/download/)
-- npm
-- pm2 (`npm install -g pm2`) **recommended but optional**
-
-```sh
-wget https://github.com/multivit4min/loxone-nexus/releases/latest/download/loxone-nexus.tar.gz -O - |
-tar -xzvf -
-cd loxone-nexus
-npm ci
-pm2 start ecosystem.configjs
-```
-
-<details>
-  <summary>Update</summary>
-
-```sh
-wget https://github.com/multivit4min/loxone-nexus/releases/latest/download/loxone-nexus.tar.gz -O - |
-tar -xzvf -
-cd loxone-nexus
-npm ci
-pm2 restart ecosystem.config.js
-```
-</details>
-
-You application now runs on Port **8000**, you can change this port by editing **data/.env**
-
-## Supported Loxone Data Types
-- `DIGITAL`  
-- `ANALOG`  
-- `TEXT`  
-- `SmartActuatorRGBW`
-- `SmartActuatorSingleChannel`
-- `SmartActuatorTunableWhite`
-
 
 ## Current Integrations
 
@@ -76,3 +35,28 @@ You application now runs on Port **8000**, you can change this port by editing *
 - Control visibility of events via a Loxone variable (e.g. hide events once completed).
 
 **Use Case** Perfect for recurring tasks such as trash pickup schedules. Events are shown on a Loxone Flex display, and once the trash is taken out, you can clear the reminder with a single button press on the display.
+
+## Setup
+
+### Requirements
+- [Node.js](https://nodejs.org/en/download/)
+- npm
+- pm2 (`npm install -g pm2`) **recommended but optional**
+
+```sh
+wget https://github.com/multivit4min/loxone-nexus/releases/latest/download/loxone-nexus.tar.gz -O - |
+tar -xzvf -
+cd loxone-nexus
+npm ci
+pm2 start ecosystem.configjs
+```
+
+You application now runs on Port **8000**, you can change this port by editing **data/.env**
+
+## Supported Loxone Data Types
+- `DIGITAL`  
+- `ANALOG`  
+- `TEXT`  
+- `SmartActuatorRGBW`
+- `SmartActuatorSingleChannel`
+- `SmartActuatorTunableWhite`
