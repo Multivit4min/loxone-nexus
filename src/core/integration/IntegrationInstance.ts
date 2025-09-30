@@ -72,6 +72,43 @@ export abstract class IntegrationInstance<T extends object> extends Instance<Int
     this.services.socketManager.sendIntegration(this)
   }
 
+  /**
+   * updates store data without reloading the entity
+   * @param store 
+   */
+  async updateStore(store: Record<string, any>) {    
+    this.entity = await this.repositories.integration.update({
+      id: this.id,
+      store
+    }) as any
+    this.services.socketManager.sendIntegration(this)
+  }
+
+  /**
+   * retrieves a stored key
+   * this can be used to save persistent data
+   * @param key the key to retrieve
+   * @param fallback fallback data to initialize
+   * @returns 
+   */
+  getStoreProperty<T extends any>(key: string, fallback?: T): T {
+    if (!this.entity.store[key]) this.entity.store[key] = fallback
+    return this.entity.store[key]
+  }
+
+  /**
+   * sets the store key to the specified value
+   * this can be used to save persistent data
+   * @param key the key to store data to
+   * @param value the value to save
+   * @returns 
+   */
+  async setStoreProperty<T extends any>(key: string, value: T): Promise<T> {
+    this.entity.store[key] = value
+    await this.updateStore(this.entity.store)
+    return this.entity.store[key]
+  }
+
   serialize() {
     const constructor = this.getConstructor()
     return {

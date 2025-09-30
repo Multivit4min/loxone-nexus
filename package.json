@@ -28,6 +28,7 @@
     "pino-http": "^10.5.0",
     "pino-pretty": "^13.1.1",
     "socket.io": "^4.8.1",
+    "socket.io-msgpack-parser": "^3.0.2",
     "tsx": "^4.20.6",
     "ws": "^8.18.3",
     "zod": "^4.1.11"

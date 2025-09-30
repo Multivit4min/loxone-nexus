@@ -10,6 +10,7 @@ export type CreateIntegrationProps = {
   label?: string|null
   type: string
   config: object
+  store?: object
 }
 
 export class IntegrationRepository {
@@ -49,6 +50,7 @@ export class IntegrationRepository {
       .update(integrations)
       .set(props)
       .where(eq(integrations.id, id))
+      .then(() => this.findById(id))
   }
 
 }

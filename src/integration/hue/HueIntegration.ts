@@ -87,16 +87,15 @@ export class HueIntegration extends IntegrationInstance<
   }
 
   async start() {
-    let { username, clientKey } = this.config
+    let username = this.getStoreProperty<string|undefined>("username", undefined)
     if (!username) {
-      this.logger.info(`missing username in config, registering for new access, i hope you have your hue bridge button`)
+      this.logger.info(`missing username in config, registering for new access... i hope you have your hue bridge button pressed`)
       const api = await v3.api.createLocal(this.config.address).connect()
       const user = await api.users.createUser("loxone-nexus")
       username = user.username
-      clientKey = user.clientkey
-      await this.update({ config: { ...this.config, username, clientKey }})
+      await this.setStoreProperty("username", username)
     }
-    this.api = await v3.api.createLocal(this.config.address).connect(username, clientKey)
+    this.api = await v3.api.createLocal(this.config.address).connect(username)
     this.bridge = (await this.api.configuration.getConfiguration()).getJsonPayload()
     this.interval = setInterval(() => this.updateLights(), 10 * 1000)
     await this.updateLights()
@@ -117,8 +116,8 @@ export class HueIntegration extends IntegrationInstance<
       ])
       this.lights = lights.map(l => l.getJsonPayload() as any)
       //console.log(groups) todo
-    } catch (e) {
-      this.logger.error(e, "cant update hue lights")
+    } catch (error) {
+      this.logger.error({ error }, "cant update hue lights")
     }
   }
 
@@ -171,9 +170,7 @@ export class HueIntegration extends IntegrationInstance<
 
   static configSchema() {
     return z.object({
-      address: z.ipv4().describe("ipv4 address of the hue bridge"),
-      username: z.string().describe("leave empty, press the button on the hue bridge then click on create").optional(),
-      clientKey: z.string().describe("leave empty, press the button on the hue bridge then click on create").optional()
+      address: z.ipv4().describe("ipv4 address of the hue bridge")
     })
   }
 }

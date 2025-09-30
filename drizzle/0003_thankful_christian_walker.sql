@@ -1,0 +1,1 @@
+ALTER TABLE `integrations` ADD `store` text DEFAULT '{}' NOT NULL;

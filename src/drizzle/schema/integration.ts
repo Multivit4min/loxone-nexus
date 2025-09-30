@@ -8,7 +8,8 @@ export const integrations = sqliteTable("integrations", {
   id: int("id").primaryKey({ autoIncrement: true }),
   label: text("label"),
   type: text("type").notNull(),
-  config: text("config", { mode: "json" }).$type<any>()
+  config: text("config", { mode: "json" }).$type<any>(),
+  store: text("store", { mode: "json" }).$type<Record<string, any>>().default({}).notNull()
 })
 
 export const integrationRelations = relations(integrations, ({ many }) => ({
