@@ -82,8 +82,8 @@ export class LoxoneManager extends InstanceManager<LoxoneEntity, LoxoneInstance>
     return z.object({
       label: z.string().min(1).describe("arbitary name"),
       host: z.union([z.ipv4(), z.ipv6(), z.hostname()]).describe("address of the miniserver"),
-      port: z.number().int().min(1024).max(65535).describe("port of the miniserver (default: 61263)").default(61263),
-      listenPort: z.number().int().min(1024).max(65535).describe("port on which loxone-nexus listens").default(61263),
+      port: z.number().int().min(1024).max(65535).describe("port of the miniserver (default: 61263)"),
+      listenPort: z.number().int().min(1024).max(65535).describe("port on which loxone-nexus listens"),
       remoteId: z.string().min(1).max(8).describe("id of the miniserver (see loxone-intercommunication settings inside loxone config)"),
       ownId: z.string().min(1).max(8).describe("arbitary id of loxone-nexus")
     }).strict()

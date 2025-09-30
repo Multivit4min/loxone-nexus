@@ -2,7 +2,11 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest"
 import { AppService } from "../../src/core/app/AppService"
 import { NexusApi } from "../__mocks__/api/NexusApi"
 import { ApiError } from "../__mocks__/api/ApiError"
-import { LoxoneServer } from "loxone-ici"
+import { DATA_TYPE, LoxoneRemoteSystem, LoxoneServer } from "loxone-ici"
+
+const sleep = (time: number) => {
+  return new Promise<void>(fulfill => setTimeout(fulfill, time))
+}
 
 describe("E2E Test", () => {
   
@@ -80,13 +84,15 @@ describe("E2E Test", () => {
 
   describe("/api/loxone", () => {
 
+    const INPUT_PACKET_ID = "itest"
+    const REMOTE_PORT = 8172
     const LISTEN_PORT = 8173
 
     it("should create a new loxone instance", async () => {
       const instance = await api.createLoxoneInstance({
         label: "test",
         host: "localhost",
-        port: 8172,
+        port: REMOTE_PORT,
         listenPort: LISTEN_PORT,
         remoteId: "mock",
         ownId: "vitest"
@@ -94,7 +100,7 @@ describe("E2E Test", () => {
       expect(instance.id).toBe(1)
       expect(instance.label).toBe("test")
       expect(instance.host).toBe("localhost")
-      expect(instance.port).toBe(8172)
+      expect(instance.port).toBe(REMOTE_PORT)
       expect(instance.listenPort).toBe(LISTEN_PORT)
       expect(instance.remoteId).toBe("mock")
       expect(instance.ownId).toBe("vitest")
@@ -119,10 +125,16 @@ describe("E2E Test", () => {
 
     describe("/:id/variables", () => {
       let ici: LoxoneServer
+      let remote: LoxoneRemoteSystem
 
       beforeAll(async () => {
         ici = new LoxoneServer({ ownId: "mock" })
-        ici.bind(LISTEN_PORT)
+        await ici.bind(REMOTE_PORT)
+        remote = ici.createRemoteSystem({
+          address: "localhost",
+          port: LISTEN_PORT,
+          remoteId: "vitest"
+        })
       })
 
       afterAll(async () => {
@@ -131,13 +143,14 @@ describe("E2E Test", () => {
 
       it("should create a loxone variable", async () => {
         const variable = await api.createLoxoneVariable(1, {
-          packetId: "test",
+          packetId: INPUT_PACKET_ID,
           type: 1,
-          direction: "OUTPUT"
+          direction: "INPUT"
         })
         expect(variable)
         expect(variable.id).toBe(1)
         expect(variable.loxoneId).toBe(1)
+        expect(variable.direction).toBe("INPUT")
         expect(variable.value.type).toBe("number")
         expect(variable.value.value).toBe(0)
         const instance = await api.getLoxoneInstance(1)
@@ -145,6 +158,17 @@ describe("E2E Test", () => {
         expect(instance.variables.length).toBe(1)
       })
 
+
+      it("should validate an updated loxone variable value", async () => {
+        remote.sendOnce(INPUT_PACKET_ID, DATA_TYPE.ANALOG).setValue(4).send()
+        await sleep(500)
+        const resA = await api.getLoxoneInstance(1)
+        expect(resA.variables[0].value.value).toBe(4)
+        remote.sendOnce(INPUT_PACKET_ID, DATA_TYPE.ANALOG).setValue(6).send()
+        await sleep(500)
+        const resB = await api.getLoxoneInstance(1)
+        expect(resB.variables[0].value.value).toBe(6)
+      })
     })
 
     it("should stop the loxone instance", async () => {
