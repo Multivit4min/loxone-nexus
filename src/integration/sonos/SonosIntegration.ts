@@ -114,10 +114,15 @@ export class SonosIntegration extends IntegrationInstance<
 
   get title() {
     if (!this.state) return ""
+    if (this.state.mediaInfo.CurrentURIMetaData === undefined) return ""
+    if (this.state.mediaInfo.CurrentURIMetaData === null) return ""
     if (typeof this.state.mediaInfo.CurrentURIMetaData === "string") {
       return this.state.mediaInfo.CurrentURIMetaData
+    } else if ("Title" in this.state.mediaInfo.CurrentURIMetaData) {
+      return this.state.mediaInfo.CurrentURIMetaData.Title
+    } else {
+      return ""
     }
-    return this.state.mediaInfo.CurrentURIMetaData.Title || ""
   }
 
   get playingState() {
