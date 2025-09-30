@@ -1,4 +1,4 @@
-import { SmartActuatorRGBWType, SmartActuatorSingleChannelType } from "../../types/general"
+import { SmartActuatorRGBWType, SmartActuatorSingleChannelType, SmartActuatorTunableWhiteType } from "../../types/general"
 
 export type SerializedDataType = 
   NumberDataType |
@@ -6,6 +6,7 @@ export type SerializedDataType =
   StringDataType |
   SmartActuatorSingleChannelDataType |
   SmartActuatorRGBWDataType |
+  SmartActuatorTunableWhiteDataType |
   NullDataType
 
   export type NumberDataType = {
@@ -31,4 +32,8 @@ export type SmartActuatorSingleChannelDataType = {
 export type SmartActuatorRGBWDataType = {
   type: "SmartActuatorRGBW",
   value: SmartActuatorRGBWType
+}
+export type SmartActuatorTunableWhiteDataType = {
+  type: "SmartActuatorTunableWhite",
+  value: SmartActuatorTunableWhiteType
 }

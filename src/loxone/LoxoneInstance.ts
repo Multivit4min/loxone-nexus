@@ -88,7 +88,7 @@ export class LoxoneInstance extends Instance<LoxoneEntity> {
     return this.state.requestChange(RunState.RUNNING, async () => {
       this.state.set(RunState.STARTING)
       await this.reload()
-      this.loxoneServer = new LoxoneServer({ ownId: this.entity.ownId })
+      this.loxoneServer = new LoxoneServer({ ownId: this.entity.ownId, emitInputMode: "change" })
       this.loxoneServer.bind(this.entity.listenPort)
       this.remoteSystem = this.loxoneServer.createRemoteSystem({
         address: this.entity.host,

@@ -18,6 +18,7 @@ import { createDatabaseConnection, initDatabase } from "./drizzle"
 import { Exporter } from "./core/exporter/Exporter"
 import { CalendarIntegration } from "./integration/calendar/CalendarIntegration"
 import { AppService } from "./core/app/AppService"
+import { HueIntegration } from "./integration/hue/HueIntegration"
 
 export type ServiceContainer = {
   authService: AuthService
@@ -79,6 +80,7 @@ export async function setupContainers(appService: AppService) {
     .register("HomeAssistant", HomeAssistantIntegration)
     .register("Sonos", SonosIntegration)
     .register("Calendar", CalendarIntegration)
+    .register("Hue", HueIntegration)
     .init(services)
   await services.loxoneManager.init(services)
   await services.linkService.init(services)

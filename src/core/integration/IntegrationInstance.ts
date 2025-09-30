@@ -49,9 +49,9 @@ export abstract class IntegrationInstance<T extends object> extends Instance<Int
     return config as T
   }
 
-  async update(data: UpdateProps) {
-    this.entity.label = data.label
-    this.entity.config = data.config
+  async update(data: Partial<UpdateProps>) {
+    this.entity.label = data.label || this.entity.label
+    this.entity.config = data.config || this.entity.config
     await this.updateEntity()
     await this.reload()
   }

@@ -1,4 +1,6 @@
-export type VariableDataTypes = string|number|boolean|SmartActuatorSingleChannelType|SmartActuatorRGBWType
+export type VariableDataTypes = 
+  string|number|boolean| //basics
+  SmartActuatorSingleChannelType|SmartActuatorRGBWType|SmartActuatorTunableWhiteType //lights
 
 export type SmartActuatorSingleChannelType = {
   channel: number
@@ -14,3 +16,8 @@ export type SmartActuatorRGBWType = {
   bits: number
 }
 
+export type SmartActuatorTunableWhiteType = {
+  temperature: number
+  brightness: number
+  fadeTime: number
+}

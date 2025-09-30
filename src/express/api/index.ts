@@ -48,6 +48,6 @@ apiRouter.use((err: any, req: Request, res: Response, next: NextFunction) => {
     res.status(404).json({ error: err.message })
   } else {
     req.log.error(err, "API Error")
-    res.sendStatus(500)
+    res.status(500).json({ error: "Failed to execute http request" })
   }
 })
