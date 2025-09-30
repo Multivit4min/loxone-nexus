@@ -44,7 +44,7 @@ export const loxoneController = {
 
   //retrieve a single instance
   async updateInstance(req: Request, res: Response) {
-    const body = services.loxoneManager.schema().parse(req.body)
+    const body = services.loxoneManager.schema().partial().parse(req.body)
     const instance = services.loxoneManager.getId(parseInt(req.params.id, 10))
     await instance.update(body)
     res.json(instance.serialize())

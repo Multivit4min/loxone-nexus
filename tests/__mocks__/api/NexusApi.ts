@@ -1,6 +1,7 @@
 import { ApiError } from "./ApiError"
 import { ApiResponse } from "./types/api"
 import { LoginResponse, WhoAmIResponse } from "./types/auth"
+import { LoxoneInstanceCreateProps, LoxoneInstanceUpdateProps, LoxoneInstance, LoxoneInstancesResponse, LoxoneInstanceVariableCreateProps, LoxoneVariable } from "./types/loxone"
 import { UpdateUserProps, User, Users } from "./types/users"
 
 export class NexusApi {
@@ -125,6 +126,79 @@ export class NexusApi {
    */
   updateUser(id: number, props: UpdateUserProps) {
     return this.patch<User>(`/api/users/${id}`, props)
+  }
+
+  /**
+   * creates a new loxone instance
+   * @param props 
+   */
+  createLoxoneInstance(props: LoxoneInstanceCreateProps) {
+    return this.post<LoxoneInstance>(`/api/loxone`, props)
+  }
+
+  /**
+   * updates the loxone instance
+   * @param id 
+   * @param props 
+   * @returns 
+   */
+  updateLoxoneInstance(id: number, props: LoxoneInstanceUpdateProps) {
+    return this.patch<LoxoneInstance>(`/api/loxone/${id}`, props)
+  }
+
+  /**
+   * deletes a loxone instance
+   * @param id 
+   * @returns 
+   */
+  deleteLoxoneInstance(id: number) {
+    return this.delete(`/api/loxone/${id}`)
+  }
+
+  /**
+   * starts the loxone instance
+   * @param id id of the instance
+   * @returns 
+   */
+  startLoxoneInstance(id: number) {
+    return this.patch(`/api/loxone/${id}/start`)
+  }
+
+  /**
+   * stops the loxone instance
+   * @param id id of the instance
+   * @returns 
+   */
+  stopLoxoneInstance(id: number) {
+    return this.patch(`/api/loxone/${id}/stop`)
+  }
+
+  /**
+   * retrieve a single loxone instance by its id
+   * @param id id of the instance
+   * @returns 
+   */
+  getLoxoneInstance(id: number) {
+    return this.get<LoxoneInstance>(`/api/loxone/${id}`)
+  }
+
+  /**
+   * retrieves all loxone instances
+   * @param id id of the instance
+   * @returns 
+   */
+  getLoxoneInstances() {
+    return this.get<LoxoneInstancesResponse>(`/api/loxone`)
+  }
+
+  /**
+   * creates a new loxone variable on an instance
+   * @param loxoneId the instance to create the variable on
+   * @param props variable properties
+   * @returns 
+   */
+  createLoxoneVariable(loxoneId: number, props: LoxoneInstanceVariableCreateProps) {
+    return this.post<LoxoneVariable>(`/api/loxone/${loxoneId}/variables`, props)
   }
   
 
