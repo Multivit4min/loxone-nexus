@@ -7,9 +7,7 @@ import { v3 } from "node-hue-api"
 import { Api } from "node-hue-api/dist/esm/api/Api"
 import type { HueLights } from "./types"
 import { OutputTreeEndpoint } from "../../core/integration/tree/OutputTreeEndpoint"
-import { SmartActuatorRGBWType } from "../../types/general"
 import { LightState } from "@peter-murray/hue-bridge-model/dist/esm/model"
-import { VariableConverter } from "../../core/conversion/VariableConverter"
 
 
 export class HueIntegration extends IntegrationInstance<
@@ -34,8 +32,8 @@ export class HueIntegration extends IntegrationInstance<
         if (!light) return this.logger.warn(`no hue light found with name ${config.name}`)
         await this.api.lights.setLightState(light.id, { on: value.toBoolean() })
       })
-    this.actions.create("light.rgbw")
-      .describe("sets the lights rgbw color")
+    this.actions.create("light.rgb")
+      .describe("sets the lights rgb color")
       .schema({
         name: z.string().min(1)
       })
@@ -54,13 +52,34 @@ export class HueIntegration extends IntegrationInstance<
             const tw = value.toSmartActuatorTunableWhite()
             state.on()
             state.white(1_000_000 / tw.temperature, tw.brightness)
-            state.transition(sma.fadeTime)
+            state.transition(tw.fadeTime)
           } else {
             state.off()
           }
           await this.api.lights.setLightState(light.id, state.getPayload())
         }
+      })    
+    this.actions.create("light.temperature")
+      .describe("sets the lights temperature and brightness")
+      .schema({
+        name: z.string().min(1)
       })
+      .execute(async ({ config, value }) => {
+        if (!this.api) return
+        const light = this.getLightByName(config.name)
+        if (!light) return this.logger.warn(`no hue light found with name ${config.name}`)
+        const tw = value.toSmartActuatorTunableWhite()
+        const state = new LightState()
+        if (value.toBoolean()) {
+          state.on()
+          state.white(1_000_000 / tw.temperature, tw.brightness)
+          state.transition(tw.fadeTime)
+        } else {
+          state.off()
+        }
+        await this.api.lights.setLightState(light.id, state.getPayload())
+      })
+  
   }
 
   getConstructor() {
@@ -91,12 +110,16 @@ export class HueIntegration extends IntegrationInstance<
 
   async updateLights() {
     if (!this.api) return
-    const [lights, groups] = await Promise.all([
-      this.api.lights.getAll(),
-      this.api.groups.getAll()
-    ])
-    this.lights = lights.map(l => l.getJsonPayload() as any)
-    //console.log(groups) todo
+    try {
+      const [lights, groups] = await Promise.all([
+        this.api.lights.getAll(),
+        this.api.groups.getAll()
+      ])
+      this.lights = lights.map(l => l.getJsonPayload() as any)
+      //console.log(groups) todo
+    } catch (e) {
+      this.logger.error(e, "cant update hue lights")
+    }
   }
 
   getLightByName(name: string) {
@@ -128,11 +151,18 @@ export class HueIntegration extends IntegrationInstance<
           action: "light.set",
           name: light.name
         })      
-      lightCat.add(OutputTreeEndpoint, `rgbw`)
+      lightCat.add(OutputTreeEndpoint, `rgb`)
         .className("text-amber")
         .setConfig({
-          label: `${light.name} > rgbw`,
-          action: "light.rgbw",
+          label: `${light.name} > rgb`,
+          action: "light.rgb",
+          name: light.name
+        })      
+      lightCat.add(OutputTreeEndpoint, `temperature`)
+        .className("text-amber")
+        .setConfig({
+          label: `${light.name} > temperature`,
+          action: "light.temperature",
           name: light.name
         })
     })

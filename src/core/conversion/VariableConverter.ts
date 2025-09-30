@@ -212,6 +212,13 @@ export class VariableConverter {
         ) {
           return { type: "SmartActuatorRGBW", value }
         }
+        if (
+          "temperature" in value &&
+          "brightness" in value &&
+          "fadeTime" in value
+        ) {
+          return { type: "SmartActuatorTunableWhite", value }
+        }
       default:
         return { type: "null", value: null }
     }

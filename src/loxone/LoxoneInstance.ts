@@ -139,6 +139,7 @@ export class LoxoneInstance extends Instance<LoxoneEntity> {
     if (variable.value === null) return
     return this.remoteSystem
       .createOutput(variable.packetId, variable.type)
+      //@ts-ignore
       .setValue(variable.value)
       .send()
   }
