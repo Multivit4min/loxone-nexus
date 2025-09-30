@@ -1,7 +1,14 @@
 import { defineConfig } from "vitest/config"
 
 export default defineConfig({
-  test: {
+  ssr: {
+    noExternal: ["node-hue-api"]
+  },
+  test: {    
+    environment: "node",
+    deps: {
+      inline: ["node-hue-api"]
+    },
     coverage: {
       enabled: true,
       provider: "v8",
