@@ -17,6 +17,7 @@ export class HomeAssistantIntegration extends IntegrationInstance<
 > {
 
   ha?: HomeAssistant
+  states: StateEntry[] = []
 
   constructor(entity: IntegrationEntity, parent: IntegrationManager) {
     super(entity, parent, HomeAssistantIntegration)
@@ -293,16 +294,10 @@ export class HomeAssistantIntegration extends IntegrationInstance<
     }
   }
 
-  async getInternalVariables() {
-    if (!this.ha) return []
-    const states = await this.getStates()
-    return { states }
-  }
-
   async getStates(): Promise<StateEntry[]> {
     if (!this.ha) return []
     const states = await this.ha.getStates()
-    return states.map(state => {
+    this.states = states.map(state => {
       const [namespace, ...rest] = state.entity_id.split(".")
       if (namespace === undefined || rest.length === 0) return null
       return {
@@ -315,6 +310,7 @@ export class HomeAssistantIntegration extends IntegrationInstance<
         }
       }
     }).filter(res => res !== null) as StateEntry[]
+    return this.states
   }
 
   async getStateByEntityId(id: string) {
@@ -327,7 +323,9 @@ export class HomeAssistantIntegration extends IntegrationInstance<
   }
 
   specificSerialize() {
-    return null
+    return {
+      states: this.states
+    }
   }
 
   async tree() {

@@ -127,10 +127,6 @@ export class HueIntegration extends IntegrationInstance<
     return light
   }
 
-  async getInternalVariables() {
-    return null
-  }
-
   specificSerialize() {
     return {
       bridge: this.bridge,

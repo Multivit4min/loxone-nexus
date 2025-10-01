@@ -7,6 +7,7 @@ import { Instance } from "../instance/Instance"
 import { ActionBuilder } from "./io/ActionBuilder"
 import { IntegrationEntity } from "../../drizzle/schema"
 import { InputBuilder } from "./io/InputBuilder"
+import express from "express"
 
 
 export abstract class IntegrationInstance<T extends object> extends Instance<IntegrationEntity> {
@@ -15,6 +16,7 @@ export abstract class IntegrationInstance<T extends object> extends Instance<Int
   inputs = new InputBuilder(this)
   variables: IntegrationVariableManager
   logger: Logger
+  router = express.Router()
 
   constructor(entity: IntegrationEntity, parent: IntegrationManager, varConstructor: IntegrationConstructor) {
     super(entity, parent)
@@ -124,7 +126,6 @@ export abstract class IntegrationInstance<T extends object> extends Instance<Int
 
   abstract tree(): Promise<any[]>
   abstract getConstructor(): IntegrationConstructor
-  abstract getInternalVariables(): Promise<any>
   abstract specificSerialize(): any
   abstract start(): Promise<any>
   abstract stop(): Promise<any>

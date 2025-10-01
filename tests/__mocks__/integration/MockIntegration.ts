@@ -24,10 +24,6 @@ export class MockIntegration extends IntegrationInstance<{}> {
     
   }
 
-  async getInternalVariables() {
-    
-  }
-
   specificSerialize() {
     return null
   }

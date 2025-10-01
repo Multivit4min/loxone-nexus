@@ -158,10 +158,6 @@ export class CalendarIntegration extends IntegrationInstance<
     this.data = ical.parseICS(content)
   }
 
-  async getInternalVariables() {
-    return null
-  }
-
   specificSerialize() {
     return {
       events: this.events,

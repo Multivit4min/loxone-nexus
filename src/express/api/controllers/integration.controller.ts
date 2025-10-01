@@ -69,12 +69,6 @@ export const integrationController = {
     return res.json(tree)
   },
 
-  //retrieve the variables for an integration
-  async internalVariables(req: Request, res: Response) {
-    const integration = services.integrationManager.getId(parseInt(req.params.id, 10))
-    res.json(await integration.getInternalVariables())
-  },
-
   //remove a integration
   async removeIntegration(req: Request, res: Response) {
     await services.integrationManager.remove(parseInt(req.params.id, 10))

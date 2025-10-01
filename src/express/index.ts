@@ -8,6 +8,7 @@ import history from "connect-history-api-fallback"
 import { logger } from "../logger/pino"
 import pinoHttp from "pino-http"
 import { Socket } from "net"
+import { services } from "../container"
 
 const timeouts: Record<string, NodeJS.Timeout> = {}
 
@@ -36,6 +37,11 @@ export async function setupExpress() {
   app.use(bodyParser.json())
   app.use(bodyParser.urlencoded({ extended: false }))
 
+  app.use("/hook/:id", (req, res, next) => {
+    const integration = services.integrationManager.findId(parseInt(req.params.id, 10))
+    if (!integration) return res.sendStatus(404)
+    return integration.router(req, res, next)
+  })
   app.use("/api", httpLogger)
   app.use("/api", (req, res, next) => {
     const TIMEOUT = 5000 //max expected request duration

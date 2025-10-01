@@ -19,6 +19,7 @@ import { Exporter } from "./core/exporter/Exporter"
 import { CalendarIntegration } from "./integration/calendar/CalendarIntegration"
 import { AppService } from "./core/app/AppService"
 import { HueIntegration } from "./integration/hue/HueIntegration"
+import { WebhookIntegration } from "./integration/webhook/WebhookIntegration"
 
 export type ServiceContainer = {
   authService: AuthService
@@ -81,6 +82,7 @@ export async function setupContainers(appService: AppService) {
     .register("Sonos", SonosIntegration)
     .register("Calendar", CalendarIntegration)
     .register("Hue", HueIntegration)
+    .register("Webhook", WebhookIntegration)
     .init(services)
   await services.loxoneManager.init(services)
   await services.linkService.init(services)

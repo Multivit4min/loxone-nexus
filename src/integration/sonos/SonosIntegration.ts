@@ -168,10 +168,6 @@ export class SonosIntegration extends IntegrationInstance<
     }
   }
 
-  async getInternalVariables() {
-    
-  }
-
   specificSerialize() {
     return {
       zone: this.zone,
