@@ -68,11 +68,13 @@ export class MqttIntegration extends IntegrationInstance<
 
   async handleMessage(topic: string, buffer: Buffer) {
     const message = buffer.toString("utf-8")
+    let exists = topic in this.messages
     try {
       this.messages[topic] = { json: true, value: JSON.parse(message) }
     } catch (e) {
       this.messages[topic] = { json: false, value: message }
     }
+    if (!exists) this.services.socketManager.sendIntegration(this)
     const variables = this.variables.collection.filter(v => v.config.action.startsWith("subscribe") && v.config.topic === topic)
     if (variables.length === 0) return
     variables.forEach(async v => {
