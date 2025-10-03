@@ -19,7 +19,7 @@ export class IntegrationVariable<T extends { action: string } = any> extends Ins
     readonly parent: IntegrationVariableManager
   ) {
     super(entity, parent)
-    this.logger = this.parent.parent.logger.child({}, { msgPrefix: "[IntegrationVariable] " })
+    this.logger = this.parent.logger.child({}, { msgPrefix: "[Variable] " })
   }
 
   /**
