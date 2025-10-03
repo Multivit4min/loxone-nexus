@@ -13,5 +13,6 @@ router.get("/integration/:id/tree", integrationController.getTree)
 router.post("/integration/:id/variable", integrationController.createIntegrationVariable)
 router.patch("/integration/:id/variable/:variableId", integrationController.updateIntegrationVariable)
 router.delete("/integration/:id/variable/:variableId", integrationController.deleteIntegrationVariable)
+router.use("/integration/:id/custom", integrationController.customRoutes)
 
 export default router

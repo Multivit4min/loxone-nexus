@@ -12,6 +12,7 @@
   "dependencies": {
     "@libsql/client": "^0.15.15",
     "@svrooij/sonos": "^2.5.0",
+    "@types/lodash": "^4.17.20",
     "argon2": "^0.44.0",
     "body-parser": "^2.2.0",
     "connect-history-api-fallback": "^2.0.0",
@@ -21,7 +22,9 @@
     "express-rate-limit": "^8.1.0",
     "http-proxy-middleware": "^3.0.5",
     "jsonwebtoken": "^9.0.2",
+    "lodash": "^4.17.21",
     "loxone-ici": "^0.1.1",
+    "mqtt": "^5.14.1",
     "node-hue-api": "^5.0.0-beta.16",
     "node-ical": "^0.21.0",
     "pino": "^9.12.0",

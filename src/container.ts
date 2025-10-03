@@ -20,6 +20,7 @@ import { CalendarIntegration } from "./integration/calendar/CalendarIntegration"
 import { AppService } from "./core/app/AppService"
 import { HueIntegration } from "./integration/hue/HueIntegration"
 import { WebhookIntegration } from "./integration/webhook/WebhookIntegration"
+import { MqttIntegration } from "./integration/mqtt/MqttIntegration"
 
 export type ServiceContainer = {
   authService: AuthService
@@ -83,6 +84,7 @@ export async function setupContainers(appService: AppService) {
     .register("Calendar", CalendarIntegration)
     .register("Hue", HueIntegration)
     .register("Webhook", WebhookIntegration)
+    .register("Mqtt", MqttIntegration)
     .init(services)
   await services.loxoneManager.init(services)
   await services.linkService.init(services)

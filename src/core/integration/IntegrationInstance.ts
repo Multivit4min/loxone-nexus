@@ -16,12 +16,15 @@ export abstract class IntegrationInstance<T extends object> extends Instance<Int
   inputs = new InputBuilder(this)
   variables: IntegrationVariableManager
   logger: Logger
-  router = express.Router()
+  //router for /hook/:integrationId/*
+  publicRouter = express.Router()
+  //protected router for /api/integration/:integrationId/custom/*
+  authenticatedRouter = express.Router()
 
   constructor(entity: IntegrationEntity, parent: IntegrationManager, varConstructor: IntegrationConstructor) {
     super(entity, parent)
     this.variables = new IntegrationVariableManager(this, varConstructor)
-    this.logger = logger.child({ id: this.entity.id }, { msgPrefix: "[Integration] " })
+    this.logger = logger.child({ id: this.entity.id }, { msgPrefix: `[Integration:${entity.type}:${entity.id}] ` })
   }
 
   get services() {

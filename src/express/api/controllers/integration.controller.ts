@@ -1,4 +1,4 @@
-import { Request, Response } from "express"
+import { NextFunction, Request, Response } from "express"
 import { z } from "zod"
 import { services } from "../../../container"
 import { IntegrationInstance } from "../../../core/integration/IntegrationInstance"
@@ -101,6 +101,12 @@ export const integrationController = {
     const integration = services.integrationManager.getId(parseInt(req.params.id, 10))
     integration.variables.remove(parseInt(req.params.variableId, 10))
     res.json({})
+  },
+
+  async customRoutes(req: Request, res: Response, next: NextFunction) {
+    const integration = services.integrationManager.findId(parseInt(req.params.id, 10))
+    if (!integration) return res.sendStatus(404)
+    return integration.authenticatedRouter(req, res, next)
   }
 
 }

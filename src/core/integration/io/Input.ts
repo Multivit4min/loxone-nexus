@@ -13,9 +13,8 @@ export type CurrentValueCallback<S extends z.ZodRawShape, R = any> = (props: Cal
 
 export class Input<T extends string = any, S extends z.ZodRawShape = {}> extends Entry<T, S> {
   
-  private currentValueCallback?: CurrentValueCallback<S, Promise<any>>
+  private currentValueCallback: CurrentValueCallback<S, Promise<any>> = async ({ variable }) => variable.value.value
   private callback: RegisterCallback<S> = () => {
-    this.parent.logger.warn("no callback defined")
     return () => {}
   }
 
@@ -42,13 +41,9 @@ export class Input<T extends string = any, S extends z.ZodRawShape = {}> extends
       const props: CallbackProps<S> = {
         variable,
         config: variable.config,
-        getCurrentValue: async () => {
-          if (!this.currentValueCallback) return variable.value.value
-          return this.currentValueCallback(props)
-        }
+        getCurrentValue: async () => this.currentValueCallback(props)
       }
-      let value = variable.value.value
-      if (this.currentValueCallback) value = await this.currentValueCallback(props)
+      const value = await this.currentValueCallback(props)
       variable.updateValue(value)
       return await this.callback(props)
     } catch (e) {

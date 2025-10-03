@@ -22,7 +22,7 @@ export class WebhookIntegration extends IntegrationInstance<
       })
       .currentValue(() => false)
       .register(() => () => {})
-    this.router.use("/:name", async (req, res, next) => {
+    this.publicRouter.use("/:name", async (req, res, next) => {
       const variables = this.variables.collection.filter(v => (
         v.config.action === "hook" &&
         v.config.routeName === req.params.name &&

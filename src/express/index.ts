@@ -40,7 +40,7 @@ export async function setupExpress() {
   app.use("/hook/:id", (req, res, next) => {
     const integration = services.integrationManager.findId(parseInt(req.params.id, 10))
     if (!integration) return res.sendStatus(404)
-    return integration.router(req, res, next)
+    return integration.publicRouter(req, res, next)
   })
   app.use("/api", httpLogger)
   app.use("/api", (req, res, next) => {
