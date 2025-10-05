@@ -15,7 +15,9 @@ export class Action<
   S extends z.ZodRawShape = {}
 > extends Entry<T, S> {
   
-  private callback: ActionCallback<S> = () => this.parent.logger.warn("no callback defined")
+  private callback: ActionCallback<S> = () => {
+    throw new Error("no callback defined")
+  }
 
   /** updates the zod schema */
   schema<Ext extends z.ZodRawShape>(raw: Ext) {
@@ -36,10 +38,9 @@ export class Action<
         config: variable.config,
         value: new VariableConverter(variable.value)
       })
-      return true
     } catch (e) {
-      this.parent.logger.warn(e, `failed to execute action ${String(this.id)}`)
-      return false
+      this.parent.logger.error(e, `failed to execute action ${String(this.id)}`)
+      return e
     }
   }
 
