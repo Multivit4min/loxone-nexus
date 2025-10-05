@@ -38,4 +38,13 @@ describe("ActionBuilder", () => {
     expect(spy).toHaveBeenCalledOnce()
     expect(called).toBe(true)
   })
+  
+  it("should return with an error", async () => {
+    const action = builder.create("test")
+    action.execute(() => {
+      throw new Error("test error")
+    })
+    const response = await builder.execute(variable as any)
+    expect(response).toBeInstanceOf(Error)
+  })
 })
