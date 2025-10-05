@@ -211,12 +211,44 @@ describe("E2E Test", () => {
       
       expect((await api.getIntegrations()).length).toBe(1)
     })
+
+    describe("/:id/variables", () => {
+
+      type WebhookActionProps = {
+        action: "hook",
+        routeName: string
+        duration: number
+        token?: string
+      }
+
+      it("should create a integration variable", async () => {
+        const variable = await api.createIntegrationVariable<WebhookActionProps>(1, {
+          label: "testing webhook",
+          direction: "OUTPUT",
+          props: {
+            action: "hook",
+            routeName: "testing",
+            duration: 1000
+          }
+        })
+        expect(variable.id).toBe(1)
+        expect(variable.integrationId).toBe(1)
+        expect(variable.direction).toBe("OUTPUT")
+        expect(variable.label).toBe("testing webhook")
+      })
+
+      it("should delete the integration variable", async () => {
+        const integration = await api.deleteIntegrationVariable(1, 1)
+        expect(integration.id).toBe(1)
+        expect(integration.variables.length).toBe(0)
+      })
+    })
+
     
     it("should delete the integration", async () => {
       await api.deleteIntegration(1)
       expect(await api.getIntegrations()).toEqual([])
     })
-
 
   })
 

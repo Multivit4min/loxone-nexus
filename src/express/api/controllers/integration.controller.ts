@@ -10,7 +10,7 @@ export const updateIntegrationSchema = z.object({
 }).strict()
 
 
-export const createIntegrationVariableSchema = <T extends z.Schema>(integration: IntegrationInstance<any>) => {
+export const createIntegrationVariableSchema = (integration: IntegrationInstance<any>) => {
   const input = z.object({
     label: z.string().min(1),
     direction: z.literal("INPUT"),
@@ -24,7 +24,7 @@ export const createIntegrationVariableSchema = <T extends z.Schema>(integration:
   return z.discriminatedUnion("direction", [input, output])
 }
 
-export type CreateIntegrationVariableProps<T extends z.Schema> = z.infer<ReturnType<typeof createIntegrationVariableSchema<T>>>
+export type CreateIntegrationVariableProps = z.infer<ReturnType<typeof createIntegrationVariableSchema>>
 
 
 export const integrationController = {
@@ -83,7 +83,7 @@ export const integrationController = {
       direction: props.direction,
       config: props.props
     })
-    res.json({ variable: variable.serialize() })
+    res.json(variable.serialize())
   },  
   
   async updateIntegrationVariable(req: Request, res: Response) {
@@ -94,13 +94,13 @@ export const integrationController = {
       direction: variable.entity.direction
     })
     await variable.update({ label, config: props as any })
-    res.json({ variable: variable.serialize() })
+    res.json(variable.serialize())
   },
 
   async deleteIntegrationVariable(req: Request, res: Response) {
     const integration = services.integrationManager.getId(parseInt(req.params.id, 10))
-    integration.variables.remove(parseInt(req.params.variableId, 10))
-    res.json({})
+    await integration.variables.remove(parseInt(req.params.variableId, 10))
+    res.json(integration.serialize())
   },
 
   async customRoutes(req: Request, res: Response, next: NextFunction) {

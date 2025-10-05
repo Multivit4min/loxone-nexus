@@ -13,6 +13,16 @@ export type IntegrationUpdateProps<T extends IntegrationConfig> = {
   config: T
 }
 
+export type IntegrationVariableConfig = Record<string, any>
+
+export type IntegrationVariableCreateProps<T extends IntegrationVariableConfig> = {
+  //arbitary name to identify the integration
+  label: string
+  //type of integration
+  direction: "INPUT"|"OUTPUT"
+  //additional variable props
+  props: T
+}
 
 export type Integration<T extends IntegrationConfig = any, S = any> = {
   id: number
@@ -28,10 +38,15 @@ export type Integration<T extends IntegrationConfig = any, S = any> = {
   variables: IntegrationVariable[]
 }
 
-export type IntegrationVariable = {
+export type IntegrationVariable<T extends IntegrationVariableConfig> = {
   id: number
   integrationId: number
   label: string
+  direction: "INPUT"|"OUTPUT"
+  value: any
+  config: T
+  store: any
+  links: []
 }
 
 export type GetIntegrationsResponse = {
