@@ -3,6 +3,7 @@ import { AppService } from "../../src/core/app/AppService"
 import { NexusApi } from "../__mocks__/api/NexusApi"
 import { ApiError } from "../__mocks__/api/ApiError"
 import { DATA_TYPE, LoxoneRemoteSystem, LoxoneServer } from "loxone-ici"
+import { integrations } from "../../src/drizzle/schema"
 
 const sleep = (time: number) => {
   return new Promise<void>(fulfill => setTimeout(fulfill, time))
@@ -181,6 +182,48 @@ describe("E2E Test", () => {
         expect(instance.variables.length).toBe(0)
       })
     })
+
+  })
+
+  
+  describe("/api/integration", () => {
+    
+    it("should create a new integration", async () => {
+      expect(await api.getIntegrations()).toEqual([])
+      const integration = await api.createIntegration({ 
+        label: "webhook test",
+        type: "Webhook"
+      })
+
+      expect(integration.id).toBe(1)
+      expect(integration.label).toBe("webhook test")
+      expect(integration.type).toBe("Webhook")
+      
+      expect((await api.getIntegrations()).length).toBe(1)
+    })
+    
+    it("should update the created integration", async () => {
+      const integration = await api.updateIntegration(1, { label: "webhook test2", config: {} })
+
+      expect(integration.id).toBe(1)
+      expect(integration.label).toBe("webhook test2")
+      expect(integration.type).toBe("Webhook")
+      
+      expect((await api.getIntegrations()).length).toBe(1)
+    })
+    
+    it("should delete the integration", async () => {
+      await api.deleteIntegration(1)
+      expect(await api.getIntegrations()).toEqual([])
+    })
+
+
+  })
+
+
+
+
+  describe("/api/loxone", () => {
 
     it("should stop the loxone instance", async () => {
       const instance = await api.stopLoxoneInstance(1)

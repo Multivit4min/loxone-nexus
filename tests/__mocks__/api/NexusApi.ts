@@ -1,6 +1,7 @@
 import { ApiError } from "./ApiError"
 import { ApiResponse } from "./types/api"
 import { LoginResponse, WhoAmIResponse } from "./types/auth"
+import { Integration, IntegrationConfig, IntegrationCreateProps, IntegrationUpdateProps } from "./types/integration"
 import { LoxoneInstanceCreateProps, LoxoneInstanceVariableUpdateProps, LoxoneInstanceUpdateProps, LoxoneInstance, LoxoneInstancesResponse, LoxoneInstanceVariableCreateProps, LoxoneVariable } from "./types/loxone"
 import { UpdateUserProps, User, Users } from "./types/users"
 
@@ -222,5 +223,43 @@ export class NexusApi {
     return this.delete<LoxoneInstance>(`/api/loxone/${loxoneId}/variables/${variableId}`)
   }
   
+  /**
+   * retrieves a list of integrations
+   * @param props 
+   * @returns 
+   */
+  async getIntegrations() {
+    const { entries } = await this.get<Integration[]>(`/api/integration`)
+    return entries
+  }
+  
+  /**
+   * creates a new integration
+   * @param props 
+   * @returns 
+   */
+  createIntegration<T extends IntegrationConfig>(props: IntegrationCreateProps<T>) {
+    return this.post<Integration<T>>(`/api/integration`, props)
+  }
 
+
+  /**
+   * updates an integration
+   * @param id instance id of the integration 
+   * @param props 
+   * @returns 
+   */
+  updateIntegration<T extends IntegrationConfig>(id: number, props: IntegrationUpdateProps<T>) {
+    return this.patch<Integration<T>>(`/api/integration/${id}`, props)
+  }
+
+
+  /**
+   * deletes an integration
+   * @param id instance id of the integration 
+   * @returns 
+   */
+  deleteIntegration(id: number) {
+    return this.delete(`/api/integration/${id}`)
+  }
 }
