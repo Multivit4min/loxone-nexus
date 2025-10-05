@@ -176,16 +176,12 @@ describe("E2E Test", () => {
         expect(resB.variables[0].value.value).toBe(6)
       }, 1000)
 
-      it("should delete the variable", async () => {
-        const instance = await api.deleteLoxoneVariable(1, 1)
-        expect(instance.id).toBe(1)
-        expect(instance.variables.length).toBe(0)
-      })
     })
 
   })
 
-  
+
+
   describe("/api/integration", () => {
     
     it("should create a new integration", async () => {
@@ -244,19 +240,25 @@ describe("E2E Test", () => {
       })
     })
 
-    
     it("should delete the integration", async () => {
       await api.deleteIntegration(1)
       expect(await api.getIntegrations()).toEqual([])
     })
-
   })
 
 
-
-
   describe("/api/loxone", () => {
+  
+    describe("/:id/variables", () => {
 
+      it("should delete the loxone variable", async () => {
+        const instance = await api.deleteLoxoneVariable(1, 1)
+        expect(instance.id).toBe(1)
+        expect(instance.variables.length).toBe(0)
+      })
+      
+    })
+    
     it("should stop the loxone instance", async () => {
       const instance = await api.stopLoxoneInstance(1)
       expect(instance.id).toBe(1)
