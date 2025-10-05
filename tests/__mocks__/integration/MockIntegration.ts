@@ -9,7 +9,7 @@ import { IntegrationVariable } from "../../../src/core/integration/variables/Int
 export class MockIntegration extends IntegrationInstance<{}> {
 
   constructor(entity: IntegrationEntity, parent: IntegrationManager) {
-    super(entity, parent, MockIntegration)
+    super(entity, parent)
   }
 
   getConstructor() {

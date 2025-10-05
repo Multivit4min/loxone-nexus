@@ -20,7 +20,7 @@ export class HueIntegration extends IntegrationInstance<
   private interval!: NodeJS.Timeout
 
   constructor(entity: IntegrationEntity, parent: IntegrationManager) {
-    super(entity, parent, HueIntegration)
+    super(entity, parent)
     this.actions.create("light.set")
       .describe("sets the light to on or off")
       .schema({

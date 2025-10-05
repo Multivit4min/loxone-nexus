@@ -21,9 +21,9 @@ export abstract class IntegrationInstance<T extends object> extends Instance<Int
   //protected router for /api/integration/:integrationId/custom/*
   authenticatedRouter = express.Router()
 
-  constructor(entity: IntegrationEntity, parent: IntegrationManager, varConstructor: IntegrationConstructor) {
+  constructor(entity: IntegrationEntity, parent: IntegrationManager) {
     super(entity, parent)
-    this.variables = new IntegrationVariableManager(this, varConstructor)
+    this.variables = new IntegrationVariableManager(this)
     this.logger = logger.child({ id: this.entity.id }, { msgPrefix: `[Integration:${entity.type}:${entity.id}] ` })
   }
 

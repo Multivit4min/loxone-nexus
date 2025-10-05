@@ -1,12 +1,12 @@
 import { CreateIntegrationVariableProps } from "../../../drizzle/repositories/IntegrationVariableRepository"
 import { IntegrationVariableEntity } from "../../../drizzle/schema"
 import { InstanceManager } from "../../instance/InstanceManager"
-import { IntegrationConstructor, IntegrationInstance } from "../IntegrationInstance"
+import { IntegrationInstance } from "../IntegrationInstance"
 import { IntegrationVariable } from "./IntegrationVariable"
 
 export class IntegrationVariableManager extends InstanceManager<IntegrationVariableEntity, IntegrationVariable> {
 
-  constructor(public parent: IntegrationInstance<any>, readonly varConstructor: IntegrationConstructor) {
+  constructor(public parent: IntegrationInstance<any>) {
     super()
   }
 

@@ -16,7 +16,7 @@ export class CalendarIntegration extends IntegrationInstance<
   refreshInterval?: NodeJS.Timeout
 
   constructor(entity: IntegrationEntity, parent: IntegrationManager) {
-    super(entity, parent, CalendarIntegration)
+    super(entity, parent)
     this.inputs
       .create("event")
       .setLabel("event data")

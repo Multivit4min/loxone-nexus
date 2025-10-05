@@ -20,7 +20,7 @@ export class HomeAssistantIntegration extends IntegrationInstance<
   states: StateEntry[] = []
 
   constructor(entity: IntegrationEntity, parent: IntegrationManager) {
-    super(entity, parent, HomeAssistantIntegration)
+    super(entity, parent)
     //register state changes
     this.inputs.create("state")
       .describe("retrieve the current state")

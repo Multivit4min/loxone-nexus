@@ -18,7 +18,7 @@ export class MqttIntegration extends IntegrationInstance<
 
 
   constructor(entity: IntegrationEntity, parent: IntegrationManager) {
-    super(entity, parent, MqttIntegration)
+    super(entity, parent)
     this.authenticatedRouter.get("/topic/:name", (req, res) => {
       const topic = decodeURIComponent(req.params.name)
       if (!this.messages[topic]) return res.json(null)

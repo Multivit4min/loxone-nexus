@@ -23,7 +23,7 @@ export class SonosIntegration extends IntegrationInstance<
   private state?: SonosState
 
   constructor(entity: IntegrationEntity, parent: IntegrationManager) {
-    super(entity, parent, SonosIntegration)
+    super(entity, parent)
     this.device = new SonosDevice(this.config.address)
     this.inputs
       .create("media info")

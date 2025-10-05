@@ -11,7 +11,7 @@ export class WebhookIntegration extends IntegrationInstance<
 > {
 
   constructor(entity: IntegrationEntity, parent: IntegrationManager) {
-    super(entity, parent, WebhookIntegration)
+    super(entity, parent)
     this.inputs
       .create("hook")
       .describe("webhook which can set an output")
