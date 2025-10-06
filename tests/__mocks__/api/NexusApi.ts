@@ -55,9 +55,16 @@ export class NexusApi {
     return this.request<T>("DELETE", url)
   }
 
+  /** sets a token directly */
+  setCredentials(token: string) {
+    this.token = token
+  }
+
   /** resets credentials from this api */
   clearCredentials() {
+    const token = this.token
     this.token = undefined
+    return token
   }
 
   /**

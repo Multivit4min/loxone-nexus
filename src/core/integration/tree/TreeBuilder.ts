@@ -19,10 +19,10 @@ export class TreeBuilder {
   }
 
   serialize() {
-    return [
-      this.inputs.serialize(),
-      this.outputs.serialize()
-    ]
+    const res = []
+    if (this.inputs.props.children.length > 0) res.push(this.inputs.serialize())
+    if (this.outputs.props.children.length > 0) res.push(this.outputs.serialize())
+    return JSON.parse(JSON.stringify(res))
   }
 
 }

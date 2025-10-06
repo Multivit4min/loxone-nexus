@@ -55,15 +55,27 @@ describe("E2E Test", () => {
     })
   })
 
+  describe("misc routes", () => {
+
+    it("should try to access a route without having permissions", async () => {
+      const token = api.clearCredentials()
+      try {
+        await expect(api.getLoxoneInstances()).rejects.toThrowError(ApiError)
+      } finally {
+        if (token) api.setCredentials(token)
+      }
+
+    })
+
+    it("should test a 404 route", async () => {
+      await expect(api["get"]("/api/foo/bar")).rejects.toThrowError(ApiError)
+    })
+
+  })
 
   describe("/api/auth", () => {
     it("should validate a failed login attempt", async () => {
       await expect(api.login("admin", "WRONG_PASSWORD")).rejects.toThrowError(ApiError)
-    })
-
-    it("should try to access a route without having permissions", async () => {
-      api.clearCredentials()
-      await expect(api.getLoxoneInstances()).rejects.toThrowError(Error)
     })
 
     it("should login and retrieve a token for the user", async () => {
