@@ -55,6 +55,11 @@ export class NexusApi {
     return this.request<T>("DELETE", url)
   }
 
+  /** resets credentials from this api */
+  clearCredentials() {
+    this.token = undefined
+  }
+
   /**
    * retrieve current user data
    * @returns 

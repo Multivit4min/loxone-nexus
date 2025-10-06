@@ -61,12 +61,18 @@ describe("E2E Test", () => {
       await expect(api.login("admin", "WRONG_PASSWORD")).rejects.toThrowError(ApiError)
     })
 
+    it("should try to access a route without having permissions", async () => {
+      api.clearCredentials()
+      await expect(api.getLoxoneInstances()).rejects.toThrowError(Error)
+    })
+
     it("should login and retrieve a token for the user", async () => {
       const { user, token } = await api.login("admin", "foo123456")
       expect(user.id).toBe(1)
       expect(user.username).toBe("admin")
       expect(token).toBeTypeOf("string")
     })
+
   })
 
 
