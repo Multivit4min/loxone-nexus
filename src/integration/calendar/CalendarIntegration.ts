@@ -1,7 +1,5 @@
 import z from "zod"
 import { IntegrationInstance } from "../../core/integration/IntegrationInstance"
-import { IntegrationManager } from "../../core/integration/IntegrationManager"
-import { IntegrationEntity } from "../../drizzle/schema"
 import { TreeBuilder } from "../../core/integration/tree/TreeBuilder"
 import ical, { CalendarResponse, VEvent } from "node-ical"
 import { IntegrationVariable } from "../../core/integration/variables/IntegrationVariable"
@@ -15,8 +13,7 @@ export class CalendarIntegration extends IntegrationInstance<
   data?: CalendarResponse
   refreshInterval?: NodeJS.Timeout
 
-  constructor(entity: IntegrationEntity, parent: IntegrationManager) {
-    super(entity, parent)
+  async initialize() {    
     this.inputs
       .create("event")
       .setLabel("event data")

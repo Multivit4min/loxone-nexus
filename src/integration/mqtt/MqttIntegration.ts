@@ -1,7 +1,5 @@
 import z from "zod"
 import { IntegrationInstance } from "../../core/integration/IntegrationInstance"
-import { IntegrationManager } from "../../core/integration/IntegrationManager"
-import { IntegrationEntity } from "../../drizzle/schema"
 import { TreeBuilder } from "../../core/integration/tree/TreeBuilder"
 import mqtt, { MqttClient } from "mqtt"
 import { VariableDataTypes } from "../../types/general"
@@ -17,8 +15,7 @@ export class MqttIntegration extends IntegrationInstance<
   static KEEP_MESSAGE_TIME = 5 * 60 * 1000 //5 minutes
 
 
-  constructor(entity: IntegrationEntity, parent: IntegrationManager) {
-    super(entity, parent)
+  async initialize() {
     this.authenticatedRouter.get("/topic/:name", (req, res) => {
       const topic = decodeURIComponent(req.params.name)
       if (!this.messages[topic]) return res.json(null)
@@ -46,10 +43,6 @@ export class MqttIntegration extends IntegrationInstance<
         if (!this.client) throw new Error("mqtt not connected")
         return this.client.publishAsync(config.topic, value.toString())
       })
-  }
-
-  getConstructor() {
-    return MqttIntegration
   }
 
   async start() {

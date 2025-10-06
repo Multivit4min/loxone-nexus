@@ -9,6 +9,11 @@ import { IntegrationEntity } from "../../drizzle/schema"
 import { InputBuilder } from "./io/InputBuilder"
 import express from "express"
 
+export interface IntegrationConstructor<T extends IntegrationInstance<any>> {
+  new (entity: IntegrationEntity, parent: IntegrationManager): T
+
+  configSchema(): z.ZodObject
+}
 
 export abstract class IntegrationInstance<T extends object> extends Instance<IntegrationEntity> {
 
@@ -25,6 +30,10 @@ export abstract class IntegrationInstance<T extends object> extends Instance<Int
     super(entity, parent)
     this.variables = new IntegrationVariableManager(this)
     this.logger = logger.child({ id: this.entity.id }, { msgPrefix: `[Integration:${entity.type}:${entity.id}] ` })
+  }
+
+  private get ctor() {
+    return this.constructor as IntegrationConstructor<this>
   }
 
   get services() {
@@ -49,7 +58,7 @@ export abstract class IntegrationInstance<T extends object> extends Instance<Int
 
   get config() {
     const { config } = this.entity
-    if (config === null && typeof config !== "object")
+    if (config === null || typeof config !== "object")
       throw new Error(`invalid config in ${this.entity.id}`)
     return config as T
   }
@@ -115,11 +124,10 @@ export abstract class IntegrationInstance<T extends object> extends Instance<Int
   }
 
   serialize() {
-    const constructor = this.getConstructor()
     return {
       specific: this.specificSerialize(),
       variables: this.variables.serialize().entries,
-      configSchema: z.toJSONSchema(constructor.configSchema()),
+      configSchema: z.toJSONSchema(this.ctor.configSchema()),
       outputVariableSchema: z.toJSONSchema(this.actions.schema),
       inputVariableSchema: z.toJSONSchema(this.inputs.schema),
       actions: this.actions.serialize(),
@@ -127,8 +135,8 @@ export abstract class IntegrationInstance<T extends object> extends Instance<Int
     }
   }
 
+  abstract initialize(): Promise<any>
   abstract tree(): Promise<any[]>
-  abstract getConstructor(): IntegrationConstructor
   abstract specificSerialize(): any
   abstract start(): Promise<any>
   abstract stop(): Promise<any>
@@ -140,9 +148,3 @@ export type UpdateProps = {
   config: object
 }
 
-
-export interface IntegrationConstructor {
-  new (entity: IntegrationEntity, parent: IntegrationManager): IntegrationInstance<any>
-
-  configSchema(): z.ZodObject
-}

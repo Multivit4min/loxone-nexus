@@ -1,7 +1,5 @@
 import z from "zod"
 import { IntegrationInstance } from "../../core/integration/IntegrationInstance"
-import { IntegrationManager } from "../../core/integration/IntegrationManager"
-import { IntegrationEntity } from "../../drizzle/schema"
 import { TreeBuilder } from "../../core/integration/tree/TreeBuilder"
 import { Request } from "express"
 
@@ -10,8 +8,7 @@ export class WebhookIntegration extends IntegrationInstance<
   z.infer<ReturnType<typeof WebhookIntegration.configSchema>>
 > {
 
-  constructor(entity: IntegrationEntity, parent: IntegrationManager) {
-    super(entity, parent)
+  async initialize() {
     this.inputs
       .create("hook")
       .describe("webhook which can set an output")
@@ -48,10 +45,6 @@ export class WebhookIntegration extends IntegrationInstance<
     if (!match) return false
     console.log(match[1], match, token)
     return match[1] === token
-  }
-
-  getConstructor() {
-    return WebhookIntegration
   }
 
   async start() {}

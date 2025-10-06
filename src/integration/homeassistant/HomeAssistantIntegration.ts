@@ -2,9 +2,7 @@ import z from "zod"
 import { IntegrationInstance } from "../../core/integration/IntegrationInstance"
 import { HomeAssistant } from "./hass/HomeAssistant"
 import { VariableDataTypes } from "../../types/general"
-import { IntegrationManager } from "../../core/integration/IntegrationManager"
 import { ActionCallback, ActionProps } from "../../core/integration/io/Action"
-import { IntegrationEntity } from "../../drizzle/schema"
 import { State } from "./hass/commands/HomeAssistantStateCommand"
 import { TreeBuilder } from "../../core/integration/tree/TreeBuilder"
 import { OutputTreeEndpoint } from "../../core/integration/tree/OutputTreeEndpoint"
@@ -19,9 +17,7 @@ export class HomeAssistantIntegration extends IntegrationInstance<
   ha?: HomeAssistant
   states: StateEntry[] = []
 
-  constructor(entity: IntegrationEntity, parent: IntegrationManager) {
-    super(entity, parent)
-    //register state changes
+  async initialize() {    //register state changes
     this.inputs.create("state")
       .describe("retrieve the current state")
       .schema({
@@ -265,10 +261,6 @@ export class HomeAssistantIntegration extends IntegrationInstance<
         service_data: { entity_id: config.entityId, [key]: value  }
       })
     }) as ActionCallback<any>
-  }
-
-  getConstructor() {
-    return HomeAssistantIntegration
   }
 
   async start() {

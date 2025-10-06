@@ -92,6 +92,7 @@ export class IntegrationManager extends InstanceManager<IntegrationEntity, Integ
     const constructorClass = this.getRegisteredConstructor(entity.type)
     if (!constructorClass) throw new Error(`Integration with name ${entity.type} not found`)
     const integration = new constructorClass(entity, this)
+    await integration.initialize()
     await integration.variables.init()
     try {
       await integration.start()

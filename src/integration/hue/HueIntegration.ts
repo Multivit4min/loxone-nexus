@@ -1,7 +1,5 @@
 import z from "zod"
 import { IntegrationInstance } from "../../core/integration/IntegrationInstance"
-import { IntegrationManager } from "../../core/integration/IntegrationManager"
-import { IntegrationEntity } from "../../drizzle/schema"
 import { TreeBuilder } from "../../core/integration/tree/TreeBuilder"
 import { v3 } from "node-hue-api"
 import { Api } from "node-hue-api/dist/esm/api/Api"
@@ -19,8 +17,7 @@ export class HueIntegration extends IntegrationInstance<
   private lights: HueLights = []
   private interval!: NodeJS.Timeout
 
-  constructor(entity: IntegrationEntity, parent: IntegrationManager) {
-    super(entity, parent)
+  async initialize(): Promise<any> {
     this.actions.create("light.set")
       .describe("sets the light to on or off")
       .schema({
@@ -79,11 +76,6 @@ export class HueIntegration extends IntegrationInstance<
         }
         await this.api.lights.setLightState(light.id, state.getPayload())
       })
-  
-  }
-
-  getConstructor() {
-    return HueIntegration
   }
 
   async start() {

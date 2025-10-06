@@ -187,23 +187,21 @@ describe("E2E Test", () => {
         label: "webhook test",
         type: "Webhook"
       })
-
       expect(integration.id).toBe(1)
       expect(integration.label).toBe("webhook test")
       expect(integration.type).toBe("Webhook")
-      
+
       expect((await api.getIntegrations()).length).toBe(1)
     })
     
     it("should update the created integration", async () => {
       const integration = await api.updateIntegration(1, { label: "webhook test2", config: {} })
-
       expect(integration.id).toBe(1)
       expect(integration.label).toBe("webhook test2")
       expect(integration.type).toBe("Webhook")
-      
       expect((await api.getIntegrations()).length).toBe(1)
     })
+
 
     describe("/:id/variables", () => {
 
@@ -235,7 +233,9 @@ describe("E2E Test", () => {
         expect(integration.id).toBe(1)
         expect(integration.variables.length).toBe(0)
       })
+
     })
+
   })
 
   
@@ -315,5 +315,8 @@ describe("E2E Test", () => {
       const instances = await api.getLoxoneInstances()
       expect(instances.entries.length).toBe(0)
     })
+
   })
+
+
 })

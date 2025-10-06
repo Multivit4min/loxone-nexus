@@ -1,11 +1,9 @@
 import z from "zod"
 import { IntegrationInstance } from "../../core/integration/IntegrationInstance"
 import { VariableDataTypes } from "../../types/general"
-import { IntegrationManager } from "../../core/integration/IntegrationManager"
 import { SonosDevice } from "@svrooij/sonos/lib"
 import { GetZoneInfoResponse } from "@svrooij/sonos/lib/services"
 import { SonosState } from "@svrooij/sonos/lib/models/sonos-state"
-import { IntegrationEntity } from "../../drizzle/schema"
 import { TransportState } from "@svrooij/sonos/lib/models"
 import { TreeBuilder } from "../../core/integration/tree/TreeBuilder"
 import { InputTreeEndpoint } from "../../core/integration/tree/InputTreeEndpoint"
@@ -16,14 +14,13 @@ export class SonosIntegration extends IntegrationInstance<
   z.infer<ReturnType<typeof SonosIntegration.configSchema>>
 > {
 
-  device: SonosDevice
+  device!: SonosDevice
   private pollInterval?: NodeJS.Timeout
   static POLL_INTERVAL = 4 * 1000
   private zone?: GetZoneInfoResponse
   private state?: SonosState
 
-  constructor(entity: IntegrationEntity, parent: IntegrationManager) {
-    super(entity, parent)
+  async initialize() {
     this.device = new SonosDevice(this.config.address)
     this.inputs
       .create("media info")
@@ -138,10 +135,6 @@ export class SonosIntegration extends IntegrationInstance<
   get muted() {
     if (!this.state) return false
     return this.state.muted
-  }
-
-  getConstructor() {
-    return SonosIntegration
   }
 
   async start() {
