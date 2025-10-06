@@ -57,7 +57,7 @@ export const integrationController = {
   async updateIntegration(req: Request, res: Response) {
     const body = updateIntegrationSchema.parse(req.body)
     const integration = services.integrationManager.getId(parseInt(req.params.id, 10))
-    const config: any = integration.getConstructor().configSchema().parse(body.config)
+    const config: any = integration.ctor.configSchema().parse(body.config)
     await integration.update({ label: body.label, config })
     res.json(integration.serialize())
   },

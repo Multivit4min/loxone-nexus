@@ -32,7 +32,7 @@ export abstract class IntegrationInstance<T extends object> extends Instance<Int
     this.logger = logger.child({ id: this.entity.id }, { msgPrefix: `[Integration:${entity.type}:${entity.id}] ` })
   }
 
-  private get ctor() {
+  get ctor() {
     return this.constructor as IntegrationConstructor<this>
   }
 

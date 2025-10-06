@@ -116,10 +116,6 @@ export class CalendarIntegration extends IntegrationInstance<
     return this.data.VCALENDAR
   }
 
-  getConstructor() {
-    return CalendarIntegration
-  }
-
   async start() {
     this.refreshInterval = setInterval(() => {
       this.fetchCalendar()
