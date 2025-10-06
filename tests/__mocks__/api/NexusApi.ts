@@ -2,6 +2,7 @@ import { ApiError } from "./ApiError"
 import { ApiResponse } from "./types/api"
 import { LoginResponse, WhoAmIResponse } from "./types/auth"
 import { Integration, IntegrationConfig, IntegrationCreateProps, IntegrationUpdateProps, IntegrationVariable, IntegrationVariableConfig, IntegrationVariableCreateProps } from "./types/integration"
+import { CreateLinkResponse, LinkCreateProps } from "./types/link"
 import { LoxoneInstanceCreateProps, LoxoneInstanceVariableUpdateProps, LoxoneInstanceUpdateProps, LoxoneInstance, LoxoneInstancesResponse, LoxoneInstanceVariableCreateProps, LoxoneVariable } from "./types/loxone"
 import { UpdateUserProps, User, Users } from "./types/users"
 
@@ -281,6 +282,49 @@ export class NexusApi {
    */
   deleteIntegrationVariable(integrationId: number, variableId: number) {
     return this.delete<Integration>(`/api/integration/${integrationId}/variable/${variableId}`)
+  }
+
+  /**
+   * links 2 variables together
+   * @param props 
+   * @returns 
+   */
+  createLink(props: LinkCreateProps) {
+    return this.post<CreateLinkResponse>(`/api/link`, props)
+  }
+
+  /**
+   * removes a variable link
+   * @param id 
+   * @returns 
+   */
+  removeLink(id: number) {
+    return this.delete(`/api/link/${id}`)
+  }
+
+  /**
+   * calls an integration hook
+   * @param id integration id to call
+   * @param path path of the hook
+   * @returns 
+   */
+  callPublicIntegrationHook(id: number, path: string) {
+    const urlPath = `/hook/${id}/${path}`
+    return {
+      get: () => {
+        console.log({ urlPath })
+        return this.get(urlPath)
+      },
+      post: (props: any) => {
+        return this.post(urlPath, props)
+      },
+      patch: (props: any) => {
+        return this.post(urlPath, props)
+      },
+      delete: (props: any) => {
+        return this.delete(urlPath)
+      }
+    }
   }
 
 }
