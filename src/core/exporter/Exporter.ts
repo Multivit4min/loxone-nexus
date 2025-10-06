@@ -99,7 +99,8 @@ export class Exporter {
         const integrationsInsertedIds = await tx.insert(integrations).values(data.integration.map(i => ({
           label: i.label,
           type: i.type,
-          config: i.config
+          config: i.config,
+          store: i.store
         }))).returning({ id: integrations.id, label: integrations.label }).all()
         //integration variables
         if (data.integrationVariables.length > 0) {
@@ -123,7 +124,8 @@ export class Exporter {
               integrationId: i.integrationId,
               direction: i.direction,
               value: i.value,
-              config: i.config
+              config: i.config,
+              store: i.store
             })))
         }
       }
@@ -172,7 +174,8 @@ export class Exporter {
           id: z.int().positive(),
           label: z.string(),
           type: z.string(),
-          config: z.any()
+          config: z.any(),
+          store: z.any()
         })),
         integrationVariables: z.array(z.object({
           id: z.int().positive(),
@@ -180,7 +183,8 @@ export class Exporter {
           label: z.string(),
           direction: z.enum(["INPUT", "OUTPUT"]),
           value: z.any(),
-          config: z.any()
+          config: z.any(),
+          store: z.any()
         }))
       })
 
