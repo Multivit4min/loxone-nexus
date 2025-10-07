@@ -56,13 +56,10 @@ export class HomeAssistantIntegration extends IntegrationInstance<
     /** domain: light */
     this.actions.create("light.brightness")
       .describe("sets the brightness of a light in % (0 = off)")
-      .schema({
-        entityId: z.string().min(1),
-        fadeTime: z.number().min(0).describe("fade time in seconds").optional()
-      })
+      .schema({ entityId: z.string().min(1) })
       .execute(async ({ value, config }) => {
         if (!this.ha) return
-        const sma = value.toSmartActuatorSingleChannel({ fadeTime: config.fadeTime })
+        const sma = value.toSmartActuatorSingleChannel()
         let transition = sma.fadeTime
         const serviceData: Record<string, any> = { entity_id: config.entityId, transition }
         const service = value.toBoolean() ? "turn_on" : "turn_off"
@@ -70,33 +67,31 @@ export class HomeAssistantIntegration extends IntegrationInstance<
         return this.ha.callService({ domain: "light", service, service_data: serviceData })
       })
     this.actions.create("light.rgbw")
-      .describe("sets the rgba color of the light")
-      .schema({
-        entityId: z.string().min(1),
-        red: z.number().min(0).max(100).describe("red color (0 to 100%)").optional(),
-        green: z.number().min(0).max(100).describe("green color (0 to 100%)").optional(),
-        blue: z.number().min(0).max(100).describe("blue color (0 to 100%)").optional(),
-        white: z.number().min(0).max(100).describe("white color (0 to 100%)").optional(),
-        fadeTime: z.number().min(0).describe("fade time in seconds").optional()
-      })
+      .describe("sets the rgbw color of the light")
+      .schema({ entityId: z.string().min(1) })
       .execute(async ({ value, config }) => {
         if (!this.ha) return
-        const rgbw = value.toSmartActuatorRGBW({ red: config.red, green: config.green, blue: config.blue, white: config.white, fadeTime: config.fadeTime })
-        let transition = rgbw.fadeTime
+        const sma = value.toSmartActuatorRGBW()
+        let transition = sma.fadeTime
         const serviceData: Record<string, any> = { entity_id: config.entityId, transition }
         const service = value.toBoolean() ? "turn_on" : "turn_off"
         if (service === "turn_on") {
-          serviceData.rgbw_color = [
-            Math.floor(rgbw.red * 2.55),
-            Math.floor(rgbw.green * 2.55),
-            Math.floor(rgbw.blue * 2.55),
-            Math.floor(rgbw.white * 2.55)
-          ]
+          if (sma.white === 0) {
+            serviceData.rgb_color = [
+              Math.floor(sma.red * 2.55),
+              Math.floor(sma.green * 2.55),
+              Math.floor(sma.blue * 2.55)
+            ]
+          } else {
+            const { temperature, brightness } = value.toSmartActuatorTunableWhite()
+            serviceData.color_temp_kelvin = temperature
+            serviceData.brightness = Math.floor(brightness * 2.55)
+          }
         }
         await this.ha.callService({ domain: "light", service, service_data: serviceData})
       })
     this.actions.create("light.set")
-      .describe("sets the brightness of a light in % (0 = off)")
+      .describe("sets the the light to on or off")
       .schema({ entityId: z.string().min(1) })
       .execute(async ({ value, config }) => {
         if (!this.ha) return
