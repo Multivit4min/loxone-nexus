@@ -10,7 +10,6 @@ export class CalendarIntegration extends IntegrationInstance<
   z.infer<ReturnType<typeof CalendarIntegration.configSchema>>
 > {
 
-  data?: CalendarResponse
   refreshInterval?: NodeJS.Timeout
 
   async initialize() {    
@@ -24,9 +23,9 @@ export class CalendarIntegration extends IntegrationInstance<
         regex: z.string().optional().describe("Regular Expression to match Event"),
         regexLocation: z.enum(["summary", "description"]).default("summary").describe("location to match regex"),
         timeBeforeEvent: z.number().min(0).default(0).describe("with the modifier this sets how long the event gets sent before it actually starts"),
-        timeBeforeEventModifier: z.enum(["minute(s)", "hour(s)", "day(s)"]).default("minute(s)"),
+        timeBeforeEventModifier: z.enum(["minute", "hour", "day"]).default("minute"),
         timeAfterEvent: z.number().min(0).default(0).describe("with the modifier this sets how long the event gets sent after it has started"),
-        timeAfterEventModifier: z.enum(["minute(s)", "hour(s)", "day(s)"]).default("minute(s)")
+        timeAfterEventModifier: z.enum(["minute", "hour", "day"]).default("minute")
       })
       .currentValue(async ({ config, variable }) => {
         const events = this.getActiveEvents(variable)
@@ -95,32 +94,35 @@ export class CalendarIntegration extends IntegrationInstance<
   /**
    * calculates how many ms the time with the modifier should have
    */
-  private calculateDuration(time: number, modifier: "minute(s)"|"hour(s)"|"day(s)") {
+  private calculateDuration(time: number, modifier: "minute"|"hour"|"day"|"never") {
     switch (modifier) {
-      case "minute(s)": return time * 60 * 1000
-      case "hour(s)": return time * 60 * 60 * 1000
-      case "day(s)": return time * 60 * 60 * 24 * 1000
+      case "never": return Infinity
+      case "minute": return time * 60 * 1000
+      case "hour": return time * 60 * 60 * 1000
+      case "day": return time * 60 * 60 * 24 * 1000
       default: return 0
     }
   }
 
   get events(): VEvent[] {
-    if (!this.data) return []
-    return Object.values(this.data)
+    if (!this.calendar) return []
+    return Object.values(this.calendar)
       .filter(ev => ev.type === "VEVENT")
       .sort((a, b) => a.start.getTime() - b.start.getTime())
   }
 
   get calendar() {
-    if (!this.data) return null
-    return this.data.VCALENDAR
+    const data = this.getStoreProperty<false|CalendarResponse>("calendar", false)
+    if (!data) return null
+    return data.VCALENDAR
   }
 
   async start() {
-    this.refreshInterval = setInterval(() => {
-      this.fetchCalendar()
-    }, this.getRefreshInterval())
-    await this.fetchCalendar()
+    if (this.config.refetch !== "NEVER") {
+      this.refreshInterval = setInterval(() => this.fetchCalendar(), this.getRefreshInterval())
+      await this.fetchCalendar()
+    }
+    if (!this.calendar) await this.fetchCalendar()
     await this.variables.reload()
   }
 
@@ -148,13 +150,13 @@ export class CalendarIntegration extends IntegrationInstance<
       return
     }
     const content = await res.text()
-    this.data = ical.parseICS(content)
+    await this.setStoreProperty("calendar", ical.parseICS(content))
   }
 
   specificSerialize() {
     return {
       events: this.events,
-      calendar: this.data
+      calendar: this.calendar
     }
   }
 
@@ -181,7 +183,7 @@ export class CalendarIntegration extends IntegrationInstance<
   static configSchema() {
     return z.object({
       url: z.url().describe("url of the calendar to fetch"),
-      refetch: z.enum(["HOURLY", "DAILY", "WEEKLY", "MONTHLY"]).describe("how often should the calendar be reloaded (data will also reload on application restarts)")
+      refetch: z.enum(["HOURLY", "DAILY", "WEEKLY", "MONTHLY", "NEVER"]).describe("how often should the calendar be reloaded (data will also reload on application restarts)")
     })
   }
 }
