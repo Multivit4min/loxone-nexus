@@ -43,6 +43,10 @@ export class SocketClient {
     this.socket.emit("integrations:update.variable", { variable })
   }
 
+  sendIntegrationSpecific({ id, specific }: any) {
+    this.socket.emit("integrations:update.specific", { id, specific })
+  }
+
   private async authenticate(data: any, ack: (data: any) => void) {
     const { token } = tokenSchema.parse(data)
     const user = await this.parent.services.userService.getByToken(token)

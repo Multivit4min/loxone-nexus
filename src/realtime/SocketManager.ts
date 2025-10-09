@@ -57,13 +57,24 @@ export class SocketManager implements IAppService {
     return this.sockets.filter(socket => socket.authenticated)
   }
 
+  /**
+   * checks if there are any sockets connected
+   * @param authenticated wether only authenticated sockets should be counted
+   */
+  hasSockets(authenticated = true) {
+    if (authenticated) return this.getAuthenticated().length > 0
+    return this.sockets.length > 0
+  }
+
   sendInstance(instance: LoxoneInstance) {
+    if (!this.hasSockets()) return
     this.logger.debug(`Sending instance ${instance.entity.label} (${instance.id})`)
     const serialized = instance.serialize()
     this.getAuthenticated().map(socket => socket.sendInstance(serialized))
   }
 
   sendVariable(variable: LoxoneVariableService) {
+    if (!this.hasSockets()) return
     this.logger.silent(`Sending Loxone variable ${variable.entity.packetId} (${variable.id}) to ${variable.entity.loxoneId}`)
     const serialized = variable.serialize()
     this.getAuthenticated().map(socket => socket.sendVariable(variable.entity.loxoneId, serialized))
@@ -73,6 +84,7 @@ export class SocketManager implements IAppService {
    * sends the state of the instances to all connected and authenticated socket clients
    */
   sendInstances() {
+    if (!this.hasSockets()) return
     this.logger.debug(`Sending all instances`)
     const instances = this.services.loxoneManager.serialize()
     this.getAuthenticated().map(socket => socket.sendInstances(instances))
@@ -82,6 +94,7 @@ export class SocketManager implements IAppService {
    * sends the state of the datasource to all connected and authenticated socket clients
    */
   sendIntegrations() {
+    if (!this.hasSockets()) return
     this.logger.debug(`Sending all integrations`)
     const integrations = this.services.integrationManager.serialize()
     this.getAuthenticated().map(socket => socket.sendIntegrations(integrations))
@@ -91,16 +104,24 @@ export class SocketManager implements IAppService {
    * sends the state of the datasource to all connected and authenticated socket clients
    */
   sendIntegration(integration: IntegrationInstance<any>) {
+    if (!this.hasSockets()) return
     this.logger.debug(`Sending integration ${integration.label} (${integration.id})`)
     const data = integration.serialize()
     this.getAuthenticated().map(socket => socket.sendIntegration(data))
   }
 
-
   sendIntegrationVariable(variable: IntegrationVariable) {
+    if (!this.hasSockets()) return
     this.logger.silent(`Sending Integration variable ${variable.entity.label} (${variable.id})`)
     const data = variable.serialize()
     this.getAuthenticated().map(socket => socket.sendIntegrationVariable(data))
+  }
+
+  sendIntegrationSpecific(integration: IntegrationInstance<any>) {
+    if (!this.hasSockets()) return
+    this.logger.silent(`send integration specific data ${integration.label} (${integration.id})`)
+    const specific = integration.specificSerialize()
+    this.getAuthenticated().map(socket => socket.sendIntegrationSpecific({ id: integration.id, specific }))
   }
 
 }
