@@ -32,6 +32,12 @@ Loxone Nexus connects external integrations to **Loxone Miniservers** using the 
   - subscribe
   - subscribe on topics which return json data and get specific values
 
+### ☀️ Fronius
+- Read Grid and Load Wattages
+- Read Status of Battery (SoC, Current, Voltage, temperature)
+- Read Ohmpilot temperature and current wattage
+- Read Fronius connected Meters with all details (Phase Voltages, Phase Currents, Frequency, Reactive-, Apparent-, Real Power)
+
 ### ⚡️ Webhooks
 - on a Webhook it trigger a boolean variable for the specified amount of time
 
@@ -57,7 +63,7 @@ wget https://github.com/multivit4min/loxone-nexus/releases/latest/download/loxon
 tar -xzvf -
 cd loxone-nexus
 npm ci
-pm2 start ecosystem.configjs
+pm2 restart ecosystem.config.js
 ```
 
 You application now runs on Port **8000**, you can change this port by editing **data/.env**
