@@ -63,6 +63,11 @@ export abstract class IntegrationInstance<T extends object> extends Instance<Int
     return config as T
   }
 
+  async updateSpecific() {
+    this.inputs.updateSpecific(this.variables.collection.items)
+    return this.services.socketManager.sendIntegrationSpecific(this)
+  }
+
   async update(data: Partial<UpdateProps>) {
     this.entity.label = data.label || this.entity.label
     this.entity.config = data.config || this.entity.config

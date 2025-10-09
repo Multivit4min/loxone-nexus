@@ -144,6 +144,7 @@ export class CalendarIntegration extends IntegrationInstance<
   }
 
   async fetchCalendar() {
+    this.logger.info(`reloading calendar from ${this.config.url}`)
     const res = await fetch(this.config.url)
     if (res.status !== 200) {
       this.logger.error(`failed to refresh calendar from ${this.config.url} got http status code ${res.status}`)

@@ -13,6 +13,7 @@ export type CurrentValueCallback<S extends z.ZodRawShape, R = any> = (props: Cal
 
 export class Input<T extends string = any, S extends z.ZodRawShape = {}> extends Entry<T, S> {
   
+  isTiedToSpecificUpdate = false
   private currentValueCallback: CurrentValueCallback<S, Promise<any>> = async ({ variable }) => variable.value.value
   private callback: RegisterCallback<S> = () => {
     return () => {}
@@ -31,8 +32,21 @@ export class Input<T extends string = any, S extends z.ZodRawShape = {}> extends
     return this
   }
 
+  getCurrentValue(variable: IntegrationVariable) {
+    return this.currentValueCallback({
+      variable,
+      config: variable.config,
+      getCurrentValue: () => null
+    })
+  }
+
   register(callback: RegisterCallback<S>) {
     this.callback = callback
+    return this
+  }
+
+  tiedToSpecificUpdate(flag: boolean = true) {
+    this.isTiedToSpecificUpdate = flag
     return this
   }
 
