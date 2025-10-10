@@ -92,11 +92,6 @@ export class MqttIntegration extends IntegrationInstance<
     }
   }
 
-  async tree() {
-    const tree = new TreeBuilder()
-    return tree.serialize()
-  }
-
   static configSchema() {
     return z.object({
       url: z.url().describe("mqtt server url for example: mqtt://test.mosquitto.org"),

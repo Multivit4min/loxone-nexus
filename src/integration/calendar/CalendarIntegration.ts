@@ -13,6 +13,7 @@ export class CalendarIntegration extends IntegrationInstance<
   refreshInterval?: NodeJS.Timeout
 
   async initialize() {    
+    this.authenticatedRouter.get("/tree", async (req, res) => res.json(await this.tree()))
     this.inputs
       .create("event")
       .setLabel("event data")
@@ -105,16 +106,17 @@ export class CalendarIntegration extends IntegrationInstance<
   }
 
   get events(): VEvent[] {
-    if (!this.calendar) return []
-    return Object.values(this.calendar)
+    const calendar = this.getStoreProperty<false|CalendarResponse>("calendar", false)
+    if (!calendar) return []
+    return Object.values(calendar)
       .filter(ev => ev.type === "VEVENT")
-      .sort((a, b) => a.start.getTime() - b.start.getTime())
+      .sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime())
   }
 
   get calendar() {
     const data = this.getStoreProperty<false|CalendarResponse>("calendar", false)
     if (!data) return null
-    return data.VCALENDAR
+    return data.vcalendar
   }
 
   async start() {
@@ -150,8 +152,7 @@ export class CalendarIntegration extends IntegrationInstance<
       this.logger.error(`failed to refresh calendar from ${this.config.url} got http status code ${res.status}`)
       return
     }
-    const content = await res.text()
-    await this.setStoreProperty("calendar", ical.parseICS(content))
+    await this.setStoreProperty("calendar", ical.parseICS(await res.text()))
   }
 
   specificSerialize() {

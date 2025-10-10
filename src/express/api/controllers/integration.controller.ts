@@ -62,13 +62,6 @@ export const integrationController = {
     res.json(integration.serialize())
   },
 
-  async getTree(req: Request, res: Response) {
-    const integration = services.integrationManager.getId(parseInt(req.params.id, 10))
-    const tree = await integration.tree()
-    if (!tree) return res.json({})
-    return res.json(tree)
-  },
-
   //remove a integration
   async removeIntegration(req: Request, res: Response) {
     await services.integrationManager.remove(parseInt(req.params.id, 10))

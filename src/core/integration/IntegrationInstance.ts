@@ -129,6 +129,7 @@ export abstract class IntegrationInstance<T extends object> extends Instance<Int
   }
 
   serialize() {
+    const { store, ...entity } = this.entity 
     return {
       specific: this.specificSerialize(),
       variables: this.variables.serialize().entries,
@@ -136,12 +137,11 @@ export abstract class IntegrationInstance<T extends object> extends Instance<Int
       outputVariableSchema: z.toJSONSchema(this.actions.schema),
       inputVariableSchema: z.toJSONSchema(this.inputs.schema),
       actions: this.actions.serialize(),
-      ...this.entity
+      ...entity
     }
   }
 
   abstract initialize(): Promise<any>
-  abstract tree(): Promise<any[]>
   abstract specificSerialize(): any
   abstract start(): Promise<any>
   abstract stop(): Promise<any>

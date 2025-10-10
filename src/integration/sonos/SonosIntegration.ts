@@ -21,6 +21,7 @@ export class SonosIntegration extends IntegrationInstance<
   private state?: SonosState
 
   async initialize() {
+    this.authenticatedRouter.get("/tree", async (req, res) => res.json(await this.tree()))
     this.device = new SonosDevice(this.config.address)
     this.inputs
       .create("media info")

@@ -71,11 +71,6 @@ export class FroniusIntegration extends IntegrationInstance<
     }
   }
 
-  async tree() {
-    const tree = new TreeBuilder()
-    return tree.serialize()
-  }
-
   static configSchema() {
     return z.object({
       host: z.url().describe("address of the fronius inverter"),

@@ -18,6 +18,7 @@ export class HomeAssistantIntegration extends IntegrationInstance<
   states: StateEntry[] = []
 
   async initialize() {    //register state changes
+    this.authenticatedRouter.get("/tree", async (req, res) => res.json(await this.tree()))
     this.inputs.create("state")
       .describe("retrieve the current state")
       .schema({

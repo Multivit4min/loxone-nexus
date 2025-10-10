@@ -98,11 +98,6 @@ export class WebhookIntegration extends IntegrationInstance<
     return {}
   }
 
-  async tree() {
-    const tree = new TreeBuilder()
-    return tree.serialize()
-  }
-
   static configSchema() {
     return z.object()
   }

@@ -18,6 +18,7 @@ export class HueIntegration extends IntegrationInstance<
   private interval!: NodeJS.Timeout
 
   async initialize(): Promise<any> {
+    this.authenticatedRouter.get("/tree", async (req, res) => res.json(await this.tree()))
     this.actions.create("light.set")
       .describe("sets the light to on or off")
       .schema({
