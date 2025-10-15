@@ -22,6 +22,7 @@ import { HueIntegration } from "./integration/hue/HueIntegration"
 import { WebhookIntegration } from "./integration/webhook/WebhookIntegration"
 import { MqttIntegration } from "./integration/mqtt/MqttIntegration"
 import { FroniusIntegration } from "./integration/fronius/FroniusIntegration"
+import { ScriptIntegration } from "./integration/script/ScriptIntegration"
 
 export type ServiceContainer = {
   authService: AuthService
@@ -87,6 +88,7 @@ export async function setupContainers(appService: AppService) {
     .register("Webhook", WebhookIntegration)
     .register("Mqtt", MqttIntegration)
     .register("Fronius", FroniusIntegration)
+    .register("Script", ScriptIntegration)
     .init(services)
   await services.loxoneManager.init(services)
   await services.linkService.init(services)
