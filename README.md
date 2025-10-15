@@ -12,6 +12,7 @@ Loxone Nexus connects external integrations to **Loxone Miniservers** using the 
 
   ![Loxone](https://github.com/Multivit4min/loxone-nexus/blob/main/images/loxone.png?raw=true)
   ![HomeAssistant](https://github.com/Multivit4min/loxone-nexus/blob/main/images/hass.png?raw=true)
+  ![Scripting](https://github.com/Multivit4min/loxone-nexus/blob/main/images/scripting.png?raw=true)
   ![Sonos](https://github.com/Multivit4min/loxone-nexus/blob/main/images/sonos.png?raw=true)
   ![Variable](https://github.com/Multivit4min/loxone-nexus/blob/main/images/variable.png?raw=true)
 
