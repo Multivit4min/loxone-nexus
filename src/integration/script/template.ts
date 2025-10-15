@@ -9,8 +9,12 @@ const interval = 60 * 1000
 async function main() {
   while (true) {
     const date = new Date()
+    let hour = String(date.getHours())
+    let minute = String(date.getMinutes())
+    if (hour.length === 1) hour = "0"+hour
+    if (minute .length === 1) minute = "0"+minute
     //sets the input variable value where "time" is the variable name
-    set("time", date.getHours() + ":" + date.getMinutes())
+    nexus.set("time", hour + ":" + minute)
     //excecute at every full minute
     await wait(interval - (date.getTime() % interval))
   }
