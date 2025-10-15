@@ -41,6 +41,9 @@ Loxone Nexus connects external integrations to **Loxone Miniservers** using the 
 ### ⚡️ Webhooks
 - on a Webhook it trigger a boolean variable for the specified amount of time
 
+### 🧩 Scripts
+- write custom javascript snippets to update inputs or outputs
+
 ### 🎵 Sonos
 - Notifications (MP3 from HTTP or SMB)  
 - Media control: play, pause, volume, next, previous  

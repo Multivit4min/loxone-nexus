@@ -87,8 +87,8 @@ const context = createContext({
     get(name: string) {
       return outputs[name]
     },
+    on: eventEmitter.on.bind(eventEmitter),
   },
-  onChange: eventEmitter.on.bind(eventEmitter),
   console,
   setTimeout,
   setInterval,
