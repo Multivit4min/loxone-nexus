@@ -10,3 +10,15 @@ export type HueLight = {
   productname: string
   capabilities: Record<string, any>
 }
+
+export type HueGroups = HueGroup[]
+export type HueGroup = {
+  id: number
+  name: string
+  lights: string[]
+  sensors: string[]
+  type: "Lunimarie"|"Lighsource"|"LightGroup"|"Room"|"Entertainment"|"Zone"
+  state: Record<string, any>
+  recycle: boolean
+  action: Record<string, any>
+}
