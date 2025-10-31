@@ -3,9 +3,10 @@ import { IntegrationInstance } from "../../core/integration/IntegrationInstance"
 import { TreeBuilder } from "../../core/integration/tree/TreeBuilder"
 import { v3 } from "node-hue-api"
 import { Api } from "node-hue-api/dist/esm/api/Api"
-import type { HueLights } from "./types"
+import type { HueGroup, HueGroups, HueLights } from "./types"
 import { OutputTreeEndpoint } from "../../core/integration/tree/OutputTreeEndpoint"
-import { LightState } from "@peter-murray/hue-bridge-model/dist/esm/model"
+import { GroupState, LightState } from "@peter-murray/hue-bridge-model/dist/esm/model"
+import { VariableConverter } from "../../core/conversion/VariableConverter"
 
 
 export class HueIntegration extends IntegrationInstance<
@@ -15,15 +16,14 @@ export class HueIntegration extends IntegrationInstance<
   private api?: Api
   private bridge?: any
   private lights: HueLights = []
+  private groups: HueGroups = []
   private interval!: NodeJS.Timeout
 
   async initialize(): Promise<any> {
     this.authenticatedRouter.get("/tree", async (req, res) => res.json(await this.tree()))
     this.actions.create("light.set")
       .describe("sets the light to on or off")
-      .schema({
-        name: z.string().min(1)
-      })
+      .schema({ name: z.string().min(1) })
       .execute(async ({ config, value }) => {
         if (!this.api) return
         const light = this.getLightByName(config.name)
@@ -32,51 +32,76 @@ export class HueIntegration extends IntegrationInstance<
       })
     this.actions.create("light.rgb")
       .describe("sets the lights rgb color")
-      .schema({
-        name: z.string().min(1)
-      })
+      .schema({ name: z.string().min(1) })
       .execute(async ({ config, value }) => {
         if (!this.api) return
         const light = this.getLightByName(config.name)
         if (!light) return this.logger.warn(`no hue light found with name ${config.name}`)
-        const sma = value.toSmartActuatorRGBW()
-        const white = Math.floor(sma.white * 2.55)
-        const rgb = [Math.floor(sma.red * 2.55), Math.floor(sma.green * 2.55), Math.floor(sma.blue * 2.55)]
-        if (white === 0) { //RGB
-          await this.api.lights.setLightState(light.id, { on: value.toBoolean(), rgb: rgb })
-        } else {
-          const state = new LightState()
-          if (value.toBoolean()) {
-            const tw = value.toSmartActuatorTunableWhite()
-            state.on()
-            state.white(1_000_000 / tw.temperature, tw.brightness)
-            state.transition(tw.fadeTime)
-          } else {
-            state.off()
-          }
-          await this.api.lights.setLightState(light.id, state.getPayload())
-        }
+        await this.api.lights.setLightState(light.id, this.getRGBState(value).getPayload())
       })    
     this.actions.create("light.temperature")
       .describe("sets the lights temperature and brightness")
-      .schema({
-        name: z.string().min(1)
-      })
+      .schema({ name: z.string().min(1) })
       .execute(async ({ config, value }) => {
         if (!this.api) return
         const light = this.getLightByName(config.name)
         if (!light) return this.logger.warn(`no hue light found with name ${config.name}`)
-        const tw = value.toSmartActuatorTunableWhite()
-        const state = new LightState()
+        await this.api.lights.setLightState(light.id, this.getTemperatureState(value).getPayload())
+      })
+    this.actions.create("group.set")
+      .describe("sets the group to on, off or a state from 0 to 100%")
+      .schema({ name: z.string().min(1) })
+      .execute(async ({ config, value }) => {
+        if (!this.api) return
+        const group = this.getGroupByName(config.name)
+        if (!group) return this.logger.warn(`no hue group found with name ${config.name}`)
+        const state = new GroupState()
         if (value.toBoolean()) {
+          let { fadeTime, channel } = value.toSmartActuatorSingleChannel()
+          state.transitionInMillis(fadeTime)
           state.on()
-          state.white(1_000_000 / tw.temperature, tw.brightness)
-          state.transition(tw.fadeTime)
+          if (channel > 100) channel = 100
+          if (channel <= 0) channel = 1 
+          state.brightness(channel)
         } else {
           state.off()
         }
-        await this.api.lights.setLightState(light.id, state.getPayload())
+        await this.api.groups.setGroupState(group.id, state.getPayload() as any)
       })
+  }
+
+  /** sets the state object for a color temperature */
+  private getTemperatureState(value: VariableConverter, state: LightState = new LightState()) {
+    if (value.toBoolean()) {
+      const { temperature, brightness, fadeTime } = value.toSmartActuatorTunableWhite()
+      state.on()
+      state.ct(1_000_000 / temperature)
+      state.brightness(brightness)
+      state.transition(fadeTime * 1000)
+    } else {
+      state.off()
+    }
+    return state
+  }
+
+  private getRGBState(value: VariableConverter, state: LightState = new LightState()) {
+    const sma = value.toSmartActuatorRGBW()
+    if (sma.white === 0) { //RGB
+      const rgb: [number, number, number] = [
+        Math.floor(sma.red * 2.55),
+        Math.floor(sma.green * 2.55),
+        Math.floor(sma.blue * 2.55)
+      ]
+      if (rgb.some(c => c > 0)) {
+        state.on() 
+        state.rgb(...rgb)
+      } else {
+        state.off()
+      }
+    } else { //temperature
+      return this.getTemperatureState(value, state)
+    }
+    return state
   }
 
   async start() {
@@ -108,7 +133,7 @@ export class HueIntegration extends IntegrationInstance<
         this.api.groups.getAll()
       ])
       this.lights = lights.map(l => l.getJsonPayload() as any)
-      //console.log(groups) todo
+      this.groups = groups.map(g => g.getJsonPayload() as any)
     } catch (error) {
       this.logger.error({ error }, "cant update hue lights")
     }
@@ -120,10 +145,17 @@ export class HueIntegration extends IntegrationInstance<
     return light
   }
 
+  getGroupByName(name: string) {
+    const group = this.groups.find(group => group.name.toLowerCase() === name.toLowerCase())
+    if (!group) return undefined
+    return group
+  }
+
   specificSerialize() {
     return {
       bridge: this.bridge,
-      lights: this.lights
+      lights: this.lights,
+      groups: this.groups
     }
   }
 
@@ -154,7 +186,34 @@ export class HueIntegration extends IntegrationInstance<
           name: light.name
         })
     })
+    const groupsCat = tree.addOutputCategory("groups")
+    this.groups.filter(group => ["Room", "Zone", "LightGroup"].includes(group.type)).forEach(group => {
+      const count = group.lights.length
+      const groupCat = groupsCat
+        .addCategory(group.name)
+        .icon(HueIntegration.getGroupIcon(group))
+        .comment(`${count} light${count === 1 ? '' : 's'}`)
+      groupCat.add(OutputTreeEndpoint, `set`)
+        .className("text-amber")
+        .setConfig({
+          label: `${group.name} > set`,
+          action: "group.set",
+          name: group.name
+        })
+    })
     return tree.serialize()
+  }
+
+  static getGroupIcon(group: HueGroup) {
+    switch (group.type) {
+      case "Lunimarie":
+      case "Lighsource":
+      case "Zone":
+      case "LightGroup": return "mdi-lightbulb-group"
+      case "Room": return "mdi-home"
+      case "Entertainment": return "mdi-audio-video"
+      default: return "mdi-help"
+    }
   }
 
   static configSchema() {
