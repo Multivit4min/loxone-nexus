@@ -64,6 +64,12 @@ export const loxoneController = {
   },
 
   //starts the loxone instance
+  async test(req: Request, res: Response) {
+    const instance = services.loxoneManager.getId(parseInt(req.params.id, 10))
+    res.json(await instance.testConnection())
+  },
+
+  //starts the loxone instance
   async start(req: Request, res: Response) {
     const instance = services.loxoneManager.getId(parseInt(req.params.id, 10))
     await instance.start()

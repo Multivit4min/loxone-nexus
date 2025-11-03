@@ -8,6 +8,7 @@ import { InstanceManager } from "../core/instance/InstanceManager"
 import { Logger } from "pino"
 import { logger } from "../logger/pino"
 import { LoxoneEntity } from "../drizzle/schema"
+import { checkFTPConnection, checkHTTPConnection } from "../core/util/connection"
 
 export class LoxoneInstance extends Instance<LoxoneEntity> {
 
@@ -118,6 +119,17 @@ export class LoxoneInstance extends Instance<LoxoneEntity> {
       }
       if (deactivate) await this.setActive(false)
     })
+  }
+
+  /**
+   * tests connection to ports which the loxone miniserver uses
+   */
+  async testConnection() {
+    return {
+      [21]: await checkFTPConnection(this.entity.host),
+      [80]: await checkHTTPConnection(`http://${this.entity.host}:80`),
+      [443]: await checkHTTPConnection(`https://${this.entity.host}:443`)
+    }
   }
 
   /**
